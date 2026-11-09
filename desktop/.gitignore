@@ -1,0 +1,3 @@
+# Local-only build and environments; never include any private art in this tree.
+game/
+.venv/

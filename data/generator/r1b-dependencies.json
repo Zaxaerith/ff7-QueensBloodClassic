@@ -1,0 +1,162 @@
+{
+  "schema": "qb-production-dependencies",
+  "version": 1,
+  "scope": "Production generator code and public recipe/card-index inputs.",
+  "code": [
+    {
+      "path": "tools/assets.py",
+      "lfNormalizedSha256": "045e0bae2c981e8acdd7e98857bb8d62358b2a82f4e29062615981879c381d26",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/batch10_models.py",
+      "lfNormalizedSha256": "b05ef150a088e6d30a0b9ea85b24f52d4dfbd685aefd845699379a3907781ef5",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/batch11_models.py",
+      "lfNormalizedSha256": "c8fe2141759a44b1da1992c9566ffcfb5d189781a70bded12ce480efc50120ce",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/batch12_models.py",
+      "lfNormalizedSha256": "d839b8c2bd2724ca76deea7a222a398495419623e833c88e24e998e3e0eda251",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/batch13_models.py",
+      "lfNormalizedSha256": "3af1a5ce2a2dbb4914491231caab6d1b555dd00c1a154b6d87c89bb71e10cade",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/batch14_models.py",
+      "lfNormalizedSha256": "fbe51f1b9714a65d4737a65ef3ecbde399a056190475a7f250ceb9e6a37a7337",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/ff7_assets/battle.py",
+      "lfNormalizedSha256": "940b3d5619e8a935a3e9d4e4ff9d8252064b8e1d4b4523af1e4196fdad547b53",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/ff7_assets/battle_composite.py",
+      "lfNormalizedSha256": "942ca12b1537ee8a5817230ebf161133b7ee318e60a763429c9f3619279f038b",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/ff7_assets/battle_model.py",
+      "lfNormalizedSha256": "5a7e9aac9164633d4ba49faf891fd2b33825ed455dbd840d8c97242f63351766",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/ff7_assets/battle_render.py",
+      "lfNormalizedSha256": "77b649c92a07e6b104434af01cf6b0e986725899e8701c0f2516f26926e11e1a",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/ff7_assets/field_models.py",
+      "lfNormalizedSha256": "c19285afa19d4781e234639a1be68a37cdac807f06addf6632663b01cdff3bec",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/ff7_assets/formats.py",
+      "lfNormalizedSha256": "05d43950c6afc6e13f0b7d4b8c58a68005508c95a6e97bf70934e1685ef1f6d7",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/ff7_assets/lgp.py",
+      "lfNormalizedSha256": "c19f17ccdbf555fb56e5d43c3105a6479fb24888af170befc09633b49f53b09c",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/ff7_assets/local_paths.py",
+      "lfNormalizedSha256": "f18174b9a50b1050788258afa55df5395d41755d86cf384e85fdcd215ff315f1",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/ff7_assets/lzss.py",
+      "lfNormalizedSha256": "39ead2684b5781a8c80f2a26770d98eac880025211a8613b584a584a999f4691",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/ff7_assets/magic_model.py",
+      "lfNormalizedSha256": "ea760e2f308e5f0e7456af87c7254d26efcf026b8fcdec68b012036aa112b8b9",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/ff7_assets/original_ps1.py",
+      "lfNormalizedSha256": "c58eff009e160081878992142d80e0f6d498a168def8c00bc51327403e78bc85",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/ff7_assets/render.py",
+      "lfNormalizedSha256": "9e3bb641796a16858948916dd22190f9c0149a79dd6e8763e9df7991e9ee20f8",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/ff7_assets/tex.py",
+      "lfNormalizedSha256": "befa9b72fc48690d87d02426e0b2dfa46f00ea8f56ba27e74aa13d249063493b",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/qb-assets.py",
+      "lfNormalizedSha256": "9638792e899e8a519ae7f2cf1adb426e67a209612bd0f29310bc7bf875e69402",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/qb_assets/__init__.py",
+      "lfNormalizedSha256": "49eabd864c1f16542fa5d4687097712b6e6e5d87449904fd4a3354b5c1567143",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/qb_assets/cli.py",
+      "lfNormalizedSha256": "13fef814352c1087fd2efbb97e228f2dfa7c73c7a561ca7dad9cd4a928f43b6f",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/qb_assets/core.py",
+      "lfNormalizedSha256": "e3dc2d9ae5f7aca9fde776332c668d527483b1f2adbc31019277f015fc8bbd95",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/qb_assets/production.py",
+      "lfNormalizedSha256": "552b49d0e6922fc510a43b187826467b26e0866cbab8c5607c96ede689aaec20",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    },
+    {
+      "path": "tools/qb_assets/sources.py",
+      "lfNormalizedSha256": "3a0325715292a71c9d30a89ca2ae72d8e3af30e01485b1747b0b391bc236a05e",
+      "source": "Project GPL-3.0-only; adapted modules retain upstream notices"
+    }
+  ],
+  "data": [
+    "data/generator/r1a-recipes.json",
+    "data/generator/r1b-recipes.json",
+    "data/card-index.json"
+  ],
+  "externalImports": [
+    "PIL",
+    "argparse",
+    "collections",
+    "dataclasses",
+    "hashlib",
+    "importlib",
+    "json",
+    "math",
+    "os",
+    "pathlib",
+    "re",
+    "shutil",
+    "signal",
+    "struct",
+    "sys",
+    "threading",
+    "time",
+    "zlib"
+  ],
+  "thirdPartyRuntime": {
+    "Python": ">=3.11",
+    "Pillow": "13.0.0"
+  },
+  "productionReadsPrivateReferences": false
+}

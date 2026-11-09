@@ -1,0 +1,10 @@
+{
+  "operations": [
+    {"op": "create", "seed": 701, "preset": "M2 动态与条件"},
+    {"op": "mulligan", "player": 0, "indices": []},
+    {"op": "mulligan", "player": 1, "indices": []},
+    {"op": "legal"},
+    {"op": "state"},
+    {"op": "score"}
+  ]
+}

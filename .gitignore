@@ -1,0 +1,32 @@
+node_modules/
+.DS_Store
+*.log
+dist/
+coverage/
+site/js/
+node_modules/.vite/
+.research-cache/
+private-assets/
+dist-private/
+__pycache__/
+*.pyc
+qb.local.json
+.parallel-check/
+# Local configuration, credentials and Python environments are not source assets.
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+# Original archives must never be added, including copies outside private-assets.
+*.[lL][gG][pP]
+# Blender working files/backups remain in the private production workspace.
+*.blend
+*.blend[0-9]

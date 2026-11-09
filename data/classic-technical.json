@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "note": "Technical baseline only. Idle full-body previews are not card art candidates. Optional reproduction for before/after comparison, five approved characters only.",
+  "models": [
+    {"id":"cloud-world","kind":"world","resourceId":"bbe.hrc","animation":"bid.a","frame":0,"cardIds":[]},
+    {"id":"tifa-world","kind":"world","resourceId":"dlb.hrc","animation":"dse.a","frame":0,"cardIds":[]},
+    {"id":"barret-field","kind":"field","resourceId":"acgd.hrc","animation":"adcb.a","bindingField":"blackbg1","frame":0,"cardIds":[]},
+    {"id":"aerith-field","kind":"field","resourceId":"auff.hrc","animation":"avbf.a","bindingField":"blackbg1","frame":0,"cardIds":[]},
+    {"id":"red-xiii-field","kind":"field","resourceId":"adda.hrc","animation":"aeae.a","bindingField":"blackbg1","frame":0,"cardIds":[]}
+  ]
+}

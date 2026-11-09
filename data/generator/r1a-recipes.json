@@ -1,0 +1,449 @@
+{
+  "schema": "qb-production-recipes",
+  "version": 1,
+  "resolution": 384,
+  "scope": "R1-A six approved sample routes; no new art direction",
+  "cards": [
+    {
+      "cardId": 41,
+      "name": "Bomb",
+      "skeleton": "ebaa",
+      "pose": {
+        "animation": 0,
+        "frame": 17,
+        "editProvenance": "Original open-mouth frame. Authored arms-folded-back still: all source meshes retained, endpoints rotated with original bone lengths.",
+        "jointAims": {
+          "21": [
+            0.7,
+            0.35,
+            -1
+          ],
+          "22": [
+            0.2,
+            0.8,
+            -1
+          ],
+          "23": [
+            -0.7,
+            0.35,
+            -1
+          ],
+          "24": [
+            -0.2,
+            0.8,
+            -1
+          ]
+        }
+      },
+      "camera": {
+        "yaw": -6,
+        "elevation": 2,
+        "roll": 0,
+        "unitsPerFrame": 760,
+        "center": [
+          0,
+          380,
+          0
+        ],
+        "ambient": 0.72,
+        "keyStrength": 0.48
+      },
+      "layers": {
+        "background": "authored-indigo-ember-contrast",
+        "effects": "authored-angular-flame-crown",
+        "flames": [
+          [
+            0.29,
+            0.32,
+            0.08,
+            0.19
+          ],
+          [
+            0.37,
+            0.23,
+            0.09,
+            0.19
+          ],
+          [
+            0.49,
+            0.21,
+            0.08,
+            0.17
+          ],
+          [
+            0.61,
+            0.25,
+            0.09,
+            0.18
+          ],
+          [
+            0.7,
+            0.34,
+            0.07,
+            0.18
+          ]
+        ],
+        "style": "classic-card-v2",
+        "glow": "authored-amber-three-tone-flames"
+      },
+      "kind": "battle",
+      "exportFullSubject": true,
+      "origin": {
+        "file": "data/card-art-design.json",
+        "fileSha256": "46261b8a906e48f312259e2edfb570accdc17cc4d19a550671a190e2924e8d04",
+        "selectedSpecSha256": "dc297fbf9782ee25a5da8c247ad71ae794661379dd71644f8caa9543939d69d2",
+        "policy": "Exact production fields extracted; reference, review and cached fanRecipe paths omitted"
+      }
+    },
+    {
+      "cardId": 86,
+      "name": "Cloud",
+      "skeleton": "rtaa",
+      "weapon": "rtck",
+      "pose": {
+        "animation": 0,
+        "frame": 0,
+        "editProvenance": "Authored still, not an original animation. Arm directions solved with source bone lengths; RTCK and right fist retain their frame-0 relative grip.",
+        "absoluteBoneRotations": {
+          "0": [
+            270,
+            0,
+            0
+          ],
+          "1": [
+            0,
+            0,
+            0
+          ],
+          "2": [
+            -3,
+            -6,
+            0
+          ]
+        },
+        "jointAims": {
+          "5": [
+            0.05,
+            -1,
+            0.15
+          ],
+          "6": [
+            0,
+            -1,
+            0.05
+          ],
+          "10": [
+            -1,
+            -0.2,
+            0.08
+          ],
+          "11": [
+            0.28,
+            1,
+            0.12
+          ]
+        },
+        "weaponBinding": {
+          "handBone": 12,
+          "bladeDirection": [
+            0.87,
+            -0.52,
+            -1.05
+          ],
+          "thicknessNormal": [
+            0,
+            0,
+            1
+          ]
+        }
+      },
+      "camera": {
+        "yaw": -8,
+        "elevation": 3,
+        "roll": 0,
+        "unitsPerFrame": 520,
+        "center": [
+          -20,
+          655,
+          0
+        ],
+        "ambient": 0.78,
+        "keyStrength": 0.52,
+        "keyDirection": [
+          -0.6,
+          0.8,
+          1
+        ]
+      },
+      "layers": {
+        "background": "authored-mako-industrial-silhouette",
+        "effects": "authored-sparse-mako-motes",
+        "style": "classic-card-v2"
+      },
+      "kind": "battle",
+      "exportFullSubject": true,
+      "origin": {
+        "file": "data/card-art-design.json",
+        "fileSha256": "46261b8a906e48f312259e2edfb570accdc17cc4d19a550671a190e2924e8d04",
+        "selectedSpecSha256": "4f725c61fa806526e85c6898d4f4522fe290ce477d19e6ab0bfa5fc16f1f0784",
+        "policy": "Exact production fields extracted; reference, review and cached fanRecipe paths omitted"
+      }
+    },
+    {
+      "cardId": 95,
+      "name": "Ifrit",
+      "kind": "magic",
+      "skeleton": "ifreetda.d",
+      "pose": {
+        "animation": 1,
+        "frame": 22
+      },
+      "camera": {
+        "yaw": 15,
+        "elevation": 4,
+        "roll": -5,
+        "ambient": 0.96,
+        "keyStrength": 0.46,
+        "unitsPerFrame": 1937.8682489622759,
+        "center": [
+          94.76611649523412,
+          1347.6807337022203,
+          -212.73606710807852
+        ]
+      },
+      "layers": {
+        "kind": "atmosphere",
+        "top": [
+          31,
+          13,
+          24
+        ],
+        "bottom": [
+          65,
+          29,
+          16
+        ],
+        "halo": [
+          132,
+          70,
+          25
+        ],
+        "haloStrength": 0.38
+      },
+      "exportFullSubject": true,
+      "origin": {
+        "file": "data/batch-07-art.json",
+        "fileSha256": "a0eb16e5c10944ad96f68b547949c60bcb6ede248fc61958f5bdfd93f5e4d7c2",
+        "selectedSpecSha256": "0cabc009fb8cbb1974d14080925da098c667434b6c9f9fba0daad2bd750708d3",
+        "policy": "Exact production fields extracted; reference, review and cached fanRecipe paths omitted"
+      }
+    },
+    {
+      "cardId": 106,
+      "name": "Gilgamesh",
+      "kind": "original",
+      "pose": {
+        "type": "authored-static",
+        "description": "wide asymmetric braced stance; six arms; two hands across the foreground katana"
+      },
+      "camera": {
+        "yaw": -15,
+        "elevation": 4,
+        "roll": -5,
+        "lighting": "neutral",
+        "ambient": 0.72,
+        "keyStrength": 0.34,
+        "unitsPerFrame": 10.385957967228494,
+        "center": [
+          0.15443349325969002,
+          6.323893264291729,
+          1.3384508698391338
+        ]
+      },
+      "layers": {
+        "kind": "atmosphere",
+        "top": [
+          22,
+          22,
+          22
+        ],
+        "bottom": [
+          35,
+          35,
+          35
+        ],
+        "halo": [
+          75,
+          75,
+          75
+        ],
+        "haloStrength": 0.24
+      },
+      "modelId": "fan-original-106",
+      "provenance": "fan-original-not-ff7-original-asset",
+      "exportFullSubject": true,
+      "origin": {
+        "file": "data/batch-10-art.json",
+        "fileSha256": "b39a2780eb09ad84963feaabf6193b112440265ccfb568688ec788fa4ec15615",
+        "selectedSpecSha256": "59a6105e804424969af29c12a6b586bb133f4304595366753b5d9eeb086063fa",
+        "policy": "Exact production fields extracted; reference, review and cached fanRecipe paths omitted"
+      }
+    },
+    {
+      "cardId": 135,
+      "name": "Chocobo Jockey",
+      "kind": "composition",
+      "pose": {
+        "type": "native-source-instances-and-authored-scene",
+        "description": "骑手位于鸟背上方，陆行鸟头颈向左，保留骑乘的上下关系。"
+      },
+      "camera": {
+        "yaw": -37,
+        "elevation": 3,
+        "roll": -3,
+        "unitsPerFrame": 12.8,
+        "center": [
+          0,
+          4.9,
+          0
+        ],
+        "lighting": "neutral",
+        "ambient": 1,
+        "keyStrength": 0
+      },
+      "layers": {
+        "kind": "atmosphere",
+        "top": [
+          12,
+          17,
+          28
+        ],
+        "bottom": [
+          27,
+          31,
+          40
+        ],
+        "halo": [
+          65,
+          65,
+          60
+        ],
+        "haloStrength": 0.18
+      },
+      "instances": [
+        {
+          "label": "Chocobo",
+          "provenance": "AUTHENTIC_OG",
+          "source": {
+            "kind": "world",
+            "resource": "aja.hrc",
+            "pose": {
+              "frame": 10
+            },
+            "animation": "asc.a"
+          },
+          "placement": {
+            "height": 7.5,
+            "position": [
+              0,
+              0,
+              0
+            ],
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          },
+          "identityEvidence": "Frozen World ledger; verified existing World loader asc.a; original white vertex colors retained"
+        },
+        {
+          "label": "Joe / original red jockey",
+          "provenance": "AUTHENTIC_OG",
+          "source": {
+            "kind": "field",
+            "resource": "gpcd.hrc",
+            "pose": {
+              "frame": 15
+            },
+            "animation": "gpib.a",
+            "field": "crcin_2"
+          },
+          "placement": {
+            "height": 4.3,
+            "position": [
+              0.15,
+              4.3,
+              -0.4
+            ],
+            "rotation": [
+              0,
+              180,
+              0
+            ]
+          },
+          "identityEvidence": "crcin_2gold_dirver1.char; native red coat/white breeches/black yellow-banded hat visually match OG Joe; source gpib frame, no seated retarget"
+        }
+      ],
+      "fanProvenance": "FAN_ORIGINAL",
+      "exportFullSubject": true,
+      "origin": {
+        "file": "data/batch-11-art.json",
+        "fileSha256": "f90e082067d5552a49aeeb6f4139e3f4905c5731f02faad6257f096f1851e08f",
+        "selectedSpecSha256": "ea0a8626ad69505f7494c30e505f2aef644e9365e439f3aa471b5ccbbc25c5a0",
+        "policy": "Exact production fields extracted; reference, review and cached fanRecipe paths omitted"
+      }
+    },
+    {
+      "cardId": 141,
+      "name": "Dio",
+      "kind": "field",
+      "skeleton": "gajc.hrc",
+      "animation": "gbhc.a",
+      "bindingField": "gldst",
+      "pose": {
+        "animation": 0,
+        "frame": 14
+      },
+      "camera": {
+        "yaw": 160,
+        "elevation": 7,
+        "roll": 0,
+        "ambient": 0.9,
+        "keyStrength": 0.5,
+        "unitsPerFrame": 34.66352928358098,
+        "center": [
+          -0.026481571655267738,
+          18.86359841491513,
+          0.5185644192524685
+        ]
+      },
+      "layers": {
+        "kind": "atmosphere",
+        "top": [
+          16,
+          27,
+          42
+        ],
+        "bottom": [
+          31,
+          23,
+          38
+        ],
+        "halo": [
+          101,
+          94,
+          111
+        ],
+        "haloStrength": 0.36
+      },
+      "exportFullSubject": true,
+      "origin": {
+        "file": "data/batch-06-art.json",
+        "fileSha256": "e3cb03f80c270b3957786b54b01be678b467224d5d584effbbab40aecdf3e423",
+        "selectedSpecSha256": "2b2f151a21cc412507ef77a3ab30fcdd2504eb17542520c20589f239f1cd0b0e",
+        "policy": "Exact production fields extracted; reference, review and cached fanRecipe paths omitted"
+      }
+    }
+  ]
+}

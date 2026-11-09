@@ -1,0 +1,41 @@
+/* D2: compose existing card details. No frame geometry or presentation clocks. */
+#view-game .board-layout{width:calc(100% - 500px);justify-self:center}
+#view-game .hand-focus{position:absolute;right:18px;top:70px;width:226px;max-height:calc(100% - 330px);overflow:auto;padding:10px;border:1px solid #c9d6e8;box-shadow:inset 0 0 0 2px #111c4b;background:linear-gradient(135deg,#1a347b,#0b1746);z-index:2;text-align:left;scrollbar-width:thin}
+.hand-focus-caption{font-size:12px;color:#f5d47b;margin:0 0 6px;line-height:1.4;overflow-wrap:anywhere;min-height:17px}
+.hand-focus-body .qb-details{padding:0;border:0;background:none;font-size:14px;line-height:1.4}
+.hand-focus-body .qb-details h3{font-size:15px;line-height:1.3;margin:0 0 6px}
+.hand-focus-body .qb-facts{gap:2px 8px;margin:0 0 5px}
+.hand-focus-body .qb-details>.qb-pattern{position:static;width:120px;height:120px;margin:8px auto;aspect-ratio:1;flex-shrink:0}
+.hand-focus-body .qb-key{display:none}
+.hand-focus-body .qb-description{margin:6px 0;line-height:1.45;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden}
+.hand-focus-body .qb-trigger{margin:5px 0;font-size:12px;line-height:1.4}
+.hand-focus-body .qb-trigger{display:none}
+.hand-focus-body .qb-description+.qb-trigger{display:block}
+.hand-focus-range,.hand-focus-key{font-size:11px;line-height:1.4;color:#d0ddf2;margin:6px 0}
+.hand-focus>button{font-size:12px;min-height:32px;padding:4px 10px;width:100%}
+.hand-focus-empty{font-size:14px;line-height:1.6;color:#c9d6e8}
+#view-game .battle-hand .hand-card.browsing:not(.selected){outline:1px solid #c9d6e8;outline-offset:-1px}
+#view-game .battle-hand{scroll-snap-type:none}
+#view-game .battle-hand .hand-card.selected{padding-top:0;box-shadow:0 0 0 2px #f5d47b}
+#view-game .battle-hand .selection-tag{position:absolute;top:34px;left:3px;padding:1px 4px;background:#f5d47b;color:#10152d;font-weight:bold;font-size:11px;z-index:4;pointer-events:none}
+/* Static preview overlays remain visible above occupied cards, including replacement. */
+#view-game .tile.preview-pawn::before{content:'';position:absolute;inset:6px;background:repeating-linear-gradient(135deg,#f5d47b25 0 3px,#f5d47b08 3px 7px);border:1px solid #f5d47b;pointer-events:none;z-index:2}
+#view-game .tile.preview-effect{outline:none}
+#view-game .tile.preview-effect .range-overlay{position:absolute;inset:3px;border:2px solid #ff6478;pointer-events:none;z-index:3}
+#view-game .tile.pending::after{border:2px dashed white}
+@media(max-width:1000px){
+  #view-game .board-layout{width:100%}
+  #view-game .hand-area{grid-template-columns:146px minmax(0,1fr);column-gap:8px}
+  #view-game .hand-heading{grid-column:1/-1}
+  #view-game .battle-hand{grid-column:2;grid-row:2;justify-content:safe start}
+  #view-game .hand-focus{position:static;grid-column:1;grid-row:2;width:auto;max-height:none;min-height:0;padding:6px;z-index:auto;overflow:auto}
+  .hand-focus-caption{font-size:10px;margin-bottom:3px;min-height:0}
+  .hand-focus-body .qb-details h3{font-size:12px;margin-bottom:3px}
+  .hand-focus-body .qb-facts{display:flex;flex-wrap:wrap;gap:0 4px;font-size:11px;margin:0}
+  .hand-focus-body .qb-details>.qb-pattern{width:94px;height:94px;margin:4px auto}
+  .hand-focus-body .qb-description{font-size:12px;line-height:1.4;margin:4px 0}
+  .hand-focus-body .qb-trigger,.hand-focus-body .qb-description+.qb-trigger,.hand-focus-range,.hand-focus-key{display:none}
+  .hand-focus>button{min-height:30px;font-size:11px;margin-top:4px}
+}
+@media(max-width:760px){#view-game .battle-window{grid-template-rows:44px minmax(0,1fr) 40px 228px 40px}}
+@media(max-width:380px){#view-game .hand-area{grid-template-columns:136px minmax(0,1fr);column-gap:6px}}

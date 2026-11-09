@@ -1,0 +1,1428 @@
+{
+  "schema": "qb-card-index",
+  "version": 1,
+  "cards": [
+    {
+      "cardId": 1,
+      "name": "Security Officer",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 2,
+      "name": "Riot Trooper",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 3,
+      "name": "Grenadier",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 4,
+      "name": "J-Unit Sweeper",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 5,
+      "name": "Queen Bee",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 6,
+      "name": "Toxirat",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "C"
+    },
+    {
+      "cardId": 7,
+      "name": "Levrikon",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 8,
+      "name": "Grasslands Wolf",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 9,
+      "name": "Mu",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 10,
+      "name": "Mandragora",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 11,
+      "name": "Elphadunk",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 12,
+      "name": "Cactuar",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 13,
+      "name": "Crystalline Crab",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 14,
+      "name": "Quetzalcoatl",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 15,
+      "name": "Zu",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 16,
+      "name": "Devil Rider",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 17,
+      "name": "Screamer",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 18,
+      "name": "Flan",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "C"
+    },
+    {
+      "cardId": 19,
+      "name": "Crawler",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 20,
+      "name": "Archdragon",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 21,
+      "name": "Ogre",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 22,
+      "name": "Deathwheel",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 23,
+      "name": "Fleetwing",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 24,
+      "name": "Zemzelett",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 25,
+      "name": "Ignilisk",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 26,
+      "name": "Capparwire",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 27,
+      "name": "Mindflayer",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "C"
+    },
+    {
+      "cardId": 28,
+      "name": "Scrutineye",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 29,
+      "name": "Hell Rider II",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 30,
+      "name": "Flametrooper",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "C"
+    },
+    {
+      "cardId": 31,
+      "name": "Spearhawk",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 32,
+      "name": "Sea Devil",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "C"
+    },
+    {
+      "cardId": 33,
+      "name": "Shoalopod",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 34,
+      "name": "Crown Lance",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 35,
+      "name": "Tonberry King",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 36,
+      "name": "Sandhog Pie",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 37,
+      "name": "Bloatfloat",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 38,
+      "name": "Bagnadrana",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 39,
+      "name": "Cockatrice",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 40,
+      "name": "Heatseeker",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 41,
+      "name": "Bomb",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "HUMAN REVIEW PENDING",
+      "route": "A"
+    },
+    {
+      "cardId": 42,
+      "name": "Thug",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 43,
+      "name": "Death Claw",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 44,
+      "name": "Landworm",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 45,
+      "name": "Sandspitter",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 46,
+      "name": "Chimera",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 47,
+      "name": "Joker",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 48,
+      "name": "Amphidex",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 49,
+      "name": "Frightflower",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 50,
+      "name": "Gagighandi",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 51,
+      "name": "Insectoid Chimera",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 52,
+      "name": "Gigantoad",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 53,
+      "name": "Maloceros",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 54,
+      "name": "Grandhorn",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 55,
+      "name": "Great Malboro",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 56,
+      "name": "Grangalan",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 57,
+      "name": "Amalgam",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 58,
+      "name": "Skeeskee",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 59,
+      "name": "Griffon",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 60,
+      "name": "Basilisk",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 61,
+      "name": "Reapertail",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "C"
+    },
+    {
+      "cardId": 62,
+      "name": "Jabberwock",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 63,
+      "name": "Desert Sahagin",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 64,
+      "name": "Cavestalker",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 65,
+      "name": "Stone Golem",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 66,
+      "name": "Two Face",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 67,
+      "name": "Gi Specter",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 68,
+      "name": "Valron",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 69,
+      "name": "Disgorgon",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 70,
+      "name": "Dragon",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 71,
+      "name": "Twin Brain",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 72,
+      "name": "Black Bat",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 73,
+      "name": "Bahba Velamyu",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 74,
+      "name": "Rictus",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 75,
+      "name": "Adjudicator",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 76,
+      "name": "Yin & Yang",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 77,
+      "name": "Diabolic Variant",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "HUMAN REVIEW PENDING",
+      "route": "C"
+    },
+    {
+      "cardId": 78,
+      "name": "Special Forces Operator",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "HUMAN REVIEW PENDING",
+      "route": "B"
+    },
+    {
+      "cardId": 79,
+      "name": "2-C SOLDIER Operator",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 80,
+      "name": "Kelzmelzer",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 81,
+      "name": "Panthera Protector",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "HUMAN REVIEW PENDING",
+      "route": "B"
+    },
+    {
+      "cardId": 82,
+      "name": "Hecteyes",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 83,
+      "name": "Floating Death",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "HUMAN REVIEW PENDING",
+      "route": "B"
+    },
+    {
+      "cardId": 84,
+      "name": "Ironclad",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "HUMAN REVIEW PENDING",
+      "route": "B"
+    },
+    {
+      "cardId": 85,
+      "name": "Moss-Grown Adamantoise",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 86,
+      "name": "Cloud",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "HUMAN REVIEW PENDING",
+      "route": "A"
+    },
+    {
+      "cardId": 87,
+      "name": "Barret",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 88,
+      "name": "Tifa",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 89,
+      "name": "Aerith",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 90,
+      "name": "Red XIII",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 91,
+      "name": "Yuffie",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 92,
+      "name": "Cait Sith",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 93,
+      "name": "Cid",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 94,
+      "name": "Vincent",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 95,
+      "name": "Ifrit",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "magic"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 96,
+      "name": "Shiva",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "magic"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 97,
+      "name": "Ramuh",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "magic"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 98,
+      "name": "Titan",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "magic"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 99,
+      "name": "Kujata",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "magic"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 100,
+      "name": "Odin",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "magic"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 101,
+      "name": "Phoenix",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "magic"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 102,
+      "name": "Leviathan",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "magic"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 103,
+      "name": "Alexander",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "magic"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 104,
+      "name": "Bahamut",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "magic"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 105,
+      "name": "Bahamut Arisen",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "magic"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 106,
+      "name": "Gilgamesh",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "C"
+    },
+    {
+      "cardId": 107,
+      "name": "Chocobo & Moogle",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "magic"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "D"
+    },
+    {
+      "cardId": 108,
+      "name": "Fat Chocobo",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "magic"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 109,
+      "name": "Posh Chocobo",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "world"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 110,
+      "name": "Moogle Trio",
+      "className": "mixed-og-and-authored",
+      "archiveRoles": [
+        "magic"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "D"
+    },
+    {
+      "cardId": 111,
+      "name": "Magic Pot",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 112,
+      "name": "Materia Guardian",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "C"
+    },
+    {
+      "cardId": 113,
+      "name": "Midgardsormr",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 114,
+      "name": "Mythril Golem",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "B"
+    },
+    {
+      "cardId": 115,
+      "name": "Terror of the Deep",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 116,
+      "name": "Grasptropod",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "C"
+    },
+    {
+      "cardId": 117,
+      "name": "Custom Valkyrie",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "C"
+    },
+    {
+      "cardId": 118,
+      "name": "Gigatrice",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "HUMAN REVIEW PENDING",
+      "route": "B"
+    },
+    {
+      "cardId": 119,
+      "name": "Dyne",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 120,
+      "name": "Anuran Suppressor",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "C"
+    },
+    {
+      "cardId": 121,
+      "name": "Specimen H1024",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "HUMAN REVIEW PENDING",
+      "route": "B"
+    },
+    {
+      "cardId": 122,
+      "name": "Crimson Mare Mk. II",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "C"
+    },
+    {
+      "cardId": 123,
+      "name": "Gi Nattak",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 124,
+      "name": "Forgotten Specimen",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "HUMAN REVIEW PENDING",
+      "route": "A"
+    },
+    {
+      "cardId": 125,
+      "name": "Don Corneo & Abzu",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle",
+        "bindings",
+        "field"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "D"
+    },
+    {
+      "cardId": 126,
+      "name": "Red Dragon",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 127,
+      "name": "Demon Gate",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 128,
+      "name": "Reno",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 129,
+      "name": "Rude",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 130,
+      "name": "Elena",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 131,
+      "name": "Tseng",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "bindings",
+        "field"
+      ],
+      "acceptance": "HUMAN REVIEW PENDING",
+      "route": "A"
+    },
+    {
+      "cardId": 132,
+      "name": "Rufus",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 133,
+      "name": "Roche",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "C"
+    },
+    {
+      "cardId": 134,
+      "name": "J-Squad",
+      "className": "mixed-og-and-authored",
+      "archiveRoles": [
+        "bindings",
+        "field"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "D"
+    },
+    {
+      "cardId": 135,
+      "name": "Chocobo Jockey",
+      "className": "mixed-og-and-authored",
+      "archiveRoles": [
+        "bindings",
+        "field",
+        "world"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "D"
+    },
+    {
+      "cardId": 136,
+      "name": "Space Ranger",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "D"
+    },
+    {
+      "cardId": 137,
+      "name": "Haunted Hotel",
+      "className": "mixed-og-and-authored",
+      "archiveRoles": [
+        "bindings",
+        "field"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "D"
+    },
+    {
+      "cardId": 138,
+      "name": "Skywheel",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "D"
+    },
+    {
+      "cardId": 139,
+      "name": "Loveless",
+      "className": "mixed-og-and-authored",
+      "archiveRoles": [
+        "bindings",
+        "field"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "D"
+    },
+    {
+      "cardId": 140,
+      "name": "Saucer Squad",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "D"
+    },
+    {
+      "cardId": 141,
+      "name": "Dio",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "bindings",
+        "field"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 142,
+      "name": "Ultimate Party Animal",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "bindings",
+        "field"
+      ],
+      "acceptance": "HUMAN REVIEW PENDING",
+      "route": "B"
+    },
+    {
+      "cardId": 143,
+      "name": "Sephiroth",
+      "className": "og-and-procedural-layers",
+      "archiveRoles": [
+        "battle"
+      ],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "A"
+    },
+    {
+      "cardId": 144,
+      "name": "Emerald Witch",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "D"
+    },
+    {
+      "cardId": 145,
+      "name": "Shadowblood Queen",
+      "className": "authored-only",
+      "archiveRoles": [],
+      "acceptance": "CURRENT VERSION ACCEPTED / PRIVATE ONLY",
+      "route": "D"
+    }
+  ]
+}

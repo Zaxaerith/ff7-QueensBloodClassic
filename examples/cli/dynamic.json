@@ -1,0 +1,19 @@
+{
+  "includeState": true,
+  "operations": [
+    {"op": "importPosition", "position": {
+      "seed": 20261029, "turn": 1,
+      "hands": [[], [20]],
+      "board": [
+        {"row": 0, "col": 0, "owner": 0, "cardId": 7, "permanentDelta": 1},
+        {"row": 0, "col": 1, "owner": 1, "pawns": 1},
+        {"row": 1, "col": 1, "owner": 0, "cardId": 107},
+        {"row": 2, "col": 4, "owner": 0, "cardId": 95}
+      ]
+    }},
+    {"op": "score"},
+    {"op": "play", "cardId": 20, "row": 0, "col": 1},
+    {"op": "score"},
+    {"op": "events"}
+  ]
+}

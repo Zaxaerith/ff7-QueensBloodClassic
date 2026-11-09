@@ -1,0 +1,194 @@
+{
+  "baseline": "643afba",
+  "saves": [
+    {
+      "schema": "qbclassic.match",
+      "version": 1,
+      "rulesVersion": "qb-classic-m3-v1",
+      "id": "pre-m6-v1",
+      "deckName": "Legacy v1",
+      "settings": {
+        "deck": [
+          1,
+          1,
+          4,
+          5,
+          7,
+          7,
+          8,
+          8,
+          9,
+          11,
+          11,
+          12,
+          13,
+          14,
+          18
+        ],
+        "seed": 701,
+        "difficulty": "normal",
+        "first": "player"
+      },
+      "replay": {
+        "version": 1,
+        "seed": 701,
+        "decks": [
+          [
+            1,
+            1,
+            4,
+            5,
+            7,
+            7,
+            8,
+            8,
+            9,
+            11,
+            11,
+            12,
+            13,
+            14,
+            18
+          ],
+          [
+            1,
+            1,
+            4,
+            5,
+            7,
+            7,
+            8,
+            8,
+            9,
+            11,
+            11,
+            12,
+            13,
+            14,
+            18
+          ]
+        ],
+        "firstPlayer": 0,
+        "commands": [
+          {
+            "type": "mulligan",
+            "player": 0,
+            "indices": []
+          },
+          {
+            "type": "mulligan",
+            "player": 1,
+            "indices": []
+          },
+          {
+            "type": "play",
+            "player": 0,
+            "handIndex": 0,
+            "row": 0,
+            "col": 0
+          }
+        ]
+      },
+      "phase": "playing",
+      "check": "1aa439ec"
+    },
+    {
+      "schema": "qbclassic.match",
+      "version": 1,
+      "rulesVersion": "qb-classic-m3-v1",
+      "id": "pre-m6-v2",
+      "deckName": "Legacy v2",
+      "settings": {
+        "deck": [
+          1,
+          1,
+          4,
+          5,
+          7,
+          7,
+          8,
+          8,
+          9,
+          11,
+          11,
+          12,
+          13,
+          14,
+          18
+        ],
+        "seed": 20261029,
+        "difficulty": "normal",
+        "first": "player"
+      },
+      "replay": {
+        "version": 2,
+        "seed": 20261029,
+        "decks": [
+          [],
+          []
+        ],
+        "firstPlayer": 0,
+        "position": {
+          "seed": 20261029,
+          "turn": 0,
+          "hands": [
+            [
+              123
+            ],
+            []
+          ],
+          "board": [
+            {
+              "row": 0,
+              "col": 1,
+              "owner": 0,
+              "cardId": 7
+            },
+            {
+              "row": 1,
+              "col": 1,
+              "owner": 0,
+              "cardId": 46,
+              "permanentDelta": 14
+            },
+            {
+              "row": 2,
+              "col": 1,
+              "owner": 0,
+              "cardId": 13
+            }
+          ],
+          "phase": "playing",
+          "passes": 0,
+          "decks": [
+            [],
+            []
+          ],
+          "discard": [
+            [],
+            []
+          ]
+        },
+        "commands": [
+          {
+            "type": "play",
+            "player": 0,
+            "handIndex": 0,
+            "row": 1,
+            "col": 1
+          },
+          {
+            "type": "pass",
+            "player": 1
+          },
+          {
+            "type": "pass",
+            "player": 0
+          }
+        ]
+      },
+      "phase": "finished",
+      "check": "a6317141"
+    }
+  ]
+}

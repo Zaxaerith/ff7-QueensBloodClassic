@@ -1,0 +1,37 @@
+{
+  "name": "ff7-queens-blood-classic",
+  "version": "0.8.0-rc.2",
+  "private": false,
+  "type": "module",
+  "description": "Unofficial fan-made Queen's Blood game with local FF7 Original asset import.",
+  "scripts": {
+    "build": "npm run check && vite build",
+    "build:private": "npm run check && node tools/private-web.mjs build",
+    "dev:private": "node tools/private-web.mjs dev",
+    "preview:private": "node tools/private-web.mjs preview",
+    "assets:inspect": "node tools/assets-cli.mjs inspect",
+    "assets:build": "node tools/assets-cli.mjs build",
+    "assets:test": "node tools/assets-cli.mjs test",
+    "art:validate": "node tools/art-pack.mjs",
+    "art:mapping": "node tools/art-mapping.mjs",
+    "test:contracts": "vitest run tests/visuals.test.ts tests/assets.test.ts tests/art-contract.test.ts tests/art-mapping.test.ts",
+    "check": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "replay": "node tools/replay.mjs",
+    "qb": "node tools/qb-cli.mjs",
+    "catalog:sync": "node tools/sync-catalog.mjs",
+    "catalog:coverage": "node tools/coverage.mjs",
+    "dev": "vite",
+    "start": "vite preview"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "typescript": "^5.8.3",
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  },
+  "engines": {
+    "node": ">=22.12"
+  },
+  "license": "GPL-3.0-only"
+}

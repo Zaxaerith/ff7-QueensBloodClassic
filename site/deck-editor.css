@@ -1,0 +1,145 @@
+/* Menu layout for the deck editor and pre-match overview. */
+#view-home.home-layout {
+  max-width: 1240px;
+  margin: 0 auto;
+  grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr);
+  grid-template-areas: "deck setup" "deck info";
+  grid-template-rows: auto 1fr;
+  align-items: start;
+}
+.d4-home-setup { grid-area: setup; }
+#homeDeckInfo { grid-area: info; }
+.d4-home-setup, .d4-home-deck, .d4-inspector, .d4-deck-panel { padding: 14px; }
+.d4-home-setup .field { margin: 12px 0; }
+.d4-home-setup .home-actions { margin: 12px 0 0; }
+.d4-home-setup .advanced { margin-top: 10px; }
+.d4-home-deck {
+  grid-area: deck;
+  background: radial-gradient(ellipse at 50% 8%, #20458d 0%, transparent 68%), linear-gradient(140deg, #172b65, #0a143c);
+}
+.d4-panel-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.d4-panel-heading h2 { color: var(--gold); }
+#deckSummary, #currentDeckCount { margin: 0; color: var(--gold); font-variant-numeric: tabular-nums; }
+.d4-home-deck-choice { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.d4-home-deck-choice strong, .d4-home-deck-choice select { flex: 1 1 140px; min-width: 0; overflow-wrap: anywhere; }
+#homeDeckSlots { max-width: 535px; margin: 12px auto 0; }
+.d4-deck-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.d4-slot, .d4-library-item { min-width: 0; }
+.d4-card-button {
+  display: block;
+  width: 100%;
+  aspect-ratio: 240 / 346;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  box-shadow: none;
+  background: transparent;
+  text-align: left;
+}
+.d4-card-button:hover:not(:disabled) { background: transparent; }
+.d4-card-button:hover .qb-card { box-shadow: 0 0 0 1px var(--silver); }
+.d4-card-button[aria-pressed="true"] { box-shadow: 0 0 0 2px var(--gold); }
+.d4-card-button:focus-visible { outline: 2px solid white; outline-offset: 3px; }
+.d4-card-button .qb-power { left: auto; right: 5%; width: max(var(--power-w), 20px); height: auto; aspect-ratio: 1; }
+.d4-card-button .qb-rank .qb-icon { min-width: 7px; min-height: 10px; }
+.d4-empty-slot {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 240 / 346;
+  border: 1px dashed #778ab9;
+  border-radius: 3px;
+  background: #0713328a;
+  color: var(--muted);
+  font-size: 12px;
+}
+.d4-slot-code { display: block; color: var(--muted); font-size: 11px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.d4-slot > .d4-slot-code { text-align: center; margin-top: 3px; }
+.d4-deck-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 18px; padding: 10px 14px; margin-bottom: 12px; }
+.d4-deck-tools .editor-tools { flex: 1 1 260px; max-width: 360px; }
+.d4-deck-tools .field { display: flex; flex: 1 1 245px; align-items: center; margin: 0; max-width: 400px; }
+.d4-deck-tools .field input { flex: 1; width: auto; }
+.d4-deck-tools .field { white-space: nowrap; }
+.d4-deck-tools .advanced { margin: 0; padding: 0; border: 0; }
+.d4-deck-tools .advanced[open] { flex: 1 1 100%; }
+.d4-deck-tabs { display: none; }
+.d4-deck-layout {
+  display: grid;
+  grid-template-columns: minmax(365px, 4fr) minmax(300px, 5fr) minmax(228px, 2.5fr);
+  align-items: start;
+  gap: var(--space);
+}
+#deckSlots { margin-top: 12px; }
+.d4-library-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; gap: 10px 8px; }
+.d4-library-grid .empty { grid-column: 1 / -1; }
+.d4-library-caption { display: flex; justify-content: space-between; align-items: baseline; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
+.d4-library-status { font-size: 11px; color: var(--gold); line-height: 1.5; }
+.d4-library-item[data-blocked="true"] .d4-library-status { color: var(--muted); }
+.d4-library-item[data-in-deck="true"] .d4-library-status { color: var(--teal); }
+#deckFilters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0 0 12px; gap: 6px; }
+#deckFilters input { grid-column: span 2; }
+#deckFilters select { max-width: none; }
+#deckPager { margin-top: 10px; }
+.d4-inspector > h3 { margin-bottom: 8px; }
+.d4-inspector .qb-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 120px;
+  align-items: start;
+  gap: 6px 10px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+.d4-inspector .qb-details h3 { grid-column: 1 / -1; margin: 0; }
+.d4-inspector .qb-details > .qb-pattern { grid-column: 2; grid-row: 2 / span 2; width: 120px; height: 120px; margin: 0; }
+.d4-inspector .qb-facts { grid-column: 1; margin: 0; gap: 4px 6px; }
+.d4-inspector .qb-key { grid-column: 1; margin: 0; }
+.d4-inspector .qb-trigger { display: none; }
+.d4-inspector .qb-description { grid-column: 1 / -1; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; margin: 0; }
+.d4-inspector .d4-copy-count, .d4-inspector .d4-limit { margin: 8px 0; font-size: .9rem; }
+.d4-copy-count { color: var(--teal); }
+.d4-inspector-actions { gap: 6px; }
+.d4-inspector-actions button { min-height: 44px; padding: 6px 9px; font-size: .88rem; }
+.d4-deck-footer { position: sticky; bottom: 0; z-index: 4; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; padding: 8px 10px; margin-top: 12px; }
+.d4-deck-actions { gap: 5px; }
+.d4-deck-actions button { min-height: 40px; }
+.d4-inspector-actions button:disabled, .d4-deck-actions button:disabled { color: #91a2c6; border-color: #536c98; background: #101e46; }
+#view-decks .d4-card-button { scroll-margin-block-end: 115px; }
+@media (min-width: 1121px) {
+  #deckSlotsPanel, #deckInfo { position: sticky; top: 12px; }
+}
+@media (min-height: 950px) and (min-width: 1121px) {
+  #homeDeckSlots { max-width: 650px; }
+}
+@media (max-width: 1120px) {
+  #view-decks { max-width: 650px; margin-inline: auto; }
+  .d4-deck-layout { display: block; }
+  .d4-deck-tabs { position: sticky; top: 0; z-index: 3; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-bottom: 8px; padding: 4px 0; background: #0a143e; }
+  .d4-deck-tabs button { min-height: 44px; padding: 6px 4px; }
+  .d4-deck-tabs button[aria-pressed="true"] { color: var(--gold); border-color: var(--gold); background: #27457c; }
+  #view-decks[data-deck-pane="slots"] [data-deck-panel]:not([data-deck-panel="slots"]),
+  #view-decks[data-deck-pane="library"] [data-deck-panel]:not([data-deck-panel="library"]),
+  #view-decks[data-deck-pane="info"] [data-deck-panel]:not([data-deck-panel="info"]) { display: none; }
+  #deckSlots { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .d4-library-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #deckCards, #view-decks .d4-card-button, #view-decks [data-deck-panel] h3 { scroll-margin-block-start: 60px; }
+}
+@media (max-width: 760px) {
+  #view-home.home-layout { grid-template-columns: 1fr; grid-template-areas: "setup" "deck" "info"; grid-template-rows: auto; max-width: 520px; }
+  #homeDeckSlots { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .d4-home-setup, .d4-home-deck, .d4-inspector, .d4-deck-panel { padding: 10px; }
+  .d4-deck-tools { gap: 7px; padding: 8px; margin-bottom: 8px; }
+  .d4-deck-tools .editor-tools, .d4-deck-tools .field { max-width: none; }
+  .d4-deck-footer { gap: 4px; padding: 6px; }
+  .d4-deck-actions button { min-height: 44px; font-size: 12px; padding: 5px 8px; }
+  .d4-deck-footer > p { font-size: 12px; }
+  #deckFilters select { font-size: 12px; padding: 6px 3px; }
+  #deckFilters input { padding: 6px; }
+}

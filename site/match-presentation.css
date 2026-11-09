@@ -1,0 +1,35 @@
+/* D1/D3 feedback. No Classic Frame or portrait table geometry changes. */
+.battle-window[data-presentation-phase="PlayerResolve"] #who,
+.battle-window[data-presentation-phase="OpponentResolve"] #who{color:var(--gold)}
+.battle-window[data-presentation-phase="OpponentTurn"] #who{color:var(--rose)}
+.battle-window .presentation-tools{font-size:12px;display:flex;gap:6px;align-items:center;line-height:1.5}
+.battle-window .presentation-tools input{width:auto}
+#presentationSkip[hidden]{display:none}
+/* D3: actual event/endpoint annotations, never predicted yellow range flashes. */
+#view-game .board-layout{position:relative}
+.match-effects{position:absolute;pointer-events:none;z-index:4;overflow:visible}
+.match-effects>div{pointer-events:none}
+.match-drop-target,.match-event-target,.match-net-change{position:absolute;left:calc(var(--effect-col) * (var(--cell-width) + var(--cell-gap)));top:calc(var(--effect-row) * (var(--cell-height) + var(--cell-gap)));width:var(--cell-width);height:var(--cell-height);display:flex;align-items:center;justify-content:center;text-align:center}
+.match-drop-target{border:2px solid #e5edff;box-shadow:inset 0 0 0 2px #102850}
+.match-drop-target span,.match-event-target span,.match-net-change span{background:#0b174de8;border:1px solid #b9cee3;color:#f3f5ff;padding:3px 4px;font-size:12px;line-height:1.3;overflow-wrap:anywhere;max-width:100%}
+.match-drop-target span{align-self:start;font-weight:bold}
+.match-event-target{align-items:end;padding-bottom:3px}
+.match-event-target[data-kind="CardDestroyed"] span,.match-event-target[data-kind="CardReplaced"] span{border-color:#e4a4b0;color:#ffd1dc}
+.match-event-target[data-kind="CardEnhanced"] span,.match-event-target[data-kind="CardSpawned"] span{border-color:#97e6da;color:#c1fff0}
+.match-event-target.historical-target span{border-style:dashed}
+.match-net-change span{border-color:#97e6da;color:#c1fff0;font-weight:bold}
+.match-net-change.negative span{border-color:#e4a4b0;color:#ffd1dc}
+.match-net-change.pawns span{font-size:11px;color:#edf1ff;border-color:#c9d6e8}
+#view-game .battle-feedback{position:relative}
+#view-game .battle-feedback:has(.match-action-notice:not([hidden]))>#feedback{display:none}
+#view-game .battle-feedback .match-action-notice{margin:0;color:#e6efff;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.match-effects[data-motion=true] .match-net-change span{animation:match-note-enter 180ms ease-out both}
+.match-card-arrival>.qb-card{animation:match-card-enter 180ms ease-out both}
+@keyframes match-card-enter{from{opacity:.5;transform:translateY(-7px)}to{opacity:1;transform:none}}
+@keyframes match-note-enter{from{transform:translateY(5px)}to{transform:none}}
+.match-score-row{position:absolute;left:0;right:0;top:calc(var(--effect-row) * (var(--cell-height) + var(--cell-gap)) + var(--cell-height) * .35);min-height:40px;display:grid;text-align:center;padding:5px;background:linear-gradient(90deg,#0b174ddd,#152b65f5,#0b174ddd);border-block:1px solid #a8badb;color:#edf2ff;font-size:13px}
+.match-score-row.active{border-color:#f5d47b}.match-score-row span{color:#f5d47b}
+.match-score-total{position:absolute;top:0;left:0;right:0;padding:5px;background:#0b174df5;border:1px solid #f5d47b;text-align:center;color:#ffe3a5;font-weight:bold;font-size:15px}
+@media(max-width:760px){.match-drop-target span,.match-event-target span,.match-net-change span{font-size:10px;padding:2px}.match-net-change.pawns span{font-size:9px}.match-score-row{font-size:11px;min-height:34px;padding:2px}.match-score-total{font-size:12px}#view-game .battle-feedback .match-action-notice{font-size:11px}}
+@media(prefers-reduced-motion:reduce){.match-card-arrival>.qb-card,.match-effects[data-motion=true] .match-net-change span{animation:none}}
+:root[data-reduce-motion=true] .match-card-arrival>.qb-card,:root[data-reduce-motion=true] .match-net-change span{animation:none}

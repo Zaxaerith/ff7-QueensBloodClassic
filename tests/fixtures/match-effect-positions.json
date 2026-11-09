@@ -1,0 +1,428 @@
+{
+  "normal": {
+    "title": "普通落牌、控制权与棋子等级",
+    "position": {
+      "seed": 630,
+      "turn": 0,
+      "hands": [
+        [
+          7,
+          1
+        ],
+        [
+          7,
+          1
+        ]
+      ],
+      "decks": [
+        [],
+        []
+      ],
+      "board": [
+        {
+          "row": 1,
+          "col": 0,
+          "owner": 0,
+          "pawns": 1
+        },
+        {
+          "row": 1,
+          "col": 1,
+          "owner": 1,
+          "pawns": 2
+        },
+        {
+          "row": 1,
+          "col": 4,
+          "owner": 1,
+          "pawns": 1
+        }
+      ]
+    },
+    "move": {
+      "handIndex": 0,
+      "row": 1,
+      "col": 0
+    }
+  },
+  "enhance": {
+    "title": "Crab持续强化：实际力量2→4",
+    "position": {
+      "seed": 630,
+      "turn": 0,
+      "hands": [
+        [
+          13,
+          1
+        ],
+        [
+          7,
+          1
+        ]
+      ],
+      "decks": [
+        [],
+        []
+      ],
+      "board": [
+        {
+          "row": 1,
+          "col": 0,
+          "owner": 0,
+          "pawns": 1
+        },
+        {
+          "row": 0,
+          "col": 0,
+          "owner": 0,
+          "cardId": 7
+        },
+        {
+          "row": 1,
+          "col": 4,
+          "owner": 1,
+          "pawns": 1
+        }
+      ]
+    },
+    "move": {
+      "handIndex": 0,
+      "row": 1,
+      "col": 0
+    }
+  },
+  "weaken": {
+    "title": "Archdragon：力量修正与最终数值",
+    "position": {
+      "seed": 630,
+      "turn": 0,
+      "hands": [
+        [
+          20,
+          1
+        ],
+        [
+          7,
+          1
+        ]
+      ],
+      "decks": [
+        [],
+        []
+      ],
+      "board": [
+        {
+          "row": 1,
+          "col": 0,
+          "owner": 0,
+          "pawns": 1
+        },
+        {
+          "row": 1,
+          "col": 1,
+          "owner": 1,
+          "cardId": 21
+        },
+        {
+          "row": 1,
+          "col": 4,
+          "owner": 1,
+          "pawns": 1
+        }
+      ]
+    },
+    "move": {
+      "handIndex": 0,
+      "row": 1,
+      "col": 0
+    }
+  },
+  "chain": {
+    "title": "Cockatrice→Bomb摧毁连锁；落牌本身也离场",
+    "position": {
+      "seed": 630,
+      "turn": 0,
+      "hands": [
+        [
+          39,
+          1
+        ],
+        [
+          7,
+          1
+        ]
+      ],
+      "decks": [
+        [],
+        []
+      ],
+      "board": [
+        {
+          "row": 1,
+          "col": 0,
+          "owner": 0,
+          "pawns": 2
+        },
+        {
+          "row": 1,
+          "col": 1,
+          "owner": 1,
+          "cardId": 41
+        },
+        {
+          "row": 0,
+          "col": 0,
+          "owner": 0,
+          "cardId": 40
+        },
+        {
+          "row": 0,
+          "col": 1,
+          "owner": 1,
+          "cardId": 1
+        },
+        {
+          "row": 1,
+          "col": 4,
+          "owner": 1,
+          "pawns": 1
+        }
+      ]
+    },
+    "move": {
+      "handIndex": 0,
+      "row": 1,
+      "col": 0
+    }
+  },
+  "replacement": {
+    "title": "替换Heatseeker、旧牌离场与生成手牌",
+    "position": {
+      "seed": 630,
+      "turn": 0,
+      "hands": [
+        [
+          51,
+          1
+        ],
+        [
+          7,
+          1
+        ]
+      ],
+      "decks": [
+        [],
+        []
+      ],
+      "board": [
+        {
+          "row": 1,
+          "col": 0,
+          "owner": 0,
+          "cardId": 40
+        },
+        {
+          "row": 1,
+          "col": 4,
+          "owner": 1,
+          "pawns": 1
+        }
+      ]
+    },
+    "move": {
+      "handIndex": 0,
+      "row": 1,
+      "col": 0
+    }
+  },
+  "generate": {
+    "title": "Mandragora生成手牌",
+    "position": {
+      "seed": 630,
+      "turn": 0,
+      "hands": [
+        [
+          10,
+          1
+        ],
+        [
+          7,
+          1
+        ]
+      ],
+      "decks": [
+        [],
+        []
+      ],
+      "board": [
+        {
+          "row": 1,
+          "col": 0,
+          "owner": 0,
+          "pawns": 1
+        },
+        {
+          "row": 1,
+          "col": 4,
+          "owner": 1,
+          "pawns": 1
+        }
+      ]
+    },
+    "move": {
+      "handIndex": 0,
+      "row": 1,
+      "col": 0
+    }
+  },
+  "spawn": {
+    "title": "Shiva生成棋盘衍生牌",
+    "position": {
+      "seed": 630,
+      "turn": 0,
+      "hands": [
+        [
+          96,
+          1
+        ],
+        [
+          7,
+          1
+        ]
+      ],
+      "decks": [
+        [],
+        []
+      ],
+      "board": [
+        {
+          "row": 1,
+          "col": 0,
+          "owner": 0,
+          "pawns": 2
+        },
+        {
+          "row": 0,
+          "col": 0,
+          "owner": 0,
+          "pawns": 1
+        },
+        {
+          "row": 0,
+          "col": 1,
+          "owner": 0,
+          "pawns": 2
+        },
+        {
+          "row": 2,
+          "col": 2,
+          "owner": 0,
+          "pawns": 3
+        },
+        {
+          "row": 1,
+          "col": 4,
+          "owner": 1,
+          "pawns": 1
+        }
+      ]
+    },
+    "move": {
+      "handIndex": 0,
+      "row": 1,
+      "col": 0
+    }
+  },
+  "scoring": {
+    "title": "三行、平行、特殊实际计分17:3",
+    "position": {
+      "seed": 630,
+      "turn": 0,
+      "hands": [
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "decks": [
+        [],
+        []
+      ],
+      "passes": 1,
+      "board": [
+        {
+          "cardId": 142,
+          "owner": 0,
+          "row": 0,
+          "col": 0
+        },
+        {
+          "cardId": 7,
+          "owner": 1,
+          "row": 0,
+          "col": 4
+        },
+        {
+          "cardId": 53,
+          "owner": 0,
+          "row": 1,
+          "col": 0
+        },
+        {
+          "cardId": 7,
+          "owner": 1,
+          "row": 1,
+          "col": 4
+        }
+      ]
+    }
+  },
+  "both-pass": {
+    "title": "双方均无落点：自动PASS×2",
+    "position": {
+      "seed": 630,
+      "turn": 0,
+      "hands": [
+        [
+          1
+        ],
+        [
+          1
+        ]
+      ],
+      "decks": [
+        [],
+        []
+      ],
+      "passes": 0,
+      "board": [
+        {
+          "cardId": 142,
+          "owner": 0,
+          "row": 0,
+          "col": 0
+        },
+        {
+          "cardId": 7,
+          "owner": 1,
+          "row": 0,
+          "col": 4
+        },
+        {
+          "cardId": 53,
+          "owner": 0,
+          "row": 1,
+          "col": 0
+        },
+        {
+          "cardId": 7,
+          "owner": 1,
+          "row": 1,
+          "col": 4
+        }
+      ]
+    }
+  }
+}

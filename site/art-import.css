@@ -1,0 +1,6 @@
+/* Original menu styling. SPDX-License-Identifier: GPL-3.0-only */
+.art-import{margin:1rem 0 1.5rem;padding-top:1rem;border-top:3px double var(--silver,#bfcbe4)}
+.art-import-status{overflow-wrap:anywhere;min-height:1.6em;color:#ead49c}
+.art-import progress{display:block;width:100%;height:14px;margin:.7rem 0;accent-color:#afcbea}
+.art-import progress[hidden]{display:none}
+.art-import .button-row{flex-wrap:wrap}

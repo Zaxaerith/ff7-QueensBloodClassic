@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#080d35"><title>Queen's Blood — FF7 Classic</title><link rel="stylesheet" href="./card.css"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./battle-background.css"><link rel="stylesheet" href="./art-import.css"></head>
+<body><div id="app" class="app-shell" data-view="home">
+<header class="app-header"><div class="brand"><span class="brand-mark" aria-hidden="true">Ⅶ</span><div><p class="eyebrow">FINAL FANTASY VII · CLASSIC EDITION</p><h1>QUEEN'S BLOOD</h1></div></div><div class="header-actions"><button id="instructionsBtn" aria-label="操作说明">?</button><button id="backMenu" hidden>返回菜单</button><span class="version">Preview · 0.8.0-rc.2</span></div></header>
+<nav id="mainNav" class="menu-window" aria-label="主菜单"><button data-route="home" aria-current="page">New Game <span>开始</span></button><button data-route="decks">Decks <span>卡组</span></button><button data-route="collection">Collection <span>图鉴</span></button><button data-route="records">Records <span>记录</span></button><button data-route="config">Config <span>设置</span></button></nav>
+<p id="appNotice" class="app-notice" role="status"></p>
+<main id="views">
+<section id="view-home" class="view home-layout">
+  <section class="window setup-window d4-home-setup"><h2 class="view-title" tabindex="-1">NEW GAME / 开始对局</h2><label class="field">电脑难度<select id="difficulty"><option value="easy">Easy · 随机行动</option><option value="normal" selected>Normal · 局面评估</option><option value="hard">Hard · 回应前瞻</option></select></label><div class="home-actions"><button id="startGame" class="primary">开始对局</button><button id="resumeGame" hidden>Continue Game · 继续对局</button></div><p id="continueInfo" class="muted"></p>
+    <details class="advanced"><summary>高级选项</summary><label class="field">Seed（留空随机）<input id="seed" type="number" min="0" max="4294967295" placeholder="随机"></label><label class="field">自定义先手<select id="firstPlayer"><option value="player">玩家先手</option><option value="computer">电脑先手</option><option value="seeded">按 Seed 随机</option></select></label><p class="muted">先手是本原型自定义设置。修改后仅对新局生效。</p><label class="field">预设模板<select id="advancedPreset"></select></label><button id="applyPreset">本页使用模板</button></details>
+  </section>
+  <section class="window d4-home-deck">
+    <div class="d4-panel-heading"><h2>赛前牌组</h2><span id="currentDeckCount" class="muted"></span></div>
+    <div class="d4-home-deck-choice"><strong id="currentDeck"></strong><select id="homeDeckSelect" aria-label="切换已保存牌组"></select><button id="changeDeck">选择 / 编辑卡组</button></div>
+    <div id="homeDeckSlots" class="d4-deck-grid" aria-label="赛前牌组，15个槽位"></div>
+  </section>
+  <aside id="homeDeckInfo" class="window d4-inspector" aria-labelledby="homeDeckInfoTitle"><h3 id="homeDeckInfoTitle" tabindex="-1">卡牌信息</h3></aside>
+</section>
+<section id="view-game" class="view" hidden><div class="battle-window window"><div class="match-top"><div><strong class="player-label">PLAYER <b id="score0">0</b></strong><span id="playerCount"></span></div><h2 id="who" class="view-title" tabindex="-1">开局换牌</h2><div class="enemy-info"><strong>COMPUTER <b id="score1">0</b></strong><span id="enemyCount"></span></div></div>
+<div class="board-layout"><div id="leftScores" class="lane-scores"></div><div id="board" class="board" role="group" aria-label="3行5列棋盘，方向键移动焦点"></div><div id="rightScores" class="lane-scores"></div></div>
+<div class="battle-feedback"><p id="status" role="status"></p><p id="feedback" aria-live="polite"></p></div>
+<div class="hand-area"><div class="hand-heading"><strong>HAND</strong><span id="handHelp"></span></div><div id="hand" class="battle-hand" aria-label="你的手牌，可横向滚动"></div></div>
+<div class="battle-actions"><button id="cardDetails">卡牌详情</button><button id="confirmMulligan" class="primary">完成换牌</button><button id="confirmPlay" class="primary" hidden>确认出牌</button><button id="passBtn">PASS</button><button id="resultsBtn" hidden>对局结果</button><details class="action-more"><summary>更多</summary><div><button id="replayBtn">导出回放</button><button id="battleLogBtn">事件日志</button><details class="background-history"><summary>高级外观</summary><label class="background-picker">历史背景对照<select id="battleBackground" aria-label="高级背景对照"></select></label></details></div></details></div></div></section>
+<section id="view-decks" class="view" data-deck-pane="library" hidden>
+  <div class="d4-panel-heading"><h2 class="view-title" tabindex="-1">DECKS / 卡组</h2><p id="deckSummary" role="status"></p></div>
+  <div class="window d4-deck-tools">
+    <div class="editor-tools"><select id="savedDecks" aria-label="已保存卡组"></select><button id="newDeck">新建</button></div>
+    <label class="field">卡组名称<input id="deckName" maxlength="40"></label>
+    <details class="advanced"><summary>模板与备份</summary><select id="deckTemplate" aria-label="卡组模板"></select><button id="loadTemplate">载入模板</button><button id="exportDecks">导出本地卡组</button></details>
+  </div>
+  <nav class="d4-deck-tabs" aria-label="卡组编辑区域">
+    <button data-deck-tab="slots" aria-controls="deckSlotsPanel" aria-pressed="false">当前牌组</button>
+    <button data-deck-tab="library" aria-controls="deckLibraryPanel" aria-pressed="true">卡库</button>
+    <button data-deck-tab="info" aria-controls="deckInfo" aria-pressed="false">卡牌信息</button>
+  </nav>
+  <div class="d4-deck-layout">
+    <section id="deckSlotsPanel" class="window d4-deck-panel" data-deck-panel="slots" aria-labelledby="deckSlotsTitle">
+      <h3 id="deckSlotsTitle" tabindex="-1">当前牌组</h3><div id="deckSlots" class="d4-deck-grid" aria-label="草稿牌组，15个槽位"></div>
+    </section>
+    <section id="deckLibraryPanel" class="window d4-deck-panel" data-deck-panel="library" aria-labelledby="deckLibraryTitle">
+      <div class="d4-panel-heading"><h3 id="deckLibraryTitle" tabindex="-1">卡库</h3><select id="deckKind" aria-label="卡库分类"><option value="numbered">编号牌</option><option value="tokens">衍生卡</option></select></div>
+      <div id="deckFilters" class="filters"></div><div id="deckCards" class="d4-library-grid"></div><div id="deckPager" class="pager"></div>
+    </section>
+    <aside id="deckInfo" class="window d4-inspector" data-deck-panel="info" aria-labelledby="deckInfoTitle"><h3 id="deckInfoTitle" tabindex="-1">卡牌信息</h3></aside>
+  </div>
+  <div class="window d4-deck-footer"><p id="deckValidation" class="muted" role="status"></p><div class="button-row d4-deck-actions"><button id="saveDeck">保存</button><button id="useDeck" class="primary">用于新对局</button><button id="revertDeck">撤销草稿</button><button id="deleteDeck" class="danger">删除</button><button id="deckBack">返回</button></div></div>
+</section>
+<section id="view-collection" class="view" hidden><div class="section-heading"><h2 class="view-title" tabindex="-1">COLLECTION / 图鉴</h2><select id="collectionKind" aria-label="卡牌分类"><option value="numbered">145 张编号牌</option><option value="tokens">衍生卡（独立分类）</option></select></div><div class="window"><p id="collectionCount" class="muted"></p><div id="collectionFilters" class="filters"></div><div id="collectionGrid" class="collection-grid"></div><div id="collectionPager" class="pager"></div></div></section>
+<section id="view-records" class="view" hidden><div class="window narrow-window"><h2 class="view-title" tabindex="-1">RECORDS / 对局记录</h2><p class="muted">本机最近20局；新对局可逐步回放，旧摘要没有完整行动记录。所有数据仅保存在本机。</p><button id="exportRecords">导出结果摘要</button><ol id="recordList" class="record-list"></ol></div></section>
+<section id="view-replay" class="view" hidden><div class="battle-window replay-window window" data-background="hybrid">
+<div class="match-top"><div><strong class="player-label">PLAYER 1 <b id="replayScore0">0</b></strong><span id="replayPlayerCount"></span></div><h2 id="replayTurn" class="view-title" tabindex="-1">REPLAY</h2><div class="enemy-info"><strong>PLAYER 2 <b id="replayScore1">0</b></strong><span id="replayEnemyCount"></span></div></div>
+<div class="board-layout"><div id="replayScores0" class="lane-scores"></div><div id="replayBoard" class="board" role="group" aria-label="只读回放棋盘，3行5列"></div><div id="replayScores1" class="lane-scores"></div></div>
+<div class="battle-feedback"><p id="replayAction" role="status"></p><p id="replayHint"></p></div>
+<div class="hand-area"><div class="hand-heading"><strong>REPLAY <span id="replayStep"></span></strong><span>玩家1手牌 · 点击查看</span></div><div id="replayHand" class="battle-hand"></div></div>
+<div class="battle-actions replay-actions"><button id="replayFirst" aria-label="跳至开局">|◀</button><button id="replayPrev" aria-label="上一步">◀</button><button id="replayNext" aria-label="下一步">▶</button><button id="replayLast" aria-label="跳至终局">▶|</button><details class="action-more"><summary>详情</summary><div><button id="replayAnalyze">分析本步</button><button id="replayEvents">本步事件</button><button id="replayScoreDetails">终局计分</button><button id="replayExport">导出 JSON</button></div></details><button id="replayExit">退出回放</button></div>
+</div></section>
+<section id="view-config" class="view" hidden><div class="window narrow-window"><h2 class="view-title" tabindex="-1">CONFIG / 设置</h2><label class="field">显示密度<select id="density"><option value="comfortable">标准</option><option value="compact">紧凑</option></select></label><label class="field">界面文字<select id="textSize"><option value="normal">标准</option><option value="large">放大</option></select></label><label class="check-field"><input id="reduceMotion" type="checkbox">减少动效</label><p class="muted">同时遵循系统“减少动态效果”偏好。当前版本没有声音系统。</p><h3>操作提示</h3><p>鼠标 / 触屏：选卡 → 选格 → 确认。</p><p>Tab 切换控件，Enter / Space 激活，方向键浏览棋盘或手牌，Escape 返回或取消。</p><p>本地卡组与设置保存在当前浏览器，不上传。</p></div></section>
+</main><footer class="app-footer">非官方同人项目 · FINAL FANTASY VII 与 QUEEN'S BLOOD 权利归各自权利人所有</footer></div>
+<dialog id="infoDialog" aria-labelledby="dialogTitle"><header class="dialog-header"><h2 id="dialogTitle"></h2><button id="dialogClose" aria-label="关闭窗口">返回 ×</button></header><div id="dialogContent"></div></dialog>
+<script type="module" src="/src/app.ts"></script></body></html>

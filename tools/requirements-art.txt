@@ -1,0 +1,4 @@
+# Offline illustration composition, local qb-assets generator and review sheets.
+# Python >=3.11; production uses no Chrome/Blender/system fonts/network.
+# Not needed for the game, public build, or original stdlib asset importer.
+Pillow==13.0.0

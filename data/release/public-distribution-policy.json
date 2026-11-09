@@ -1,0 +1,55 @@
+{
+  "schema": "qb-public-dist-policy",
+  "version": 1,
+  "purpose": "Strict default Web artifact allowlist. This is a technical gate, not a copyright clearance.",
+  "required": [
+    "index.html",
+    "catalog.json"
+  ],
+  "allowedPatterns": [
+    "^index\\.html$",
+    "^catalog\\.json$",
+    "^assets/index-[A-Za-z0-9_-]+\\.(?:js|css)$",
+    "^assets/bot\\.worker-[A-Za-z0-9_-]+\\.js$",
+    "^assets/art-import\\.worker-[A-Za-z0-9_-]+\\.js$"
+  ],
+  "forbiddenPrefixes": [
+    "classic/",
+    "private-assets/",
+    ".research-cache/",
+    ".parallel-check/",
+    "models/",
+    "portraits/"
+  ],
+  "maxFileBytes": 2000000,
+  "assetExceptions": [],
+  "rule": "New chunks, own SVG/bitmap assets, desktop binaries or generator bundles require explicit policy review; never broaden this to all images/models.",
+  "sourceRepository": {
+    "reviewedKinds": [
+      "TypeScript/JavaScript/Python/CSS/HTML source",
+      "factual card data and authored recipes",
+      "source/provenance and license documentation",
+      "self-authored synthetic tests"
+    ],
+    "blockedKinds": [
+      "original game archives/meshes/textures/fonts/music",
+      "Rebirth reference imagery",
+      "rendered private illustrations and comparisons",
+      "credentials/private paths",
+      "node_modules/build/cache/browser profiles"
+    ],
+    "note": "Directory membership or textual JSON alone does not establish provenance. Untracked Art sources must be reviewed and committed by their owner; this policy does not authorize their distribution."
+  },
+  "approvedEmbeddedMedia": [
+    {
+      "sha256": "5a50996a3f1540615c2ac76c7b7e5b813070869f0bfd92edc23218ea0344ef5e",
+      "kind": "self-authored-svg",
+      "source": "site/battle-background.css"
+    },
+    {
+      "sha256": "2c43b3c514f758544e58f3715c3c44d85b69e96643f73bd6cc9a9f7234efa750",
+      "kind": "self-authored-svg",
+      "source": "site/battle-background.css"
+    }
+  ]
+}

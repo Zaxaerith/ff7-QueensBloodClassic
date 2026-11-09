@@ -1,0 +1,130 @@
+/* M5-B background study. Original CSS / geometric SVG only; no game textures.
+   Current/A/C are historical candidates. Only B has the scoped desktop spacing polish below. */
+.background-picker{display:grid;gap:5px;font-size:11px;color:var(--muted);padding-top:7px;border-top:1px solid var(--edge)}
+.background-picker select{font-size:11px;padding:6px 3px;width:100%;min-height:36px}
+
+.battle-window:is([data-background=classic],[data-background=hybrid],[data-background=dramatic]){
+  isolation:isolate;
+  background-color:var(--stage-base);
+  background-image:var(--stage-light),var(--stage-weave),var(--stage-shade);
+  background-size:auto,var(--weave-size),auto;
+}
+/* All decoration is painted behind controls, never inserted over a hit target. */
+.battle-window:is([data-background=classic],[data-background=hybrid],[data-background=dramatic])::before{
+  content:'';position:absolute;inset:5px;pointer-events:none;z-index:-1;
+  border:1px solid var(--stage-rule);background:var(--stage-ornament);opacity:var(--stage-ornament-strength,1);
+}
+.battle-window:is([data-background=classic],[data-background=hybrid],[data-background=dramatic]) .board-layout{
+  position:relative;isolation:isolate;
+}
+.battle-window:is([data-background=classic],[data-background=hybrid],[data-background=dramatic]) .board-layout::before{
+  content:'';position:absolute;inset:0;margin:auto;pointer-events:none;z-index:-1;
+  width:min(100%,calc(var(--board-width) + 2 * var(--score-width) + 2 * var(--score-gap) + 32px));
+  height:min(100%,calc(var(--board-height) + 20px));
+  border:var(--table-border);border-radius:3px;
+  background:var(--table-light),var(--table-weave),var(--table-base);
+  background-size:auto,var(--weave-size),auto;box-shadow:var(--table-depth);
+}
+.battle-window:is([data-background=classic],[data-background=hybrid],[data-background=dramatic]) .board-layout::after{
+  content:'';position:absolute;inset:0;margin:auto;pointer-events:none;z-index:-1;
+  width:min(100%,calc(var(--board-width) + 2 * var(--score-width) + 2 * var(--score-gap) + 22px));
+  height:min(100%,calc(var(--board-height) + 10px));
+  background:var(--table-ornament);opacity:var(--ornament-strength);
+}
+
+/* A: translucent blue-green mat, silver rules, restrained woven diagonal grain.
+   This is a palette translation of TT's hierarchy, NOT a claim that FFVIII had a blue table. */
+.battle-window[data-background=classic]{
+  --stage-base:#0b252f;
+  --stage-light:radial-gradient(ellipse at 45% 33%,#25575b70,transparent 68%);
+  --stage-weave:repeating-linear-gradient(115deg,#9ec7bc06 0 1px,transparent 1px 5px);
+  --weave-size:8px 8px;
+  --stage-shade:linear-gradient(135deg,#102c47,#102c36 48%,#07152b);
+  --stage-rule:#90b0b847;
+  --stage-ornament:linear-gradient(90deg,transparent 5%,#b5d0cb24 5% 5.12%,transparent 5.12% 94.88%,#b5d0cb24 94.88% 95%,transparent 95%);
+  --table-border:1px solid #8eb8c07a;
+  --table-light:linear-gradient(140deg,#79b2b51c,transparent 60%);
+  --table-weave:repeating-linear-gradient(0deg,#91b5ab06 0 1px,transparent 1px 4px);
+  --table-base:linear-gradient(120deg,#173d4bd9,#122e45e8);
+  --table-depth:inset 0 0 0 3px #081e37aa,0 2px 0 #030e20aa;
+  --table-ornament:linear-gradient(90deg,#b5d0cb55 12px,transparent 12px calc(100% - 12px),#b5d0cb55 calc(100% - 12px)) top/100% 1px no-repeat,linear-gradient(90deg,#b5d0cb55 12px,transparent 12px calc(100% - 12px),#b5d0cb55 calc(100% - 12px)) bottom/100% 1px no-repeat;
+  --ornament-strength:.7;
+}
+
+/* B Refined: a lit indigo table in a quieter, darker environment. One large,
+   low-contrast geometric seal replaces the old repeating diamond wallpaper. */
+.battle-window[data-background=hybrid]{
+  --stage-base:#080f25;
+  --stage-light:radial-gradient(ellipse at 50% 28%,#34456755,transparent 62%);
+  --stage-weave:repeating-linear-gradient(0deg,#b6c2d003 0 1px,transparent 1px 3px);
+  --weave-size:4px 4px;
+  --stage-shade:radial-gradient(ellipse at 50% 35%,#17233b,#0e192d 48%,#071121 100%);
+  --stage-rule:#b29c6547;
+  --hybrid-sigil:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3E%3Cg fill='none' stroke='%23c4b083' stroke-width='1'%3E%3Ccircle cx='400' cy='400' r='370'/%3E%3Ccircle cx='400' cy='400' r='350'/%3E%3Cpath d='M400 10 790 400 400 790 10 400Z M400 80 720 400 400 720 80 400Z'/%3E%3C/g%3E%3C/svg%3E");
+  --stage-ornament:var(--hybrid-sigil) center 30%/min(96%,1100px) auto no-repeat;
+  --stage-ornament-strength:.065;
+  --table-border:2px solid #9f9276;
+  --table-light:radial-gradient(ellipse at 50% 28%,#53698e38,transparent 80%);
+  --table-weave:repeating-linear-gradient(90deg,#c2cbd307 0 1px,transparent 1px 4px);
+  --table-base:linear-gradient(110deg,#23394b,#26334f 40%,#202b46 65%,#332c40);
+  --table-depth:inset 0 0 0 1px #d3c29b55,inset 0 0 0 5px #111b31,0 4px 0 #040a16,0 6px 0 #8271507d;
+  --table-ornament:linear-gradient(90deg,transparent,#c4b08355 12% 88%,transparent) center calc(var(--cell-height) + var(--cell-gap)/2)/100% 1px no-repeat,linear-gradient(90deg,transparent,#c4b08355 12% 88%,transparent) center calc(2 * var(--cell-height) + 1.5 * var(--cell-gap))/100% 1px no-repeat;
+  --ornament-strength:.4;
+}
+
+/* C: a violet ceremonial stage. Original circle/rhombus/three-line sigil,
+   with no borrowed crown, logo or official filigree. Decoration never animates. */
+.battle-window[data-background=dramatic]{
+  --stage-base:#100f29;
+  --stage-light:radial-gradient(ellipse at 50% 29%,#63527e66,transparent 62%);
+  --stage-weave:repeating-linear-gradient(45deg,#d0a7bd06 0 1px,transparent 1px 4px);
+  --weave-size:6px 6px;
+  --stage-shade:linear-gradient(110deg,#0a1d36,#201a3c 42%,#28142e 80%,#341e2c);
+  --stage-rule:#b698695e;
+  --ceremony-sigil:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Cg fill='none' stroke='%23bba078' stroke-width='1.5'%3E%3Ccircle cx='300' cy='300' r='282'/%3E%3Ccircle cx='300' cy='300' r='265'/%3E%3Cpath d='M300 10 590 300 300 590 10 300Z M180 265H420 M160 300H440 M180 335H420 M300 110 490 300 300 490 110 300Z'/%3E%3C/g%3E%3C/svg%3E");
+  --stage-ornament:radial-gradient(ellipse at center,transparent 30%,#0306189c 100%),var(--ceremony-sigil) center 32%/min(80%,900px) auto no-repeat;
+  --stage-ornament-strength:.14;
+  --table-border:3px solid #998367;
+  --table-light:radial-gradient(ellipse at 50% 38%,#76637e33,transparent 75%);
+  --table-weave:repeating-linear-gradient(0deg,#c4a4c307 0 1px,transparent 1px 4px);
+  --table-base:linear-gradient(125deg,#302b4a,#211d38 65%,#2c1c35);
+  --table-depth:inset 0 0 0 1px #ead6aa44,inset 0 0 0 6px #0c1024,0 5px 0 #060819,0 7px 0 #79654899;
+  --table-ornament:var(--ceremony-sigil) center/contain no-repeat;
+  --ornament-strength:.2;
+}
+.battle-window[data-background=hybrid] .match-top,.battle-window[data-background=dramatic] .match-top{
+  background:linear-gradient(90deg,#305f672e,transparent 34% 66%,#81465b2e);
+}
+.battle-window:is([data-background=classic],[data-background=hybrid],[data-background=dramatic]) .hand-area{
+  background:linear-gradient(180deg,#04091b55,transparent 65%);
+  box-shadow:0 -1px 0 var(--stage-rule);
+}
+@media(max-width:760px){
+  .battle-window:is([data-background=classic],[data-background=hybrid],[data-background=dramatic])::before{inset:3px}
+  /* No offset images to crop: motifs center on the exact same portrait board. */
+  .battle-window[data-background=hybrid]{--stage-ornament:linear-gradient(90deg,#8cbaa308,transparent 50%,#c5849e08);--stage-ornament-strength:1}
+  .battle-window[data-background=dramatic]{--ornament-strength:.14}
+}
+
+/* Desktop B only. Recover height from unused bands, without scaling cards or
+   changing fitTable. Mobile tracks, hands and score geometry remain untouched. */
+@media(min-width:761px){
+  .app-shell:is([data-view=game],[data-view=replay]):has(.view:not([hidden]) .battle-window[data-background=hybrid]) .app-header{height:38px;min-height:38px}
+  .app-shell:is([data-view=game],[data-view=replay]):has(.view:not([hidden]) .battle-window[data-background=hybrid]) .brand h1{font-size:26px}
+  .app-shell:is([data-view=game],[data-view=replay]):has(.view:not([hidden]) .battle-window[data-background=hybrid]) .brand-mark{font-size:32px}
+  .battle-window[data-background=hybrid]{--table-shoulders:clamp(112px,12vw,176px);grid-template-rows:34px minmax(0,1fr) 36px 196px 42px;gap:6px}
+  .battle-window[data-background=hybrid] .match-top,.battle-window[data-background=hybrid] .hand-area{width:min(100%,calc(var(--table-span,600px) + var(--table-shoulders)));margin-inline:auto}
+  .battle-window[data-background=hybrid] .match-top{padding-inline:14px}
+  .battle-window[data-background=hybrid] .match-top>div{grid-template-rows:20px 12px;gap:0}
+  .battle-window[data-background=hybrid] .match-top strong{font-size:12px;line-height:20px}
+  .battle-window[data-background=hybrid] .match-top b{font-size:22px;line-height:20px}
+  .battle-window[data-background=hybrid] .match-top span{font-size:10.5px;line-height:12px}
+  .battle-window[data-background=hybrid] .board-layout::before{width:min(calc(100% - 24px),calc(var(--table-span) + var(--table-shoulders)))}
+  .battle-window[data-background=hybrid] .board-layout::after{width:min(calc(100% - 36px),calc(var(--table-span) + var(--table-shoulders) - 12px));height:var(--board-height)}
+  .battle-window[data-background=hybrid] .battle-feedback{width:min(100%,calc(var(--table-span,600px) + var(--table-shoulders)));margin-inline:auto}
+}
+@media(min-width:1500px){.battle-window[data-background=hybrid]{grid-template-rows:38px minmax(0,1fr) 36px 216px 44px}}
+@media(max-height:730px) and (min-width:761px){
+  .app-shell:is([data-view=game],[data-view=replay]):has(.view:not([hidden]) .battle-window[data-background=hybrid]) .app-header{height:36px;min-height:36px}
+  .battle-window[data-background=hybrid]{grid-template-rows:32px minmax(0,1fr) 34px 178px 38px;gap:5px}
+}

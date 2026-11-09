@@ -1,0 +1,145 @@
+001 Security Officer
+002 Riot Trooper
+003 Grenadier
+004 J-Unit Sweeper
+005 Queen Bee
+006 Toxirat
+007 Levrikon
+008 Grasslands Wolf
+009 Mu
+010 Mandragora
+011 Elphadunk
+012 Cactuar
+013 Crystalline Crab
+014 Quetzalcoatl
+015 Zu
+016 Devil Rider
+017 Screamer
+018 Flan
+019 Crawler
+020 Archdragon
+021 Ogre
+022 Deathwheel
+023 Fleetwing
+024 Zemzelett
+025 Ignilisk
+026 Capparwire
+027 Mindflayer
+028 Scrutineye
+029 Hell Rider II
+030 Flametrooper
+031 Spearhawk
+032 Sea Devil
+033 Shoalopod
+034 Crown Lance
+035 Tonberry King
+036 Sandhog Pie
+037 Bloatfloat
+038 Bagnadrana
+039 Cockatrice
+040 Heatseeker
+041 Bomb
+042 Thug
+043 Death Claw
+044 Landworm
+045 Sandspitter
+046 Chimera
+047 Joker
+048 Amphidex
+049 Frightflower
+050 Gagighandi
+051 Insectoid Chimera
+052 Gigantoad
+053 Maloceros
+054 Grandhorn
+055 Great Malboro
+056 Grangalan
+057 Amalgam
+058 Skeeskee
+059 Griffon
+060 Basilisk
+061 Reapertail
+062 Jabberwock
+063 Desert Sahagin
+064 Cavestalker
+065 Stone Golem
+066 Two Face
+067 Gi Specter
+068 Valron
+069 Disgorgon
+070 Dragon
+071 Twin Brain
+072 Black Bat
+073 Bahba Velamyu
+074 Rictus
+075 Adjudicator
+076 Yin & Yang
+077 Diabolic Variant
+078 Special Forces Operator
+079 2-C SOLDIER Operator
+080 Kelzmelzer
+081 Panthera Protector
+082 Hecteyes
+083 Floating Death
+084 Ironclad
+085 Moss-Grown Adamantoise
+086 Cloud
+087 Barret
+088 Tifa
+089 Aerith
+090 Red XIII
+091 Yuffie
+092 Cait Sith
+093 Cid
+094 Vincent
+095 Ifrit
+096 Shiva
+097 Ramuh
+098 Titan
+099 Kujata
+100 Odin
+101 Phoenix
+102 Leviathan
+103 Alexander
+104 Bahamut
+105 Bahamut Arisen
+106 Gilgamesh
+107 Chocobo & Moogle
+108 Fat Chocobo
+109 Posh Chocobo
+110 Moogle Trio
+111 Magic Pot
+112 Materia Guardian
+113 Midgardsormr
+114 Mythril Golem
+115 Terror of the Deep
+116 Grasptropod
+117 Custom Valkyrie
+118 Gigatrice
+119 Dyne
+120 Anuran Suppressor
+121 Specimen H1024
+122 Crimson Mare Mk. II
+123 Gi Nattak
+124 Forgotten Specimen
+125 Don Corneo & Abzu
+126 Red Dragon
+127 Demon Gate
+128 Reno
+129 Rude
+130 Elena
+131 Tseng
+132 Rufus
+133 Roche
+134 J-Squad
+135 Chocobo Jockey
+136 Space Ranger
+137 Haunted Hotel
+138 Skywheel
+139 Loveless
+140 Saucer Squad
+141 Dio
+142 Ultimate Party Animal
+143 Sephiroth
+144 Emerald Witch
+145 Shadowblood Queen

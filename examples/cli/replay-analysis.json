@@ -1,0 +1,19 @@
+{
+  "operations": [
+    {"op":"restoreReplay","replay":{
+      "version":2,"seed":17,"decks":[[],[]],"firstPlayer":0,
+      "position":{"seed":17,"turn":0,"hands":[[10,51],[]],"decks":[[13],[]],"board":[
+        {"owner":0,"row":1,"col":1,"pawns":3},
+        {"owner":0,"row":0,"col":1,"cardId":7}
+      ]},
+      "commands":[
+        {"type":"play","player":0,"handIndex":0,"row":1,"col":1},
+        {"type":"pass","player":1},
+        {"type":"play","player":0,"handIndex":0,"row":1,"col":1},
+        {"type":"pass","player":1},
+        {"type":"pass","player":0}
+      ]
+    }},
+    {"op":"score"}
+  ]
+}

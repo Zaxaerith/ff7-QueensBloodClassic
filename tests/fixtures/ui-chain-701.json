@@ -1,0 +1,274 @@
+{
+  "version": 1,
+  "seed": 701,
+  "decks": [
+    [
+      1,
+      1,
+      8,
+      10,
+      10,
+      12,
+      13,
+      20,
+      26,
+      27,
+      35,
+      40,
+      41,
+      43,
+      51
+    ],
+    [
+      1,
+      1,
+      8,
+      10,
+      10,
+      12,
+      13,
+      20,
+      26,
+      27,
+      35,
+      40,
+      41,
+      43,
+      51
+    ]
+  ],
+  "firstPlayer": 0,
+  "commands": [
+    {
+      "type": "mulligan",
+      "player": 0,
+      "indices": []
+    },
+    {
+      "type": "mulligan",
+      "player": 1,
+      "indices": []
+    },
+    {
+      "type": "play",
+      "player": 0,
+      "handIndex": 0,
+      "row": 1,
+      "col": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 2,
+      "row": 0,
+      "col": 4
+    },
+    {
+      "type": "play",
+      "player": 0,
+      "handIndex": 5,
+      "row": 1,
+      "col": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 5,
+      "row": 1,
+      "col": 4
+    },
+    {
+      "type": "play",
+      "player": 0,
+      "handIndex": 0,
+      "row": 0,
+      "col": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 2,
+      "row": 1,
+      "col": 3
+    },
+    {
+      "type": "play",
+      "player": 0,
+      "handIndex": 0,
+      "row": 0,
+      "col": 1
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 2,
+      "row": 1,
+      "col": 2
+    },
+    {
+      "type": "play",
+      "player": 0,
+      "handIndex": 0,
+      "row": 2,
+      "col": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 3,
+      "row": 1,
+      "col": 1
+    },
+    {
+      "type": "pass",
+      "player": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 0,
+      "row": 1,
+      "col": 1
+    },
+    {
+      "type": "pass",
+      "player": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 2,
+      "row": 1,
+      "col": 0
+    },
+    {
+      "type": "pass",
+      "player": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 3,
+      "row": 2,
+      "col": 0
+    },
+    {
+      "type": "pass",
+      "player": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 5,
+      "row": 0,
+      "col": 0
+    },
+    {
+      "type": "pass",
+      "player": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 3,
+      "row": 0,
+      "col": 1
+    },
+    {
+      "type": "pass",
+      "player": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 5,
+      "row": 0,
+      "col": 2
+    },
+    {
+      "type": "pass",
+      "player": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 3,
+      "row": 0,
+      "col": 3
+    },
+    {
+      "type": "pass",
+      "player": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 0,
+      "row": 1,
+      "col": 1
+    },
+    {
+      "type": "pass",
+      "player": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 2,
+      "row": 2,
+      "col": 4
+    },
+    {
+      "type": "pass",
+      "player": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 1,
+      "row": 1,
+      "col": 3
+    },
+    {
+      "type": "pass",
+      "player": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 0,
+      "row": 2,
+      "col": 3
+    },
+    {
+      "type": "pass",
+      "player": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 0,
+      "row": 1,
+      "col": 3
+    },
+    {
+      "type": "pass",
+      "player": 0
+    },
+    {
+      "type": "play",
+      "player": 1,
+      "handIndex": 0,
+      "row": 0,
+      "col": 4
+    },
+    {
+      "type": "pass",
+      "player": 0
+    },
+    {
+      "type": "pass",
+      "player": 1
+    }
+  ]
+}

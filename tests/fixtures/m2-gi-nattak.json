@@ -1,0 +1,67 @@
+{
+  "version": 2,
+  "seed": 20261029,
+  "decks": [
+    [],
+    []
+  ],
+  "firstPlayer": 0,
+  "position": {
+    "seed": 20261029,
+    "turn": 0,
+    "hands": [
+      [
+        123
+      ],
+      []
+    ],
+    "board": [
+      {
+        "row": 0,
+        "col": 1,
+        "owner": 0,
+        "cardId": 7
+      },
+      {
+        "row": 1,
+        "col": 1,
+        "owner": 0,
+        "cardId": 46,
+        "permanentDelta": 14
+      },
+      {
+        "row": 2,
+        "col": 1,
+        "owner": 0,
+        "cardId": 13
+      }
+    ],
+    "phase": "playing",
+    "passes": 0,
+    "decks": [
+      [],
+      []
+    ],
+    "discard": [
+      [],
+      []
+    ]
+  },
+  "commands": [
+    {
+      "type": "play",
+      "player": 0,
+      "handIndex": 0,
+      "row": 1,
+      "col": 1
+    },
+    {
+      "type": "pass",
+      "player": 1
+    },
+    {
+      "type": "pass",
+      "player": 0
+    }
+  ]
+}

@@ -8,7 +8,7 @@ import zipfile
 from pathlib import Path, PurePosixPath
 
 ROOT = Path(__file__).resolve().parents[1]
-PUBLIC_ROOT = '6b5daa191486a6c923f1229ffab7326826533531'
+PUBLIC_ROOT = '695c76f034d7278d97a0ef28db07d8b39d3831fd'
 EXACT = {
     '.gitattributes', '.gitignore', 'LICENSE', 'THIRD_PARTY_NOTICES.md',
     'README.md', 'README.zh-CN.md', 'VERSION.txt', 'package.json',

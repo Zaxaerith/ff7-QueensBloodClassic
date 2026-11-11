@@ -2,11 +2,11 @@
 
 [English](README.md)
 
-这是面向《最终幻想 VII》玩家的非官方开源单机 Queen's Blood 游戏。包含 3×5 棋盘、可配置 Bot、卡组编辑、换牌、对局存档、回放、策略分析，以及全部 145 张 Classic Art 路线的本地生成器。
+这是面向《最终幻想 VII》玩家的非官方开源单机 Queen's Blood 游戏。本次为**仅源码预览版**，目前没有通过验收的 Windows 二进制发行包。包含 3×5 棋盘、可配置 Bot、卡组编辑、换牌、对局存档、回放、策略分析，以及 145 张 Classic Art 候选实现的本地生成工具。
 
 ## 开始游戏
 
-- **Windows 便携预览版：** 从 [GitHub Releases](https://github.com/Zaxaerith/ff7-QueensBloodClassic/releases) 下载 `v0.8.0-rc.2` ZIP，完整解压后运行 `QueensBloodClassic.exe`。需要单独安装 Microsoft Edge WebView2 Runtime。此预览版尚未在干净 Windows 虚拟机中测试。
+- **Windows：** 本次源码预览尚无通过验收的 Windows 二进制包；桌面构建仍在验证中，本次 Release 不含 EXE。
 - **浏览器：** 安装 Node.js 22.12 或更新版本，运行 `npm ci` 和 `npm run dev`，再打开 Vite 显示的本机地址。普通 Web 构建不包含生成后的私人卡图。
 
 ## Classic Art 卡图
@@ -19,7 +19,7 @@
 
 ## 当前限制
 
-#134 J-Squad 规则尚未完成；部分复杂规则仍为候选实现；卡牌美术仍可精修。Windows 预览版尚未完成独立干净虚拟机兼容测试。
+#134 已有可执行的 J-Squad 候选规则，但与原作的一致性尚未完全核验；部分复杂规则仍为候选实现；卡牌美术仍可精修。目前没有通过验收的 Windows 二进制，也未完成独立干净 Windows 虚拟机兼容测试。
 
 ## 许可证
 

@@ -2,11 +2,11 @@
 
 [简体中文](README.zh-CN.md)
 
-An unofficial, open-source single-player Queen's Blood game for Final Fantasy VII fans. It includes a 3×5 board, configurable Bot, deck editor, mulligan, saved matches, replays, analysis, and a local generator for all 145 Classic Art routes.
+An unofficial, open-source single-player Queen's Blood game for Final Fantasy VII fans. This is a **source-only preview**: there is no accepted Windows binary release yet. It includes a 3×5 board, configurable Bot, deck editor, mulligan, saved matches, replays, analysis, and candidate local generation for all 145 Classic Art routes.
 
 ## Play
 
-- **Windows portable preview:** Download the `v0.8.0-rc.2` ZIP from [GitHub Releases](https://github.com/Zaxaerith/ff7-QueensBloodClassic/releases), extract the complete folder, then start `QueensBloodClassic.exe`. Microsoft Edge WebView2 Runtime is required. This preview has not been tested in a clean Windows virtual machine.
+- **Windows:** No accepted Windows binary is available in this Source-only Preview. The desktop build is still being validated; do not expect an EXE in this release.
 - **Web:** Install Node.js 22.12 or newer, run `npm ci` and `npm run dev`, then open the local URL printed by Vite. The normal Web build contains no generated/private card art.
 
 ## Classic Art
@@ -19,7 +19,7 @@ For the Web game, run `npm ci`, `npm run check`, `npm test`, and `npm run build`
 
 ## Current limits
 
-Card #134's J-Squad rule is unfinished; some complex rule implementations remain candidates; and card art can still be refined. The Windows preview has not had an independent clean-VM compatibility test.
+Card #134 has an executable candidate J-Squad rule, but its accuracy to the original game has not been fully verified; some complex rule implementations remain candidates; and card art can still be refined. No Windows binary has passed acceptance or independent clean-VM compatibility testing.
 
 ## License
 

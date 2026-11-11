@@ -67,7 +67,7 @@ COLLECT(he,we,host.binaries,host.datas,worker.binaries,worker.datas,name='Queens
     shutil.copy2(Path(sys.executable).parent/'LICENSE.txt',licenses/'CPython-LICENSE.txt')
     shutil.copy2(root/'desktop/PORTABLE_README.txt',bundle/'README.txt')
     version=(root/'VERSION.txt').read_text(encoding='utf-8').strip()
-    (bundle/'VERSION.txt').write_text(version+' / Windows x64 local RC\nSource: '+a.commit+'\nPython: '+sys.version.split()[0]+'\n'+json.dumps(versions,indent=2)+'\n','utf-8')
+    (bundle/'VERSION.txt').write_text(version+' / Windows x64 portable build\nSource: '+a.commit+'\nPython: '+sys.version.split()[0]+'\n'+json.dumps(versions,indent=2)+'\n','utf-8')
     # Corresponding project source, no .git or working-tree inputs.
     with zipfile.ZipFile(bundle/'source.zip','w',zipfile.ZIP_DEFLATED) as z:
         for f in root.rglob('*'):

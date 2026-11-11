@@ -1,0 +1,177 @@
+name: Windows x64 cloud build
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: qbc-windows-build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Test and package Windows x64
+    runs-on: windows-2022
+    timeout-minutes: 90
+    permissions:
+      contents: read
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - name: Check out complete public history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up CPython 3.11.9 x64
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.11.9'
+          architecture: x64
+
+      - name: Set up Node.js 22.20.0 x64
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22.20.0'
+          architecture: x64
+
+      - name: Check source version, history, whitelist, and local asset boundary
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $commit = (git rev-parse HEAD).Trim()
+          if ($commit -ne $env:GITHUB_SHA) { throw "Checkout HEAD does not match the triggering commit" }
+          $package = Get-Content -Raw package.json | ConvertFrom-Json
+          $version = (Get-Content -Raw VERSION.txt).Trim()
+          if ($package.version -ne $version) { throw "package.json and VERSION.txt differ" }
+          if ($env:RUNNER_ARCH -ne 'X64') { throw "Expected an x64 hosted runner" }
+          python tools/public-source-check.py
+          if ($LASTEXITCODE -ne 0) { throw "Public source and Git history audit failed" }
+          Write-Host "Source commit: $commit; version: $version; runner: windows-2022 x64"
+          python --version
+          node --version
+          npm --version
+
+      - name: Install locked Node dependencies
+        shell: pwsh
+        run: npm ci --no-audit --no-fund
+
+      - name: TypeScript check
+        shell: pwsh
+        run: npm run check
+
+      - name: Game and protocol tests
+        shell: pwsh
+        run: npm test -- --reporter=dot
+
+      - name: Install pinned desktop build dependencies
+        shell: pwsh
+        run: python -m pip install --disable-pip-version-check --requirement desktop/requirements-build.txt
+
+      - name: Generator and desktop regression tests
+        shell: pwsh
+        run: |
+          python tools/asset-tests.py
+          if ($LASTEXITCODE -ne 0) { throw "Asset parser regression tests failed" }
+          python tools/qb-assets-tests.py
+          if ($LASTEXITCODE -ne 0) { throw "Art Pack generator regression tests failed" }
+          python -m unittest desktop.tests.test_host desktop.tests.test_portable
+          if ($LASTEXITCODE -ne 0) { throw "Desktop host regression tests failed" }
+
+      - name: Build and audit the public Web Game
+        shell: pwsh
+        run: npm run build
+
+      - name: Recheck clean public source after tests
+        shell: pwsh
+        run: |
+          python tools/public-source-check.py
+          if ($LASTEXITCODE -ne 0) { throw "Public source audit failed after tests" }
+
+      - name: Build, inspect, and prepare cloud artifact
+        id: artifact
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $root = $env:GITHUB_WORKSPACE
+          $base = Join-Path $root '.parallel-check'
+          New-Item -ItemType Directory -Path $base -Force | Out-Null
+          $suffix = "$($env:GITHUB_RUN_ID)-$($env:GITHUB_RUN_ATTEMPT)"
+          $buildRoot = Join-Path $base "r5-windows-build-$suffix"
+          $artifactRoot = Join-Path $base "r5-artifact-$suffix"
+          if (Test-Path -LiteralPath $buildRoot) { throw "Build output already exists; refusing to overwrite" }
+          if (Test-Path -LiteralPath $artifactRoot) { throw "Artifact output already exists; refusing to overwrite" }
+          New-Item -ItemType Directory -Path $buildRoot | Out-Null
+          $freezeOut = Join-Path $buildRoot 'freeze'
+          $python = (Get-Command python).Source
+          & ./desktop/build-windows.ps1 -Python $python -Out $freezeOut
+          if ($LASTEXITCODE -ne 0) { throw "desktop/build-windows.ps1 failed" }
+
+          $version = (Get-Content -Raw VERSION.txt).Trim()
+          $package = Get-Content -Raw package.json | ConvertFrom-Json
+          $commit = (git rev-parse HEAD).Trim()
+          if ($version -ne $package.version) { throw "Version mismatch" }
+          if ($commit -ne $env:GITHUB_SHA) { throw "The package source changed during the build" }
+          $zip = Join-Path $freezeOut 'QueensBloodClassic-Windows-x64.zip'
+          python desktop/audit-portable.py $zip --version $version --commit $commit
+          if ($LASTEXITCODE -ne 0) { throw "Windows package audit failed" }
+
+          $sourceRoot = Join-Path $buildRoot 'source-audit'
+          python -c "import sys,zipfile; zipfile.ZipFile(sys.argv[1]).extract('QueensBloodClassic-Windows-x64/source.zip', sys.argv[2])" $zip $sourceRoot
+          if ($LASTEXITCODE -ne 0) { throw "Could not inspect nested source.zip" }
+          $sourceZip = Join-Path $sourceRoot 'QueensBloodClassic-Windows-x64/source.zip'
+          python tools/public-source-check.py --source-zip $sourceZip
+          if ($LASTEXITCODE -ne 0) { throw "Nested source.zip or Git history audit failed" }
+
+          $zipHash = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          $sourceHash = (Get-FileHash -LiteralPath $sourceZip -Algorithm SHA256).Hash.ToLowerInvariant()
+          $artifactName = "qbc-windows-x64-$suffix"
+          New-Item -ItemType Directory -Path $artifactRoot | Out-Null
+          Copy-Item -LiteralPath $zip -Destination (Join-Path $artifactRoot 'QueensBloodClassic-Windows-x64.zip')
+          "${zipHash}  QueensBloodClassic-Windows-x64.zip" | Set-Content -NoNewline -Encoding ascii -Path (Join-Path $artifactRoot 'QueensBloodClassic-Windows-x64.zip.sha256')
+          $manifest = [ordered]@{
+            schemaVersion = 1
+            version = $version
+            tag = "v$version"
+            sourceCommit = $commit
+            workflow = '.github/workflows/windows-build.yml'
+            workflowRunId = [long]$env:GITHUB_RUN_ID
+            runAttempt = [int]$env:GITHUB_RUN_ATTEMPT
+            artifactName = $artifactName
+            runner = 'windows-2022 x64'
+            runnerImageVersion = $env:ImageVersion
+            python = (& python --version 2>&1).Trim()
+            node = (& node --version 2>&1).Trim()
+            npm = (& npm --version 2>&1).Trim()
+            zipSize = (Get-Item -LiteralPath $zip).Length
+            zipSha256 = $zipHash
+            sourceZipSha256 = $sourceHash
+            checks = @{
+              typescript = $true
+              unitTests = $true
+              generatorTests = $true
+              desktopTests = $true
+              publicWebBuild = $true
+              publicSourceWhitelist = $true
+              publicGitHistory = $true
+              nestedSourceZip = $true
+              windowsResourceAudit = $true
+            }
+            cleanWindowsVmCertification = $false
+          }
+          $manifest | ConvertTo-Json -Depth 8 | Set-Content -Encoding utf8 (Join-Path $artifactRoot 'build-manifest.json')
+          "name=$artifactName" >> $env:GITHUB_OUTPUT
+          "path=$artifactRoot" >> $env:GITHUB_OUTPUT
+
+      - name: Save Windows package for manual GUI acceptance
+        uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
+        with:
+          name: ${{ steps.artifact.outputs.name }}
+          path: ${{ steps.artifact.outputs.path }}
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0

@@ -15,7 +15,7 @@ The repository includes the 145-card recipes and local import tools. It does not
 
 ## Build and test
 
-For the Web game, run `npm ci`, `npm run check`, `npm test`, and `npm run build`. For the Windows app, see [desktop build instructions](desktop/README.md). WebView2 Runtime is installed separately on Windows.
+For the Web game, run `npm ci`, `npm run check`, `npm test`, and `npm run build`. For the Windows app, see [desktop build instructions](desktop/README.md). Maintainers build and publish Windows packages through the [cloud release workflow](docs/CLOUD_RELEASE.md); do not use a local ZIP as a release asset. WebView2 Runtime is installed separately on Windows.
 
 ## Current limits
 

@@ -15,7 +15,7 @@
 
 ## 构建与测试
 
-构建 Web 游戏：运行 `npm ci`、`npm run check`、`npm test` 和 `npm run build`。Windows 桌面版见[构建说明](desktop/README.md)。Windows 需另行安装 WebView2 Runtime。
+构建 Web 游戏：运行 `npm ci`、`npm run check`、`npm test` 和 `npm run build`。Windows 桌面版见[构建说明](desktop/README.md)。维护者通过[云端发行工作流](docs/CLOUD_RELEASE.md)构建和发布 Windows 包；本地 ZIP 不作为发行附件。Windows 需另行安装 WebView2 Runtime。
 
 ## 当前限制
 

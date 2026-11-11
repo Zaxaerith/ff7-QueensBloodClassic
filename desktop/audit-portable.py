@@ -8,7 +8,7 @@ import struct
 import zipfile
 
 
-def audit(path):
+def audit(path, expected_version=None, expected_commit=None):
     with zipfile.ZipFile(path) as z:
         names=z.namelist()
         if len(names)!=len(set(n.casefold() for n in names)): raise ValueError('Duplicate ZIP paths')
@@ -18,8 +18,8 @@ def audit(path):
             if not n.startswith(prefix) or '\\' in n or '..' in PurePosixPath(n).parts: raise ValueError('Unsafe ZIP path: '+n)
             if n.endswith('/'): continue
             rel=n[len(prefix):]
-            if any(p.lower() in ('private-assets','.research-cache','.parallel-check','node_modules','.git','profile','webview2','qb.local.json') for p in PurePosixPath(rel).parts): raise ValueError('Private/development content: '+rel)
-            if PurePosixPath(rel).suffix.lower() in ('.lgp','.png','.tex','.hrc','.rsd','.obj','.blend','.pdb'): raise ValueError('Unexpected asset: '+rel)
+            if any(p.lower() in ('private-assets','.research-cache','.parallel-check','node_modules','.git','profile','browser-profile','webview2','cache','__pycache__','qb.local.json') for p in PurePosixPath(rel).parts): raise ValueError('Private/development content: '+rel)
+            if PurePosixPath(rel).suffix.lower() in ('.lgp','.png','.jpg','.jpeg','.webp','.gif','.bmp','.tex','.hrc','.rsd','.obj','.blend','.pdb'): raise ValueError('Unexpected asset: '+rel)
             files[rel]=z.read(n)
         rows=json.loads(files['SHA256SUMS.json'])
         if set(r['path'] for r in rows)!=set(files)-{'SHA256SUMS.json'}: raise ValueError('Hash inventory mismatch')
@@ -31,6 +31,9 @@ def audit(path):
             if struct.unpack_from('<H',data,pe+4)[0]!=0x8664 or struct.unpack_from('<H',data,pe+24+68)[0]!=subsystem: raise ValueError('Wrong PE architecture/subsystem: '+name)
         for required in ('_internal/data/release/public-distribution-policy.json','_internal/producer/tools/qb-assets.py','_internal/desktop/game/index.html','licenses/CPython-LICENSE.txt','source.zip'):
             if required not in files: raise ValueError('Missing payload: '+required)
+        version_lines=files['VERSION.txt'].decode('utf-8').splitlines()
+        if expected_version is not None and (not version_lines or version_lines[0].split(' / ',1)[0]!=expected_version): raise ValueError('Version metadata mismatch')
+        if expected_commit is not None and (len(version_lines)<2 or version_lines[1]!='Source: '+expected_commit): raise ValueError('Source commit metadata mismatch')
         for arch in ('win-x64','win-arm64','win-x86'):
             if not any(arch in p and p.endswith('WebView2Loader.dll') for p in files): raise ValueError('Missing SDK loader directory: '+arch)
         game=[p for p in files if p.startswith('_internal/desktop/game/')]
@@ -47,5 +50,5 @@ def audit(path):
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('zip',type=Path);a=p.parse_args()
-    print(json.dumps(audit(a.zip),indent=2))
+    p=argparse.ArgumentParser();p.add_argument('zip',type=Path);p.add_argument('--version');p.add_argument('--commit');a=p.parse_args()
+    print(json.dumps(audit(a.zip,a.version,a.commit),indent=2))

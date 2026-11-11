@@ -1,0 +1,274 @@
+name: Publish accepted Windows pre-release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Must exactly match package.json and VERSION.txt, without the leading v.'
+        type: string
+        required: true
+      source_commit:
+        description: 'Full 40-character commit SHA from the accepted Windows Actions Artifact.'
+        type: string
+        required: true
+      build_run_id:
+        description: 'GitHub Actions run ID that produced the manually tested artifact.'
+        type: string
+        required: true
+      artifact_name:
+        description: 'Exact artifact name shown on the successful Windows cloud build run.'
+        type: string
+        required: true
+      gui_accepted:
+        description: 'Confirm the selected cloud artifact was manually tested in the Windows GUI.'
+        type: boolean
+        required: true
+        default: false
+      publish_confirmation:
+        description: 'Type PUBLISH_PRE_RELEASE to publish a public pre-release.'
+        type: string
+        required: true
+
+permissions: {}
+
+concurrency:
+  group: qbc-public-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Verify and publish the accepted artifact
+    if: ${{ github.ref == 'refs/heads/main' }}
+    runs-on: windows-2022
+    timeout-minutes: 30
+    permissions:
+      actions: read
+      contents: write
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - name: Check out the exact release source commit
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.source_commit }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up CPython 3.11.9 x64 for release audits
+        uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.11.9'
+          architecture: x64
+
+      - name: Validate manual confirmation and local release source
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          BUILD_RUN_ID: ${{ inputs.build_run_id }}
+          GUI_ACCEPTED: ${{ inputs.gui_accepted }}
+          PUBLISH_CONFIRMATION: ${{ inputs.publish_confirmation }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ($env:GUI_ACCEPTED -ne 'true') { throw "Manual Windows GUI acceptance is required" }
+          if ($env:PUBLISH_CONFIRMATION -ne 'PUBLISH_PRE_RELEASE') { throw "Type PUBLISH_PRE_RELEASE to continue" }
+          if ($env:RELEASE_VERSION -notmatch '^\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?$') { throw "Invalid release version" }
+          if ($env:SOURCE_COMMIT -notmatch '^[0-9a-f]{40}$') { throw "source_commit must be a full lowercase SHA" }
+          if ($env:BUILD_RUN_ID -notmatch '^\d+$') { throw "build_run_id must be numeric" }
+          $head = (git rev-parse HEAD).Trim()
+          if ($head -ne $env:SOURCE_COMMIT) { throw "Checked out source differs from requested source_commit" }
+          python tools/public-source-check.py
+          if ($LASTEXITCODE -ne 0) { throw "Public source or full-history audit failed" }
+          $package = Get-Content -Raw package.json | ConvertFrom-Json
+          if ($package.version -ne $env:RELEASE_VERSION) { throw "Requested version differs from package.json" }
+          if ((Get-Content -Raw VERSION.txt).Trim() -ne $env:RELEASE_VERSION) { throw "Requested version differs from VERSION.txt" }
+          $tag = "v$($env:RELEASE_VERSION)"
+          $notesPath = "docs/releases/$tag.md"
+          if (-not (Test-Path -LiteralPath $notesPath)) { throw "Missing bilingual release notes: $notesPath" }
+
+      - name: Validate repository state and selected build artifact
+        id: preflight
+        shell: pwsh
+        env:
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          BUILD_RUN_ID: ${{ inputs.build_run_id }}
+          ARTIFACT_NAME: ${{ inputs.artifact_name }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $headers = @{
+            Accept = 'application/vnd.github+json'
+            Authorization = "Bearer $env:GITHUB_TOKEN"
+            'X-GitHub-Api-Version' = '2022-11-28'
+          }
+          $api = "$env:GITHUB_API_URL/repos/$env:GITHUB_REPOSITORY"
+          $repo = Invoke-RestMethod -Uri $api -Headers $headers
+          if ($repo.visibility -ne 'public') { throw "The repository must be public before publishing a public release" }
+          $main = Invoke-RestMethod -Uri "$api/git/ref/heads/main" -Headers $headers
+          if ($main.object.sha -ne $env:SOURCE_COMMIT) { throw "main moved; rebuild and GUI-test the current main commit" }
+          $run = Invoke-RestMethod -Uri "$api/actions/runs/$($env:BUILD_RUN_ID)" -Headers $headers
+          if ($run.status -ne 'completed' -or $run.conclusion -ne 'success') { throw "Selected build run did not complete successfully" }
+          if ($run.head_branch -ne 'main' -or $run.head_sha -ne $env:SOURCE_COMMIT) { throw "Selected build run is not for the requested main commit" }
+          if ($run.repository.full_name -ne $env:GITHUB_REPOSITORY) { throw "Selected build run belongs to a different repository" }
+          if (($run.path -split '@')[0] -ne '.github/workflows/windows-build.yml') { throw "Selected run was not produced by the Windows build workflow" }
+          if ($run.event -notin @('push','workflow_dispatch')) { throw "Selected run used an unsupported trigger" }
+          $expectedArtifact = "qbc-windows-x64-$($run.id)-$($run.run_attempt)"
+          if ($env:ARTIFACT_NAME -ne $expectedArtifact) { throw "Artifact name does not match the selected run and attempt" }
+          $artifactList = Invoke-RestMethod -Uri "$api/actions/runs/$($run.id)/artifacts" -Headers $headers
+          $artifact = @($artifactList.artifacts | Where-Object { $_.name -eq $expectedArtifact }) | Select-Object -First 1
+          if ($null -eq $artifact -or $artifact.expired) { throw "Selected Actions Artifact is missing or expired" }
+          "run_attempt=$($run.run_attempt)" >> $env:GITHUB_OUTPUT
+          "artifact_name=$expectedArtifact" >> $env:GITHUB_OUTPUT
+
+      - name: Download the already tested cloud artifact
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ${{ inputs.artifact_name }}
+          run-id: ${{ inputs.build_run_id }}
+          repository: ${{ github.repository }}
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}\qbc-accepted-artifact
+
+      - name: Recheck version, hashes, package contents, and embedded source
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          BUILD_RUN_ID: ${{ inputs.build_run_id }}
+          BUILD_RUN_ATTEMPT: ${{ steps.preflight.outputs.run_attempt }}
+          ARTIFACT_NAME: ${{ steps.preflight.outputs.artifact_name }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $artifactRoot = Join-Path $env:RUNNER_TEMP 'qbc-accepted-artifact'
+          $zip = Join-Path $artifactRoot 'QueensBloodClassic-Windows-x64.zip'
+          $checksum = "$zip.sha256"
+          $manifestPath = Join-Path $artifactRoot 'build-manifest.json'
+          foreach ($required in @($zip, $checksum, $manifestPath)) {
+            if (-not (Test-Path -LiteralPath $required -PathType Leaf)) { throw "Missing artifact file: $required" }
+          }
+          $manifest = Get-Content -Raw -LiteralPath $manifestPath | ConvertFrom-Json
+          if ($manifest.version -ne $env:RELEASE_VERSION -or $manifest.tag -ne "v$($env:RELEASE_VERSION)") { throw "Artifact version does not match the requested release" }
+          if ($manifest.sourceCommit -ne $env:SOURCE_COMMIT) { throw "Artifact commit does not match the requested source" }
+          if ([string]$manifest.workflowRunId -ne $env:BUILD_RUN_ID -or [string]$manifest.runAttempt -ne $env:BUILD_RUN_ATTEMPT) { throw "Artifact was not produced by the selected run attempt" }
+          if ($manifest.artifactName -ne $env:ARTIFACT_NAME) { throw "Artifact metadata name mismatch" }
+          if ($manifest.cleanWindowsVmCertification -ne $false) { throw "Unexpected Windows certification claim" }
+          if ($manifest.checks.PSObject.Properties.Value -contains $false) { throw "Build manifest reports a failed audit" }
+
+          $zipHash = (Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($manifest.zipSha256 -ne $zipHash -or [long]$manifest.zipSize -ne (Get-Item -LiteralPath $zip).Length) { throw "Windows ZIP hash or size differs from build manifest" }
+          if ((Get-Content -Raw -LiteralPath $checksum).Trim() -ne "${zipHash}  QueensBloodClassic-Windows-x64.zip") { throw "SHA-256 sidecar does not match the ZIP" }
+          python desktop/audit-portable.py $zip --version $env:RELEASE_VERSION --commit $env:SOURCE_COMMIT
+          if ($LASTEXITCODE -ne 0) { throw "Windows package audit failed" }
+          $sourceRoot = Join-Path $env:RUNNER_TEMP 'qbc-source-audit'
+          python -c "import sys,zipfile; zipfile.ZipFile(sys.argv[1]).extract('QueensBloodClassic-Windows-x64/source.zip', sys.argv[2])" $zip $sourceRoot
+          if ($LASTEXITCODE -ne 0) { throw "Could not inspect nested source.zip" }
+          $sourceZip = Join-Path $sourceRoot 'QueensBloodClassic-Windows-x64/source.zip'
+          $sourceHash = (Get-FileHash -LiteralPath $sourceZip -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($manifest.sourceZipSha256 -ne $sourceHash) { throw "Nested source.zip hash mismatch" }
+          python tools/public-source-check.py --source-zip $sourceZip
+          if ($LASTEXITCODE -ne 0) { throw "Embedded source or Git history audit failed" }
+          Write-Host "Verified the exact accepted artifact for $($env:RELEASE_VERSION) from $($env:SOURCE_COMMIT)."
+
+      - name: Create or resume a draft, upload verified files, then publish pre-release
+        shell: pwsh
+        env:
+          RELEASE_VERSION: ${{ inputs.version }}
+          SOURCE_COMMIT: ${{ inputs.source_commit }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $headers = @{
+            Accept = 'application/vnd.github+json'
+            Authorization = "Bearer $env:GITHUB_TOKEN"
+            'X-GitHub-Api-Version' = '2022-11-28'
+          }
+          $api = "$env:GITHUB_API_URL/repos/$env:GITHUB_REPOSITORY"
+          $repo = Invoke-RestMethod -Uri $api -Headers $headers
+          if ($repo.visibility -ne 'public') { throw "The repository must remain public through publication" }
+          $currentMain = Invoke-RestMethod -Uri "$api/git/ref/heads/main" -Headers $headers
+          if ($currentMain.object.sha -ne $env:SOURCE_COMMIT) { throw "main moved after preflight; keeping this release unpublished" }
+          $tag = "v$($env:RELEASE_VERSION)"
+          $tagPath = [Uri]::EscapeDataString($tag)
+          function Get-OptionalApi($uri) {
+            try { return Invoke-RestMethod -Uri $uri -Headers $headers }
+            catch {
+              if ($null -ne $_.Exception.Response -and [int]$_.Exception.Response.StatusCode -eq 404) { return $null }
+              throw
+            }
+          }
+
+          $tagRef = Get-OptionalApi "$api/git/ref/tags/$tagPath"
+          if ($null -eq $tagRef) {
+            $tagBody = @{ tag = $tag; message = "Queen's Blood Classic $tag"; object = $env:SOURCE_COMMIT; type = 'commit' } | ConvertTo-Json
+            $tagObject = Invoke-RestMethod -Uri "$api/git/tags" -Method Post -Headers $headers -ContentType 'application/json' -Body $tagBody
+            $refBody = @{ ref = "refs/tags/$tag"; sha = $tagObject.sha } | ConvertTo-Json
+            Invoke-RestMethod -Uri "$api/git/refs" -Method Post -Headers $headers -ContentType 'application/json' -Body $refBody | Out-Null
+            $tagRef = Invoke-RestMethod -Uri "$api/git/ref/tags/$tagPath" -Headers $headers
+          }
+          if ($tagRef.object.type -eq 'tag') {
+            $resolvedTag = Invoke-RestMethod -Uri "$api/git/tags/$($tagRef.object.sha)" -Headers $headers
+            $tagTarget = $resolvedTag.object.sha
+          } elseif ($tagRef.object.type -eq 'commit') {
+            $tagTarget = $tagRef.object.sha
+          } else {
+            throw "The existing tag does not directly resolve to a commit"
+          }
+          if ($tagTarget -ne $env:SOURCE_COMMIT) { throw "Existing tag points to a different commit" }
+
+          $notesPath = "docs/releases/$tag.md"
+          $notes = Get-Content -Raw -LiteralPath $notesPath
+          $release = Get-OptionalApi "$api/releases/tags/$tagPath"
+          if ($null -eq $release) {
+            $body = @{
+              tag_name = $tag
+              target_commitish = $env:SOURCE_COMMIT
+              name = "Queen's Blood Classic $tag"
+              body = $notes
+              draft = $true
+              prerelease = $true
+            } | ConvertTo-Json -Depth 4
+            $release = Invoke-RestMethod -Uri "$api/releases" -Method Post -Headers $headers -ContentType 'application/json' -Body $body
+          } elseif (-not $release.draft -or -not $release.prerelease -or $release.tag_name -ne $tag -or $release.target_commitish -ne $env:SOURCE_COMMIT -or $release.body -ne $notes) {
+            throw "An existing non-matching or already published release blocks this version"
+          }
+
+          $artifactRoot = Join-Path $env:RUNNER_TEMP 'qbc-accepted-artifact'
+          $assets = @(
+            @{ name = 'QueensBloodClassic-Windows-x64.zip'; path = (Join-Path $artifactRoot 'QueensBloodClassic-Windows-x64.zip'); contentType = 'application/zip' },
+            @{ name = 'QueensBloodClassic-Windows-x64.zip.sha256'; path = (Join-Path $artifactRoot 'QueensBloodClassic-Windows-x64.zip.sha256'); contentType = 'text/plain' },
+            @{ name = 'build-manifest.json'; path = (Join-Path $artifactRoot 'build-manifest.json'); contentType = 'application/json' }
+          )
+          $existing = Invoke-RestMethod -Uri "$api/releases/$($release.id)/assets?per_page=100" -Headers $headers
+          $uploadUrl = $release.upload_url -replace '\{\?name,label\}$', ''
+          foreach ($item in $assets) {
+            $hash = (Get-FileHash -LiteralPath $item.path -Algorithm SHA256).Hash.ToLowerInvariant()
+            $prior = @($existing | Where-Object { $_.name -eq $item.name }) | Select-Object -First 1
+            if ($null -ne $prior) {
+              if ($prior.digest -ne "sha256:$hash" -or $prior.size -ne (Get-Item -LiteralPath $item.path).Length) {
+                throw "A draft asset with a different or unverifiable digest already exists: $($item.name)"
+              }
+              continue
+            }
+            $assetName = [Uri]::EscapeDataString($item.name)
+            $uploaded = Invoke-RestMethod -Uri "$uploadUrl`?name=$assetName" -Method Post -Headers $headers -ContentType $item.contentType -InFile $item.path
+            if ($uploaded.name -ne $item.name -or $uploaded.size -ne (Get-Item -LiteralPath $item.path).Length -or $uploaded.digest -ne "sha256:$hash") {
+              throw "GitHub did not confirm the uploaded asset digest: $($item.name)"
+            }
+          }
+          $finalAssets = Invoke-RestMethod -Uri "$api/releases/$($release.id)/assets?per_page=100" -Headers $headers
+          foreach ($item in $assets) {
+            $hash = (Get-FileHash -LiteralPath $item.path -Algorithm SHA256).Hash.ToLowerInvariant()
+            $uploaded = @($finalAssets | Where-Object { $_.name -eq $item.name }) | Select-Object -First 1
+            if ($null -eq $uploaded -or $uploaded.digest -ne "sha256:$hash" -or $uploaded.size -ne (Get-Item -LiteralPath $item.path).Length) {
+              throw "Release asset verification failed: $($item.name)"
+            }
+          }
+          $repo = Invoke-RestMethod -Uri $api -Headers $headers
+          $currentMain = Invoke-RestMethod -Uri "$api/git/ref/heads/main" -Headers $headers
+          if ($repo.visibility -ne 'public' -or $currentMain.object.sha -ne $env:SOURCE_COMMIT) {
+            throw "Repository visibility or main changed before publication; draft remains unpublished"
+          }
+          $publishBody = @{ draft = $false; prerelease = $true } | ConvertTo-Json
+          $published = Invoke-RestMethod -Uri "$api/releases/$($release.id)" -Method Patch -Headers $headers -ContentType 'application/json' -Body $publishBody
+          if ($published.draft -or -not $published.prerelease) { throw "Release did not enter public pre-release state" }
+          Write-Host "Published $($published.html_url) from the verified, manually accepted Actions Artifact."

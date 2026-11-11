@@ -106,9 +106,10 @@ jobs:
           if (Test-Path -LiteralPath $buildRoot) { throw "Build output already exists; refusing to overwrite" }
           if (Test-Path -LiteralPath $artifactRoot) { throw "Artifact output already exists; refusing to overwrite" }
           New-Item -ItemType Directory -Path $buildRoot | Out-Null
-          $freezeOut = Join-Path $buildRoot 'freeze'
+          $buildTarget = Join-Path $buildRoot 'candidate'
+          $freezeOut = Join-Path $buildTarget 'freeze'
           $python = (Get-Command python).Source
-          & ./desktop/build-windows.ps1 -Python $python -Out $freezeOut
+          & ./desktop/build-windows.ps1 -Python $python -Out $buildTarget
           if ($LASTEXITCODE -ne 0) { throw "desktop/build-windows.ps1 failed" }
 
           $version = (Get-Content -Raw VERSION.txt).Trim()

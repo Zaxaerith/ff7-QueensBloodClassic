@@ -199,7 +199,12 @@ jobs:
 
           $tagRef = Get-OptionalApi "$api/git/ref/tags/$tagPath"
           if ($null -eq $tagRef) {
-            $tagBody = @{ tag = $tag; message = "Queen's Blood Classic $tag"; object = $env:SOURCE_COMMIT; type = 'commit' } | ConvertTo-Json
+            $tagger = @{
+              name = 'github-actions[bot]'
+              email = '41898282+github-actions[bot]@users.noreply.github.com'
+              date = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
+            }
+            $tagBody = @{ tag = $tag; message = "Queen's Blood Classic $tag"; object = $env:SOURCE_COMMIT; type = 'commit'; tagger = $tagger } | ConvertTo-Json -Depth 4
             $tagObject = Invoke-RestMethod -Uri "$api/git/tags" -Method Post -Headers $headers -ContentType 'application/json' -Body $tagBody
             $refBody = @{ ref = "refs/tags/$tag"; sha = $tagObject.sha } | ConvertTo-Json
             Invoke-RestMethod -Uri "$api/git/refs" -Method Post -Headers $headers -ContentType 'application/json' -Body $refBody | Out-Null

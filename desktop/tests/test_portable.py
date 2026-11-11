@@ -31,9 +31,10 @@ class PortableTests(unittest.TestCase):
             legacy.mkdir(); (legacy/'desktop-settings.json').write_text('{}')
             native = Mock(); native.user32.MessageBoxW.return_value = 6
             with patch.object(runtime_paths, '_known_folder', side_effect=[anchor, legacy]), patch.object(runtime_paths.ctypes, 'windll', native, create=True):
-                self.assertEqual(runtime_paths.user_data(), legacy)
+                self.assertTrue(runtime_paths.user_data().samefile(legacy))
             self.assertTrue((legacy/'desktop-settings.json').is_file())
-            self.assertEqual(json.loads((anchor/'data-location.json').read_text())['path'], str(legacy.resolve()))
+            recorded_path = Path(json.loads((anchor/'data-location.json').read_text())['path'])
+            self.assertTrue(recorded_path.samefile(legacy))
 
     def test_legacy_cancel_does_not_create_pointer(self):
         with tempfile.TemporaryDirectory() as temp:

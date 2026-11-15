@@ -30,7 +30,7 @@ export function publicEventLabel(event:RuleEvent):string {
   if(event.player===1&&event.type==='CardAddedToHand')return event.reason==='draw'?'电脑补牌 1 张':'电脑生成手牌 1 张';
   return effectText(event)||presentationEventLabel(event);
 }
-interface MatchHooks {visual:(id:number)=>CardVisual;showCard:(id:number)=>void;menu:()=>void;checkpoint:(save:SavedMatch)=>string|null;completed:(save:SavedMatch)=>string|null;}
+interface MatchHooks {visual:(id:number)=>CardVisual;showCard:(id:number)=>void;menu:()=>void;hasCheckpoint:()=>boolean;checkpoint:(save:SavedMatch)=>string|null;completed:(save:SavedMatch)=>string|null;}
 export function mountMatch(hooks:MatchHooks){
   mountBackgroundPicker($('board').closest<HTMLElement>('.battle-window')!,$<HTMLSelectElement>('battleBackground'));
   // Hand indices are transient UI state: browse, arm, then choose a target.
@@ -47,7 +47,6 @@ export function mountMatch(hooks:MatchHooks){
   let boardSignature='';
   const warning=element('p','match-storage-warning');warning.hidden=true;warning.setAttribute('role','alert');table.parentElement!.append(warning);
   const currentSave=()=>saveMatch(game!,activeSettings,deckName,matchId);
-  function persist(){saveIssue=hooks.checkpoint(currentSave())??'';}
   function defaultBackground(){table.parentElement!.dataset.background='hybrid';$<HTMLSelectElement>('battleBackground').value='hybrid';}
   const presentation=new MatchPresentation({
     game:()=>game,
@@ -97,7 +96,12 @@ export function mountMatch(hooks:MatchHooks){
   function showResult(){
     if(!game||game.phase!=='finished')return;
     const content=element('div','match-result');content.innerHTML=resultMarkup(game);
-    content.append(button('再战 · 相同设置',()=>{closeDialog();start(activeSettings,deckName);}),button('导出回放',exportCurrent),button('返回菜单',()=>{closeDialog();hooks.menu();}));
+    const failure=element('p','warning');failure.setAttribute('role','alert');
+    content.append(button('再战 · 相同设置',()=>{
+      const error=start(activeSettings,deckName);
+      if(error){failure.textContent=error;return;}
+      closeDialog();
+    }),button('导出回放',exportCurrent),button('返回菜单',()=>{closeDialog();hooks.menu();}),failure);
     openDialog('RESULT / 对局结束',content);
   }
   function humanAction(action:()=>void){
@@ -187,9 +191,15 @@ export function mountMatch(hooks:MatchHooks){
     warning.textContent=presentation.issue||saveIssue;warning.hidden=!warning.textContent;
   }
   function pause(){presentation.pause();pending=null;selected=null;focusedCard=null;inspect(null);}
-  function start(settings:MatchSettings,name:string){
-    const next=startMatch(settings);pause();activeSettings={...settings,deck:[...settings.deck]};deckName=name;game=next;presentation.reset();
-    matchId=crypto.randomUUID();defaultBackground();selected=null;pending=null;focusCell=0;selectedMulligan.clear();lastMessage=`${name} · 先手为本原型自定义设置`;persist();presentation.resume();render();
+  function start(settings:MatchSettings,name:string):string|null {
+    const next=startMatch(settings),id=crypto.randomUUID();
+    // A successful write replaces the old slot in one step. On failure the
+    // active match is still bound to its original settings, ID and checkpoint.
+    const error=hooks.checkpoint(saveMatch(next,settings,name,id));
+    if(error&&hooks.hasCheckpoint())return '无法写入新对局，原存档已保留。请检查浏览器存储空间。';
+    pause();activeSettings={...settings,deck:[...settings.deck]};deckName=name;game=next;presentation.reset();
+    matchId=id;saveIssue=error??'';defaultBackground();selected=null;pending=null;focusCell=0;selectedMulligan.clear();lastMessage=`${name} · 先手为本原型自定义设置`;presentation.resume();render();
+    return null;
   }
   function restore(restored:ReturnType<typeof restoreMatch>){
     pause();game=structuredClone(restored.game);activeSettings={...restored.save.settings,deck:[...restored.save.settings.deck]};deckName=restored.save.deckName;matchId=restored.save.id;

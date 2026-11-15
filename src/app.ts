@@ -30,10 +30,12 @@ function saveDecks(next:DeckStore){
 }
 function homeSummary(){
   library.showHomeDeck(selectedDeck);
-  $('resumeGame').hidden=!match.hasMatch()||!match.unfinished()&&!slotPresent;
+  const resume=$('resumeGame'),unfinished=match.unfinished();
+  resume.hidden=!match.hasMatch();
+  resume.textContent=unfinished?'Continue Game · 继续对局':'查看上局结果';
   const rules=match.rulesVersion();
-  $('continueInfo').textContent=activeSave.error&&!rules?activeSave.error:rules&&!$('resumeGame').hidden?`继续对局 · ${rulesLabel(rules)}。`:'新对局从第二个回合起，在行动方回合开始时抽牌。';
-  $('continueInfo').title=rules&&!$('resumeGame').hidden?rules:'';
+  $('continueInfo').textContent=activeSave.error&&!rules?activeSave.error:rules?`${unfinished?'继续对局':'上局结果'} · ${rulesLabel(rules)}。`:'新对局从第二个回合起，在行动方回合开始时抽牌。';
+  $('continueInfo').title=rules??'';
 }
 function chooseDeck(deck:SavedDeck){
   const savedDeck=decks.decks.find(d=>d.id===deck.id&&d.name===deck.name&&JSON.stringify(d.cards)===JSON.stringify(deck.cards));
@@ -43,7 +45,7 @@ function chooseDeck(deck:SavedDeck){
   if(saved)notice(`已选择「${deck.name}」${selectedId?'':'；如需下次恢复，请在卡组页保存'}`);
 }
 const library=mountLibrary({entries:()=>entries,visual:id=>resolveVisual(id),decks:()=>decks,save:saveDecks,choose:chooseDeck});
-const match=mountMatch({visual:id=>resolveVisual(id),showCard:library.showCard,menu:()=>navigate('home'),checkpoint:save=>{
+const match=mountMatch({visual:id=>resolveVisual(id),showCard:library.showCard,menu:()=>navigate('home'),hasCheckpoint:()=>slotPresent,checkpoint:save=>{
   const error=writeActive(storage,save);if(!error)slotPresent=true;return error;
 },completed:save=>{
   const error=history.add(save);if(error)return error;
@@ -89,13 +91,22 @@ $('deckBack').onclick=()=>navigate('home');
 $('startGame').onclick=()=>{
   const input=$<HTMLInputElement>('seed'),seed=input.value.trim()?Number(input.value):Date.now()>>>0;
   const settings:MatchSettings={deck:selectedDeck.cards,seed,difficulty:$<HTMLSelectElement>('difficulty').value as MatchSettings['difficulty'],first:$<HTMLSelectElement>('firstPlayer').value as MatchSettings['first']};
-  const launch=()=>{match.start(settings,selectedDeck.name);input.value=String(seed);navigate('game');notice('');};
-  const discardThen=(run:()=>void)=>{const error=storage?writeActive(storage,null):null;if(error){notice(error);return;}slotPresent=false;closeDialog();run();};
   try{startMatch(settings);if(match.unfinished()||slotPresent){
-    const content=element('div');content.append(element('p','','本机已有对局存档，新局不能静默覆盖。可以继续、从原设置重开，或舍弃并使用当前菜单设置。'));
-    if(match.hasMatch()){content.append(button('继续现有对局',()=>{closeDialog();navigate('game');}),button('从原设置重开',()=>discardThen(()=>{match.restart();navigate('game');})));}
-    content.append(button('取消',closeDialog),button('舍弃存档并开始新局',()=>discardThen(launch),'danger'));openDialog('CONTINUE / 已有存档',content);
-  }else launch();}
+    const content=element('div'),failure=element('p','warning');
+    failure.setAttribute('role','alert');
+    const replace=(start:()=>string|null)=>{
+      const error=start();
+      if(error){failure.textContent=error;return;}
+      closeDialog();navigate('game');notice('');
+    };
+    content.append(element('p','','已有对局。可从原设置重开，或使用当前菜单设置开始新局。'));
+    if(match.hasMatch()){content.append(button(match.unfinished()?'继续现有对局':'查看上局结果',()=>{closeDialog();navigate('game');}),button('从原设置重开',()=>replace(match.restart)));}
+    content.append(button('取消',closeDialog),button('舍弃存档并开始新局',()=>replace(()=>{
+      const error=match.start(settings,selectedDeck.name);
+      if(!error)input.value=String(seed);
+      return error;
+    }),'danger'),failure);openDialog('CONTINUE / 已有存档',content);
+  }else {match.start(settings,selectedDeck.name);input.value=String(seed);navigate('game');notice('');}}
   catch(error){notice(String(error));}
 };
 options($<HTMLSelectElement>('advancedPreset'),deckPresets.map((d,i)=>[String(i),d.name]));

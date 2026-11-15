@@ -2,24 +2,31 @@
 
 [English](README.md)
 
-这是面向《最终幻想 VII》玩家的非官方开源单机 Queen's Blood 游戏。本次为**仅源码预览版**，目前没有通过验收的 Windows 二进制发行包。包含 3×5 棋盘、可配置 Bot、卡组编辑、换牌、对局存档、回放、策略分析，以及 145 张 Classic Art 候选实现的本地生成工具。
+这是面向《最终幻想 VII》玩家的非官方开源单机 Queen's Blood 游戏。本次为**仅源码预览版**，没有通过验收的 Windows 二进制发行包。游戏包含 3×5 棋盘、可配置 Bot、卡组编辑、换牌、对局存档、回放、策略分析，以及 145 张 Classic Art 卡牌的候选本地生成路线。
+
+## M7 更新
+
+- 新开局或重开时，如果新存档写入失败，会保留现有存档。
+- 对局结束后返回主页，可以重新查看上局结果并再战，不会重复归档同一局。
+- 维护者已接受本地 145 张卡牌的私人美术基线；相关图片和私人卡包不包含在本仓库中。公开生成器不保证复现该私人基线的全部精修细节。
+- 内部已整理 145 张卡的规则证据台账，但这不代表所有规则都已由原作实证。#066 Two Face 的循环反馈、#134 J-Squad 衍生牌力量等复杂细节仍待核验。
 
 ## 开始游戏
 
-- **Windows：** 本次源码预览尚无通过验收的 Windows 二进制包；桌面构建仍在验证中，本次 Release 不含 EXE。
+- **Windows：** 本次源码预览没有通过验收的 Windows 二进制，不包含 EXE。
 - **浏览器：** 安装 Node.js 22.12 或更新版本，运行 `npm ci` 和 `npm run dev`，再打开 Vite 显示的本机地址。普通 Web 构建不包含生成后的私人卡图。
 
 ## Classic Art 卡图
 
-仓库包含 145 张卡的配方和本地导入工具，不包含 FF7 游戏档案、提取模型或纹理，也不包含生成后的私人卡图。请自行准备合法取得的 FF7 Original PC 游戏资源，然后使用 Windows 版的 **Generate Art Pack**，或运行 `python tools/qb-assets.py inspect --source <游戏资源目录>`。生成卡包需要 Python 3.11+ 和 Pillow：`python -m pip install -r tools/requirements-art.txt`。详细步骤见[本地生成指南](docs/LOCAL_ART_GENERATOR.md)。生成的私人卡包可在桌面版或浏览器导入；原始游戏文件和生成卡图应留在自己的设备上。
+仓库包含 145 张卡的候选配方和本地导入工具，不包含 FF7 游戏档案、提取模型或纹理，也不包含生成后的私人卡图。请自行准备合法取得的 FF7 Original PC 游戏资源，然后使用 Windows 版 **Generate Art Pack**，或运行 `python tools/qb-assets.py inspect --source <游戏资源目录>`。生成卡包需要 Python 3.11+ 和 Pillow：`python -m pip install -r tools/requirements-art.txt`。详细步骤见[本地生成指南](docs/LOCAL_ART_GENERATOR.md)。生成的私人卡包可在桌面版或浏览器导入；原始游戏文件和生成卡图应留在自己的设备上。
 
 ## 构建与测试
 
-构建 Web 游戏：运行 `npm ci`、`npm run check`、`npm test` 和 `npm run build`。Windows 桌面版见[构建说明](desktop/README.md)。维护者通过[云端发行工作流](docs/CLOUD_RELEASE.md)构建和发布 Windows 包；本地 ZIP 不作为发行附件。Windows 需另行安装 WebView2 Runtime。
+构建 Web 游戏：运行 `npm ci`、`npm run check`、`npm test` 和 `npm run build`。Windows 桌面版见[构建说明](desktop/README.md)。本次仅源码预览不含 Windows 可执行文件。Windows 需另行安装 WebView2 Runtime。
 
 ## 当前限制
 
-#134 已有可执行的 J-Squad 候选规则，但与原作的一致性尚未完全核验；部分复杂规则仍为候选实现；卡牌美术仍可精修。目前没有通过验收的 Windows 二进制，也未完成独立干净 Windows 虚拟机兼容测试。
+部分复杂规则仍为候选实现，包括上文提到的 #066、#134 未决细节；卡牌美术仍可精修。目前没有通过验收的 Windows 二进制，也未完成独立干净 Windows 虚拟机兼容测试。
 
 ## 许可证
 

@@ -9,7 +9,7 @@ An unofficial, open-source single-player Queen's Blood game for Final Fantasy VI
 - New-match and restart flows protect the existing save when writing a replacement save fails.
 - After a match ends, returning home lets you reopen the result and start a rematch without archiving the same match twice.
 - A local private art baseline for all 145 cards has been accepted by the maintainer. Its images and private pack are not included here. The public generator is not claimed to reproduce every refinement in that private baseline.
-- An internal 145-card rule-evidence ledger has been prepared, but it does not establish every rule from original-game evidence. #066 Two Face feedback behavior and #134 J-Squad derived strength, among other complex details, remain to be verified.
+- An internal 145-card rule-evidence ledger has been prepared, but it does not establish every rule from original-game evidence. #066 Two Face feedback behavior remains to be verified. #134 has an executable J-Squad candidate rule, but its derived-card strengths and accuracy to the original game are not fully verified.
 
 ## Play
 

@@ -12,4 +12,4 @@ Legacy saves and replays retain the behavior associated with their recorded rule
 
 The engine implements card placement, pawn influence, replacements, triggered abilities, dynamic power, destruction, generated cards, Bot actions, and score calculation. The 145-card catalog includes cards with incomplete rule coverage; visual inclusion does not imply complete gameplay support.
 
-Card #134's J-Squad rule is not implemented. Some complex ability interactions remain candidate implementations because their exact behavior is not yet established. When a rules change affects old saves or replays, the rules version and compatibility handling must be updated explicitly.
+Card #134 has an executable candidate J-Squad rule, but its derived-card strengths and accuracy to the original game are not fully verified. Some complex ability interactions remain candidate implementations because their exact behavior is not yet established. When a rules change affects old saves or replays, the rules version and compatibility handling must be updated explicitly.

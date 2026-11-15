@@ -21,4 +21,4 @@ The generator supports the known FF7 Original PC data layouts documented by the 
 
 The Windows app can build and load a pack directly, or select an existing pack. In the browser, open Config → Classic Art, select the pack folder, validate it, and enable it. Browser-selected art lasts for the current page session; reselect after refreshing. See [Art Pack v1](ART_PACK_CONTRACT.md).
 
-Generation is local and produces private derived art. Do not include FF7 installation files, extracted assets, or generated packs in source archives or public Web builds. Card #134's J-Squad rule remains unfinished, some complex rules remain candidates, and the art can still be refined.
+Generation is local and produces private derived art. Do not include FF7 installation files, extracted assets, or generated packs in source archives or public Web builds. Card #134 has an executable candidate J-Squad rule, but its derived-card strengths and accuracy to the original game are not fully verified; some complex rules remain candidates, and the art can still be refined.

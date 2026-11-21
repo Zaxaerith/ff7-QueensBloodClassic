@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_ROOT = '695c76f034d7278d97a0ef28db07d8b39d3831fd'
 EXACT = {
     '.gitattributes', '.gitignore', 'LICENSE', 'THIRD_PARTY_NOTICES.md',
-    'README.md', 'README.zh-CN.md', 'VERSION.txt', 'package.json',
+    'README.md', 'README.zh-CN.md', 'CHANGELOG.md', 'VERSION.txt', 'package.json',
     'package-lock.json', 'tsconfig.json', 'vite.config.ts',
     '.github/workflows/windows-build.yml',
     '.github/workflows/publish-release.yml',
@@ -19,7 +19,7 @@ EXACT = {
     'data/classic-models.json', 'data/classic-technical.json', 'data/classic-art-mapping.json',
     'data/generator/r1a-recipes.json', 'data/generator/r1b-recipes.json',
     'data/generator/r1b-dependencies.json', 'data/release/public-distribution-policy.json',
-    'docs/ART_PACK_CONTRACT.md', 'docs/ASSETS.md', 'docs/CLI.md',
+    'docs/GAMEPLAY.md', 'docs/ART_PACK_CONTRACT.md', 'docs/ASSETS.md', 'docs/CLI.md',
     'docs/ENGINE.md', 'docs/LOCAL_ART_GENERATOR.md', 'docs/LOCAL_OUTPUTS.md',
     'docs/CLOUD_RELEASE.md',
     'desktop/.gitignore', 'desktop/build-game.mjs', 'desktop/PORTABLE_README.txt',

@@ -1,0 +1,33 @@
+.carnival-list, .carnival-stage { max-width: 58rem; margin: auto; }
+.carnival-list > h2, .carnival-stage > h2 { margin-bottom: .35rem; color: var(--gold); }
+.carnival-puzzles { list-style: none; display: grid; gap: 8px; padding: 0; margin: 16px 0 0; }
+.carnival-puzzles > li {
+  display: flex; gap: 12px; align-items: center; justify-content: space-between;
+  padding: 12px; border: 1px solid var(--edge); background: #0a1848b0;
+}
+.carnival-puzzles button { flex: 0 0 auto; }
+.carnival-puzzle-info { min-width: 0; }
+.carnival-puzzle-info p { margin: .25rem 0 0; }
+.carnival-cleared { color: var(--teal); }
+.carnival-stage { --hand-width: 88px; --hand-height: 126px; text-align: center; }
+.carnival-stage .carnival-table { height: clamp(180px, 36vh, 320px); margin-block: 8px; }
+.carnival-legend { color: var(--gold); font-variant-numeric: tabular-nums; }
+.carnival-stage .lane-score { position: relative; font-variant-numeric: tabular-nums; }
+.carnival-lane { position: absolute; top: 2px; left: 4px; color: var(--muted); font: 10px/1 system-ui, sans-serif; }
+.carnival-stage .carnival-range { position: absolute; inset: 3px; z-index: 2; pointer-events: none; }
+.carnival-stage .tile.preview-pawn .carnival-range { box-shadow: inset 0 0 0 2px var(--gold); }
+.carnival-stage .tile.preview-effect .carnival-range { outline: 2px solid var(--rose); }
+.carnival-stage .tile:not(.legal) { cursor: default; }
+.carnival-stage .tile.occupied:not(:disabled) { cursor: pointer; }
+.carnival-actions { justify-content: center; margin-block: .4rem; }
+.carnival-feedback { padding: 0; margin: .35rem 0 0; list-style: none; color: var(--teal); }
+.carnival-feedback:empty, .carnival-result:empty { display: none; }
+.carnival-result { border-top: 1px solid var(--edge); margin-top: 12px; padding-top: 10px; }
+.carnival-result table { margin-bottom: 0; }
+@media (max-width: 540px) {
+  .carnival-puzzles > li { display: grid; }
+  .carnival-puzzles button { justify-self: start; }
+  .carnival-stage { padding: 10px; --hand-width: 76px; --hand-height: 109px; }
+  .carnival-stage .carnival-table { height: clamp(180px, 64vw, 275px); }
+  .carnival-actions button { min-height: 44px; }
+}

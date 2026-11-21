@@ -2,7 +2,7 @@ import {afterEach,beforeEach,expect,test,vi} from 'vitest';
 import {MatchPresentation,publicMatch,publicEvents,PRESENTATION_MS} from '../src/match-presentation.js';
 import {BotClient,type BotWorkerPort} from '../src/bot-client.js';
 import {observeGame,type BotDecision,type BotAction} from '../src/bot.js';
-import {createPosition,legalMoves,play,pass,mulligan,type Game} from '../src/engine.js';
+import {createPosition,legalMoves,outcome,play,pass,mulligan,type Game} from '../src/engine.js';
 import {saveMatch,restoreMatch} from '../src/match-archive.js';
 import {startMatch} from '../src/match-flow.js';
 import {starterDeck} from '../src/cards.js';
@@ -47,6 +47,35 @@ test('slow Worker pays no new handoff after its result arrives',async()=>{
   const ready=Date.now();h.reply();await vi.advanceTimersByTimeAsync(0);
   expect(h.steps.find(s=>s.phase==='OpponentCommit')!.time).toBe(ready);
   expect(h.game.replay.commands).toHaveLength(2);h.p.pause();
+});
+
+test('a losing computer plays once per turn even when the Worker fails twice',async()=>{
+  const game=createPosition({turn:1,hands:[[7,1],[7,1,7,1,8,8]],decks:[[],Array(9).fill(1)],board:[
+    {row:0,col:0,owner:0,cardId:20},{row:1,col:0,owner:0,pawns:1},
+    {row:1,col:4,owner:1,pawns:1},{row:2,col:4,owner:1,pawns:1},
+  ]});
+  expect(outcome(game).scores).toEqual([3,0]);
+  expect(game.hands[1]).toHaveLength(6);expect(game.decks[1]).toHaveLength(9);
+  const h=harness(game);
+  const fail=()=>h.workers.at(-1)!.onerror?.({message:'Worker blocked'} as ErrorEvent);
+  fail();expect(game.replay.commands).toHaveLength(0);await reach(h.p,'PlayerSelect');
+  expect(game.replay.commands).toMatchObject([{type:'play',player:1}]);
+  expect(h.p.commitPlayer(h.action)).toBe(true);fail();await reach(h.p,'PlayerSelect');
+  expect(game.replay.commands).toMatchObject([{type:'play',player:1},{type:'play',player:0},{type:'play',player:1}]);
+  expect(h.choose).toHaveBeenCalledTimes(2);expect(h.checkpoint).toHaveBeenCalledTimes(3);
+  expect(h.steps.filter(s=>s.phase==='OpponentResolve').some(s=>s.message.includes('Worker blocked'))).toBe(true);
+});
+
+test('an unplayable Worker move uses a valid fallback, while a real PASS is still honored',async()=>{
+  const game=createPosition({hands:[[7,1,7],[7,1]],board:[
+    {row:0,col:0,owner:0,pawns:1},{row:2,col:0,owner:0,pawns:1},{row:0,col:4,owner:1,pawns:1},
+  ]});
+  const h=harness(game);h.p.commitPlayer(h.action);
+  h.workers[0].reply({type:'play',player:1,handIndex:99,row:0,col:4});await reach(h.p,'PlayerSelect');
+  expect(h.game.replay.commands[1]).toMatchObject({type:'play',player:1,handIndex:0,row:0,col:4});
+  h.p.commitPlayer(h.action);expect(legalMoves(h.game,1).length).toBeGreaterThan(0);
+  h.workers[1].reply({type:'pass',player:1});await reach(h.p,'PlayerSelect');
+  expect(h.game.replay.commands[3]).toEqual({type:'pass',player:1});
 });
 
 test('double submit and repeated skip never duplicate Replay commands',async()=>{
@@ -119,7 +148,7 @@ test('replacement/destruction/generation and event seq are unchanged by presenta
 
 test('invalid action leaves state intact; storage/view failure cannot resubmit a valid action',async()=>{
   const h=harness();const old=structuredClone(h.game);expect(h.p.commitPlayer(()=>play(h.game,0,99,0,0))).toBe(false);expect(h.game).toEqual(old);expect(h.checkpoint).not.toHaveBeenCalled();
-  const g=fresh();let throws=true;
+  const g=fresh();g.hands[1]=[];let throws=true;
   const p=new MatchPresentation({game:()=>g,choose:()=>Promise.resolve(null),cancelBot:()=>{},checkpoint:()=>{throw Error('quota');},completed:()=>null,result:()=>{},changed:()=>{if(throws){throws=false;throw Error('view');}}},()=>true);
   p.resume();expect(p.commitPlayer(()=>pass(g,0))).toBe(true);expect(p.issue).toContain('保存失败');await vi.runAllTimersAsync();
   expect(g.replay.commands).toHaveLength(2);expect(g.phase).toBe('finished');expect(p.phase).toBe('Result');

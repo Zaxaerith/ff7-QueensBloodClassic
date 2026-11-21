@@ -1,3 +1,6 @@
+import {getLocale,t} from './i18n/index.js';
+import {isLocale,type Locale} from './i18n/locales.js';
+import {localizedName,matchesCardName} from './i18n/card-names.js';
 import {byId,playableCards,tokenCards,deckPresets,type Card} from './cards.js';
 import {createGame} from './engine.js';
 import {getCardEvidence} from './evidence.js';
@@ -7,19 +10,24 @@ export const STORAGE={decks:'qbclassic.decks.v1',config:'qbclassic.config.v1',re
 export interface StoragePort {getItem(key:string):string|null;setItem(key:string,value:string):void;}
 export interface SavedDeck {id:string;name:string;cards:number[];}
 export interface DeckStore {version:1;selectedId:string|null;decks:SavedDeck[];}
-export interface UiConfig {version:1;density:'comfortable'|'compact';textSize:'normal'|'large';reduceMotion:boolean;}
+export interface UiConfig {version:1;density:'comfortable'|'compact';textSize:'normal'|'large';reduceMotion:boolean;locale?:Locale;}
 export interface MatchRecord {id:string;date:string;deckName:string;difficulty:BotDifficulty;seed:number;scores:[number,number];}
 export const defaultConfig:UiConfig={version:1,density:'comfortable',textSize:'normal',reduceMotion:false};
 export function validateDeck(cards:readonly number[]):string|null {
-  try{createGame([cards,cards],1);return null;}catch(error){return error instanceof Error?error.message:String(error);}
+  try{createGame([cards,cards],1);return null;}catch(error){const message=error instanceof Error?error.message:String(error);
+    const id=/#(\d+)/.exec(message)?.[1];
+    if(message.startsWith('Card #'))return t('invalidDeckCard',id);
+    if(message.startsWith('Too many copies'))return t('invalidDeckCopies',id);
+    if(message.startsWith('Generated cards'))return t('invalidDeckToken');
+    return t('invalidDeckCount');}
 }
 export function addReason(cards:readonly number[],id:number):string|null {
   const card=byId.get(id);
-  if(!card)return `#${id} 尚未实现，不能加入当前对局`;
-  if(card.rarity==='token')return '衍生卡只能在对局中生成';
-  if(cards.length>=15)return '卡组已满 15 张，请先移除卡牌';
+  if(!card)return t("cardUnavailableForDeck", id);
+  if(card.rarity==='token')return t("generatedCardsCanOnlyAppearDuringPlay");
+  if(cards.length>=15)return t("theDeckAlreadyHas15CardsRemoveA");
   const cap=card.rarity==='legendary'?1:2;
-  if(cards.filter(n=>n===id).length>=cap)return `${card.rarity==='legendary'?'传奇':'普通'}卡最多 ${cap} 张`;
+  if(cards.filter(n=>n===id).length>=cap)return t("cardCopyLimit", card.rarity==='legendary'?t("legendary"):t("normal"), cap);
   return null;
 }
 export function deckCardAvailability(cards:readonly number[],id:number) {
@@ -36,21 +44,21 @@ export function readDecks(raw:string|null):{data:DeckStore;issues:string[]} {
   if(raw===null)return {data,issues};
   try{
     const parsed:unknown=JSON.parse(raw);
-    if(!object(parsed)||parsed.version!==1||!Array.isArray(parsed.decks))throw Error('卡组存储版本或结构无效，原始数据已保留');
+    if(!object(parsed)||parsed.version!==1||!Array.isArray(parsed.decks))throw Error(t("invalidDeckStorageVersionOrFormatOriginalData"));
     const ids=new Set<string>();
     for(const row of parsed.decks){
-      if(!object(row)||typeof row.id!=='string'||!row.id||ids.has(row.id)||typeof row.name!=='string'||!row.name.trim()||row.name.length>40||!Array.isArray(row.cards)||row.cards.some(n=>!Number.isInteger(n))){issues.push('已跳过格式无效或重复的卡组；原始数据仍保留');continue;}
+      if(!object(row)||typeof row.id!=='string'||!row.id||ids.has(row.id)||typeof row.name!=='string'||!row.name.trim()||row.name.length>40||!Array.isArray(row.cards)||row.cards.some(n=>!Number.isInteger(n))){issues.push(t("skippedInvalidOrDuplicateDecksOriginalDataRetained"));continue;}
       const error=validateDeck(row.cards as number[]);
-      if(error){issues.push(`「${row.name}」暂不可用：${error}`);continue;}
+      if(error){issues.push(t("storedDeckUnavailable", row.name, error));continue;}
       ids.add(row.id);data.decks.push({id:row.id,name:row.name,cards:[...row.cards] as number[]});
     }
     data.selectedId=typeof parsed.selectedId==='string'&&ids.has(parsed.selectedId)?parsed.selectedId:null;
-  }catch(error){issues.push(`卡组数据无法读取，原始存储未修改：${error instanceof Error?error.message:'格式错误'}`);}
+  }catch(error){issues.push(t("deckReadFailed", error instanceof SyntaxError?t('invalidFormat'):error instanceof Error?error.message:t('invalidFormat')));}
   return {data,issues};
 }
 export function readConfig(raw:string|null):UiConfig {
   if(!raw)return {...defaultConfig};
-  try{const v=JSON.parse(raw);if(v?.version===1&&['comfortable','compact'].includes(v.density)&&['normal','large'].includes(v.textSize)&&typeof v.reduceMotion==='boolean')return {version:1,density:v.density,textSize:v.textSize,reduceMotion:v.reduceMotion};}catch{}
+  try{const v=JSON.parse(raw);if(v?.version===1&&['comfortable','compact'].includes(v.density)&&['normal','large'].includes(v.textSize)&&typeof v.reduceMotion==='boolean')return {version:1,density:v.density,textSize:v.textSize,reduceMotion:v.reduceMotion,...(isLocale(v.locale)?{locale:v.locale}:{})};}catch{}
   return {...defaultConfig};
 }
 export function readRecords(raw:string|null):MatchRecord[]{
@@ -60,20 +68,20 @@ export function readRecords(raw:string|null):MatchRecord[]{
   }catch{return [];}
 }
 export function safeRead(storage:StoragePort|null,key:string):{raw:string|null;error:string|null}{
-  try{return {raw:storage?.getItem(key)??null,error:storage?null:'浏览器未开放本地存储；本次设置仅在当前页面有效'};}
-  catch{return {raw:null,error:'无法读取本地存储；不会覆盖已有数据'};}
+  try{return {raw:storage?.getItem(key)??null,error:storage?null:t("storageUnavailable")};}
+  catch{return {raw:null,error:t("storageReadFailed")};}
 }
 export function safeWrite(storage:StoragePort|null,key:string,value:unknown,backupRaw?:string|null):string|null {
-  if(!storage)return '无法保存：本地存储不可用；当前页面仍可继续使用';
+  if(!storage)return t("storageWriteUnavailable");
   try{if(backupRaw)storage.setItem(key+'.recovery',backupRaw);storage.setItem(key,JSON.stringify(value));return null;}
-  catch{return '保存失败（存储被禁用或空间不足），原卡组仍保留；可导出卡组备份';}
+  catch{return t("deckWriteFailed");}
 }
 export interface LibraryEntry {id:number;name:string;card:Card|null;rarity:Card['rarity']|null;}
 export function libraryEntries(catalog:unknown):LibraryEntry[]{
   const rows=object(catalog)&&Array.isArray(catalog.cards)?catalog.cards:[];
   const indexed=new Map<number,{name:string;rarity:Card['rarity']|null}>();
   for(const row of rows)if(object(row)&&Number.isInteger(row.id)&&typeof row.name==='string')indexed.set(Number(row.id),{name:row.name,rarity:row.rarity==='standard'||row.rarity==='legendary'?row.rarity:null});
-  return Array.from({length:145},(_,i)=>{const id=i+1,card=byId.get(id)??null;return {id,name:card?.name??indexed.get(id)?.name??`编号牌 #${id}（目录未载入）`,card,rarity:card?.rarity??indexed.get(id)?.rarity??null};});
+  return Array.from({length:145},(_,i)=>{const id=i+1,card=byId.get(id)??null;return {id,name:card?.name??indexed.get(id)?.name??t("catalogCardPlaceholder", id),card,rarity:card?.rarity??indexed.get(id)?.rarity??null};});
 }
 export const tokenEntries=():LibraryEntry[]=>tokenCards.map(card=>({id:card.id,name:card.name,card,rarity:'token'}));
 /** UI availability follows the same catalog entries and executable definitions
@@ -81,14 +89,14 @@ export const tokenEntries=():LibraryEntry[]=>tokenCards.map(card=>({id:card.id,n
 export function libraryRuleSummary(entries:readonly LibraryEntry[]):string {
   const numbered=entries.filter(entry=>entry.rarity!=='token');
   const executable=numbered.filter(entry=>entry.card!==null).length;
-  return `${numbered.length} 张编号牌 · ${executable} 张可执行候选${executable<numbered.length?` · ${numbered.length-executable} 张尚未实现`:''}`;
+  return `${numbered.length} 张编号牌 · ${executable} 张可执行候选${executable<numbered.length?t("unimplementedCountSuffix", numbered.length-executable):''}`;
 }
 export type AbilityFilter='all'|'none'|'entry'|'aura'|'death'|'generate'|'condition'|'special';
 export type LibrarySort='id'|'name'|'rank'|'power';
 export function sortLibraryEntries(entries:readonly LibraryEntry[],order:LibrarySort):LibraryEntry[] {
   const compare=(a:LibraryEntry,b:LibraryEntry)=>{
     switch(order){
-      case 'name':return a.name.localeCompare(b.name);
+      case 'name':return localizedName(a.id,a.name).localeCompare(localizedName(b.id,b.name),getLocale(),{sensitivity:'base',numeric:true});
       case 'rank':return (a.card?.cost??Infinity)-(b.card?.cost??Infinity);
       case 'power':return (b.card?.power??-Infinity)-(a.card?.power??-Infinity);
       default:return 0;
@@ -99,8 +107,8 @@ export function sortLibraryEntries(entries:readonly LibraryEntry[],order:Library
 export interface LibraryFilter {query:string;rank:string;power:string;rarity:string;ability:AbilityFilter;}
 export const emptyFilter=():LibraryFilter=>({query:'',rank:'all',power:'all',rarity:'all',ability:'all'});
 export function matchesEntry(entry:LibraryEntry,filter:LibraryFilter):boolean {
-  const text=filter.query.trim().toLocaleLowerCase(),numeric=/^#?\d+$/.test(text),card=entry.card;
-  if(numeric?entry.id!==Number(text.replace('#','')):text&&!entry.name.toLocaleLowerCase().includes(text))return false;
+  const card=entry.card;
+  if(!matchesCardName(entry.id,entry.name,filter.query))return false;
   const facts=card??(entry.id<=145?getCardEvidence(entry.id).knownFacts:undefined);
   if(filter.rank==='0'&&card?.placement!=='replace')return false;
   if(filter.rank!=='all'&&String(card?.placement==='replace'?0:facts?.cost)!==filter.rank)return false;

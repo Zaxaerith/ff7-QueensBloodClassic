@@ -9,13 +9,20 @@ export function options(select:HTMLSelectElement,rows:readonly (readonly [string
   select.replaceChildren(...rows.map(([value,label])=>{const node=element('option','',label);node.value=value;return node;}));
 }
 let dialogReturn:HTMLElement|null=null;
-export function openDialog(title:string,content:HTMLElement){
+export function openDialog(title:string,content:HTMLElement,focus?:{initial:HTMLElement;returnTo:HTMLElement}){
   const dialog=$<HTMLDialogElement>('infoDialog');
-  if(!dialog.open)dialogReturn=document.activeElement as HTMLElement|null;
+  if(!dialog.open)dialogReturn=focus?.returnTo??document.activeElement as HTMLElement|null;
   $('dialogTitle').textContent=title;$('dialogContent').replaceChildren(content);
-  if(!dialog.open)dialog.showModal();$('dialogClose').focus();
+  if(!dialog.open)dialog.showModal();
+  (focus?.initial??$('dialogClose')).focus();
 }
-export function closeDialog(){const dialog=$<HTMLDialogElement>('infoDialog');dialog.close();if(dialogReturn?.isConnected)dialogReturn.focus();}
+export function closeDialog(){
+  const dialog=$<HTMLDialogElement>('infoDialog');
+  const returnTo=dialogReturn;
+  dialogReturn=null;
+  dialog.close();
+  if(returnTo?.isConnected&&!returnTo.closest('[hidden], [inert]'))returnTo.focus();
+}
 export function initDialog(){
   const dialog=$<HTMLDialogElement>('infoDialog');$('dialogClose').onclick=closeDialog;
   dialog.addEventListener('cancel',event=>{event.preventDefault();closeDialog();});

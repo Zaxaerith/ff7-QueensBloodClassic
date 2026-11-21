@@ -1,0 +1,75 @@
+.gamepad-hints {
+  color: var(--gold);
+  font-size: .75rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+#view-game .gamepad-hints { margin-inline-start: auto; }
+#view-home .gamepad-hints, #infoDialog > .gamepad-hints { padding: 4px 10px; }
+
+:root[data-gamepad-input] :is(#view-game, #view-home, #infoDialog) :is(button, summary, a[href]):focus {
+  outline: 2px solid #fff5d7;
+  outline-offset: 2px;
+}
+
+:root[data-gamepad-input] #view-game .tile:focus { z-index: 4; }
+
+#view-game.view .battle-actions:has(> .gamepad-play-hints:not([hidden])):not(:has(> .action-more[open])) > :not(.gamepad-play-hints) {
+  display: none;
+}
+#view-game.view .gamepad-play-hints {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  align-items: center;
+  gap: 4px clamp(10px, 1.15vw, 17px);
+  padding: 4px 0 7px;
+  min-width: 0;
+  font-size: .82rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.gamepad-play-controls { display: flex; flex-wrap: wrap; justify-content: end; gap: 4px clamp(8px, 1.05vw, 15px); color: var(--ink); }
+.gamepad-pass-hint { position: relative; color: var(--gold); }
+.gamepad-pass-meter { position: absolute; inset: 100% 0 auto; width: 100%; height: 3px; accent-color: var(--gold); }
+
+.match-aim-layer {
+  position: absolute;
+  grid-area: 1 / 2 / 2 / 3;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+}
+.match-player-preview {
+  position: absolute;
+  left: calc(var(--effect-col) * (var(--cell-width) + var(--cell-gap)));
+  top: calc(var(--effect-row) * (var(--cell-height) + var(--cell-gap)) - 5px);
+  width: var(--cell-width);
+  height: var(--cell-height);
+  opacity: .92;
+  box-shadow: 0 5px 0 #080d3088;
+  transition: left 90ms ease-out, top 90ms ease-out;
+}
+.match-player-preview[data-invalid] {
+  outline: 2px solid #ff8f9d;
+}
+.match-player-preview[data-invalid]::after {
+  content: "×";
+  position: absolute;
+  right: 2px;
+  bottom: 2px;
+  min-width: 1.1em;
+  border: 1px solid #ffa3ae;
+  background: #3e172b;
+  color: #ffe5e8;
+  text-align: center;
+  font: bold 1rem/1 monospace;
+}
+#view-game.view .tile.blocked-target::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px dashed #ff8f9d;
+  pointer-events: none;
+}

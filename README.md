@@ -1,33 +1,49 @@
-# Queen's Blood Classic
+# Queen’s Blood Classic
 
 [简体中文](README.zh-CN.md)
 
-An unofficial, open-source single-player Queen's Blood game for Final Fantasy VII fans. This is a **source-only preview**: no Windows binary has passed acceptance. The game includes a 3×5 board, configurable Bot, deck editor, mulligan, saved matches, replays, analysis, and candidate local generation routes for all 145 Classic Art cards.
+An unofficial, open-source single-player card game inspired by Queen’s Blood. The public `main` branch is a source snapshot; the latest tagged preview remains [v0.9.0-rc.1](https://github.com/Zaxaerith/ff7-QueensBloodClassic/releases/tag/v0.9.0-rc.1). No accepted Windows executable is included.
 
-## M7 update
+## Features
 
-- New-match and restart flows protect the existing save when writing a replacement save fails.
-- After a match ends, returning home lets you reopen the result and start a rematch without archiving the same match twice.
-- A local private art baseline for all 145 cards has been accepted by the maintainer. Its images and private pack are not included here. The public generator is not claimed to reproduce every refinement in that private baseline.
-- An internal 145-card rule-evidence ledger has been prepared, but it does not establish every rule from original-game evidence. #066 Two Face feedback behavior remains to be verified. #134 has an executable J-Squad candidate rule, but its derived-card strengths and accuracy to the original game are not fully verified.
+- A 3×5 board, 145 numbered card definitions, deck editing, mulligan, saved matches, replay, and match analysis.
+- Three Bot difficulty levels, named NPC challengers, and keyboard or gamepad controls.
+- An 11-language interface and Classic Frame presentation.
+- Card Carnival currently offers three playable puzzles. The full set of 22 puzzles is not implemented.
+- Candidate local generation routes for all 145 Classic Art cards.
 
-## Play
+Some complex card interactions remain candidates. #066 Two Face feedback and #134 J-Squad details still need verification against the original game.
 
-- **Windows:** No accepted Windows binary is available in this preview. The desktop build is not included; do not expect an EXE.
-- **Web:** Install Node.js 22.12 or newer, run `npm ci` and `npm run dev`, then open the local URL printed by Vite. The normal Web build contains no generated/private card art.
+## Play in a browser
 
-## Classic Art
+Install Node.js 22.12 or newer, then run:
 
-The repository includes candidate recipes and local import tools for 145 cards. It does not include FF7 game archives, extracted models or textures, or generated/private card images. Provide your own lawfully obtained FF7 Original PC game data, then use **Generate Art Pack** in the Windows app or run `python tools/qb-assets.py inspect --source <game-data-folder>`. To generate the pack, install Python 3.11+ and Pillow with `python -m pip install -r tools/requirements-art.txt`, then follow [the local generator guide](docs/LOCAL_ART_GENERATOR.md). Import the generated private pack in the desktop app or browser. Keep the original files and generated art on your own device.
+```sh
+npm ci
+npm run dev
+```
 
-## Build and test
+Open the local address printed by Vite. The normal Web build works without card art and contains no private generated images.
 
-For the Web game, run `npm ci`, `npm run check`, `npm test`, and `npm run build`. For the Windows app, see [desktop build instructions](desktop/README.md). No Windows executable is part of this Source-only Preview. WebView2 Runtime is installed separately on Windows.
+## Generate and import private card art
 
-## Current limits
+Provide your own lawfully obtained FF7 Original PC game data. The repository includes the local generator and candidate recipes for 145 cards, but no original game archives, extracted models or textures, or generated private card images. Follow the [local generator guide](docs/LOCAL_ART_GENERATOR.md), then import the generated Art Pack in the desktop app or browser. The public generator is not claimed to reproduce every refinement in any private art collection.
 
-Some complex rules remain candidate implementations, including the unresolved #066 and #134 details above. Card art can still be refined. No Windows binary has passed acceptance or independent clean-VM compatibility testing.
+## Windows desktop source
 
-## License
+The repository includes the desktop host and build instructions in [desktop/README.md](desktop/README.md). This preview does not provide an accepted Windows binary. Windows GUI acceptance and independent clean-VM compatibility testing are incomplete.
 
-The project source is GPL-3.0-only. See [LICENSE](LICENSE) and [third-party notices](THIRD_PARTY_NOTICES.md). This is an unofficial fan project, not affiliated with or endorsed by Square Enix. Final Fantasy VII and related names and materials belong to their respective owners. GPL covers this repository's source and does not grant rights to third-party game assets or characters.
+## Build and checks
+
+```sh
+npm ci
+npm run check
+npm test
+npm run build
+```
+
+See [gameplay and current limits](docs/GAMEPLAY.md), [Art Pack v1 contract](docs/ART_PACK_CONTRACT.md), and [third-party notices](THIRD_PARTY_NOTICES.md).
+
+## License and project status
+
+Project source is GPL-3.0-only; see [LICENSE](LICENSE). This is an unofficial fan project, not affiliated with or endorsed by Square Enix. Final Fantasy VII and related names and materials belong to their respective owners. GPL covers this repository’s source and does not grant rights to third-party game assets or characters.

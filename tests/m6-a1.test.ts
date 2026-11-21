@@ -7,6 +7,7 @@ import {botActions,botSimulation,observeGame,recommendBot} from '../src/bot.js';
 import {analyzeDecision,historicalDecision} from '../src/replay-analysis.js';
 import {saveMatch,restoreMatch,ReplayTimeline,RULES_VERSION} from '../src/match-archive.js';
 import {readDecks,validateDeck} from '../src/ui-data.js';
+import {t} from '../src/i18n/index.js';
 import {getCardEvidence} from '../src/evidence.js';
 import {QbSession} from '../src/session.js';
 
@@ -19,12 +20,16 @@ const spawned=(game:Game)=>game.events.filter(e=>e.type==='CardSpawned');
 
 test('J-Squad is a single-copy legendary in normal and persisted decks; auto-spawned Johnnys cannot be drafted or played from hand',()=>{
   expect(validateDeck(deck)).toBeNull();expect(()=>createGame([deck,deck],134)).not.toThrow();
-  expect(validateDeck([...deck.slice(1),134])).toContain('Too many copies');
+  const duplicate=[...deck.slice(1),134];
+  expect(()=>createGame([duplicate,deck],134)).toThrow('Too many copies of card #134');
+  expect(validateDeck(duplicate)).toBe(t('invalidDeckCopies',134));
   const raw=JSON.stringify({version:1,selectedId:'j',decks:[{id:'j',name:'Johnnys',cards:deck}]});
   expect(readDecks(raw)).toMatchObject({issues:[],data:{selectedId:'j',decks:[{cards:deck}]}});
   for(const id of johnnys){
     expect(byId.get(id)).toMatchObject({rarity:'token',cost:0,power:1,influence:[]});
-    expect(validateDeck([...deck.slice(0,14),id])).toContain('Generated cards');
+    const withToken=[...deck.slice(0,14),id];
+    expect(()=>createGame([withToken,deck],134)).toThrow('Generated cards cannot be included in a deck');
+    expect(validateDeck(withToken)).toBe(t('invalidDeckToken'));
   }
   expect(legalMoves(createPosition({hands:[johnnys,[]],board:[pawn(0,1,0)]}),0)).toEqual([]);
 });

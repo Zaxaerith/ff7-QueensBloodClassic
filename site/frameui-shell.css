@@ -1,0 +1,520 @@
+:root {
+  --frame-ground: #101322;
+  --frame-surface: #1f233b;
+  --frame-inset: #161c30;
+  --frame-line: #586385;
+  --frame-copper: #a78658;
+  --frame-wine: #482c42;
+  --frame-wood: #292238;
+  --ink: #f1e9d8;
+  --muted: #c2c8d9;
+  --gold: #f4cb82;
+  --teal: #94e6db;
+  --rose: #f0a2a3;
+  --edge: var(--frame-line);
+  --frame-title: Georgia, "Times New Roman", serif;
+  --frame-gap: clamp(12px, 2vw, 28px);
+}
+
+body {
+  background:
+    radial-gradient(ellipse at 77% 30%, #633a5255, transparent 44rem),
+    radial-gradient(ellipse at 25% 15%, #31466e68, transparent 45rem),
+    var(--frame-ground);
+  color: var(--ink);
+}
+
+#app:not([data-view=game], [data-view=replay]) {
+  min-height: 100dvh;
+  max-width: 1350px;
+  padding: clamp(12px, 2.5vw, 40px);
+  gap: var(--frame-gap);
+}
+
+.app-header { border-bottom: 1px solid var(--frame-copper); padding-bottom: .65rem; }
+.app-header .brand-mark { color: var(--gold); font-family: var(--frame-title); }
+.app-header .eyebrow { color: var(--muted); }
+.app-header .brand h1 { color: var(--ink); }
+.app-footer { margin-top: auto; }
+
+.app-shell .menu-window {
+  padding: 0;
+  gap: 4px;
+  background: none;
+  border: 0;
+  box-shadow: none;
+}
+#app .menu-window button {
+  flex: 0 1 auto;
+  min-width: min(8ch, 27vw);
+  padding-inline: 1rem;
+  text-align: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-block-end-color: #65738f6b;
+  color: var(--muted);
+}
+#app .menu-window button[aria-current=page] {
+  color: var(--gold);
+  background: linear-gradient(0deg, #b5824335, transparent 80%);
+  border-color: transparent;
+  border-block-end-color: var(--gold);
+}
+.app-shell .menu-window button[aria-current=page]::before { content: none; }
+
+:is(#app, #infoDialog) :is(.window, .d4-home-deck) {
+  background: var(--frame-surface);
+  border: 1px solid var(--frame-line);
+  border-radius: 2px;
+  box-shadow: 0 9px 22px #0004;
+}
+:is(#app, #infoDialog) :is(button, input, select):where(:not(.tile, .hand-card, .d4-card-button, .collection-card, [type=checkbox], [type=range])) {
+  border-radius: 2px;
+  border-color: var(--frame-line);
+  background: var(--frame-inset);
+  color: var(--ink);
+  box-shadow: none;
+}
+:is(#app, #infoDialog) button:not(.tile, .hand-card, .d4-card-button, .collection-card):hover:not(:disabled) {
+  background: #323d5c;
+  border-color: var(--frame-copper);
+}
+:is(#app, #infoDialog) button.primary:not(.tile) {
+  color: #21190b;
+  background: var(--gold);
+  border-color: var(--gold);
+  font-weight: 700;
+}
+:is(#app, #infoDialog) button.primary:not(.tile):hover:not(:disabled) { background: #ffda92; }
+:is(#app, #infoDialog) button.danger:not(.tile) { color: var(--rose); border-color: #936258; }
+:is(#app, #infoDialog) button:disabled:not(.tile, .hand-card) { opacity: .64; }
+:root[data-gamepad-input] :is(#app, #infoDialog) :is(button, summary, a[href]):focus,
+:is(#app, #infoDialog) :is(button, summary, a[href], input, select):focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+:is(#app, #infoDialog) .view-title { font: 500 clamp(1.35rem, 2.8vw, 2.15rem)/1.1 var(--frame-title); }
+.app-shell .app-notice { background: var(--frame-wine); }
+#infoDialog {
+  border: 1px solid var(--frame-copper);
+  border-radius: 2px;
+  background: var(--frame-surface);
+  box-shadow: 0 16px 80px #0009;
+}
+#infoDialog::backdrop { background: #080b17c9; }
+#infoDialog .dialog-header { background: var(--frame-inset); border-color: var(--frame-line); }
+
+#app:is([data-view=home], [data-view=prepare], [data-view=decks], [data-view=collection], [data-view=records], [data-view=carnival], [data-view=config]) {
+  --deck-surface: #19212c;
+  --deck-recess: #111823;
+  --deck-steel: #505b67;
+  --deck-edge: #879099;
+  gap: clamp(9px, .9vw, 14px);
+  padding-block-start: clamp(12px, 1.35vw, 24px);
+}
+
+.challenge-screen {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.28fr);
+  margin-inline: auto;
+  max-width: 1140px;
+  border-block: 1px solid var(--deck-edge);
+  background: linear-gradient(105deg, #171e2b, #202633 69%, #302630);
+  box-shadow: 0 5px #0a0e16, 0 12px 22px #080b1140;
+}
+.challenge-picker {
+  display: flex;
+  flex-direction: column;
+  gap: .8rem;
+  min-width: 0;
+  padding: clamp(14px, 2.2vw, 28px);
+}
+.challenge-roster { display: grid; gap: .8rem; align-items: start; }
+.challenge-group { display: grid; gap: 5px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.challenge-group h3 {
+  grid-column: 1 / -1;
+  padding-bottom: .32rem;
+  border-bottom: 1px solid var(--deck-steel);
+  font: 500 1.02rem/1.2 var(--frame-title);
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+#app .challenge-option {
+  position: relative;
+  padding: .48rem 1.35rem;
+  text-align: start;
+  min-height: 44px;
+  overflow-wrap: anywhere;
+  border: 0;
+  border-block-end: 1px solid #82919d39;
+  background: linear-gradient(90deg, #2b35466b, transparent);
+}
+#app .challenge-roster > .challenge-option { justify-self: start; }
+#app .challenge-option[aria-current=true] {
+  color: var(--gold);
+  font-weight: 600;
+  border-block-end-color: #b99c68;
+  background: linear-gradient(90deg, #5a4a39, #3c32333d);
+}
+#app .challenge-option[aria-current=true]::before {
+  content: "";
+  position: absolute;
+  top: calc(50% - 3px);
+  inset-inline-start: .55rem;
+  width: 7px;
+  height: 7px;
+  background: var(--gold);
+  box-shadow: 0 0 0 1px #483624;
+  transform: rotate(45deg);
+}
+.frame-challenge-heading { display: flex; gap: 8px; flex-wrap: wrap; align-items: baseline; justify-content: space-between; }
+#app #view-home .frame-challenge-hints { margin: 0; padding: 0; }
+.resume-match p { margin-top: .5rem; }
+.challenge-feature {
+  min-width: 0;
+  border-inline-start: 1px solid var(--deck-steel);
+  padding: clamp(16px, 3.25vw, 46px);
+  background: linear-gradient(150deg, #28334285, #1b212b47 64%, transparent);
+}
+.challenge-dossier {
+  margin-top: 1.15rem;
+  display: grid;
+  align-items: start;
+  gap: clamp(14px, 2vw, 29px);
+}
+.challenge-dossier.has-card { grid-template-columns: minmax(0, 1fr) minmax(78px, 9.5rem); }
+.challenge-emblem, #prepReward {
+  margin: 0;
+  display: grid;
+  gap: .4rem;
+  text-align: center;
+}
+.challenge-emblem .qb-card, #prepReward .qb-card { box-shadow: 2px 4px 0 #0b1119b5, 3px 6px 9px #090e16aa; }
+.challenge-emblem figcaption, #prepReward figcaption {
+  color: var(--muted);
+  font-size: .78rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+.challenge-copy { min-width: 0; padding-block-end: .9rem; border-bottom: 1px solid var(--deck-steel); }
+.challenge-region { margin-bottom: .35rem; color: var(--muted); overflow-wrap: anywhere; }
+.challenge-region:empty { display: none; }
+.challenge-name { font: 500 clamp(1.35rem, 3vw, 2.65rem)/1.12 var(--frame-title); color: var(--gold); overflow-wrap: anywhere; }
+.challenge-tier { margin-top: .4rem; color: var(--muted); font-size: .88rem; overflow-wrap: anywhere; }
+.challenge-description { color: var(--ink); line-height: 1.58; overflow-wrap: anywhere; }
+
+#view-prepare.home-layout {
+  max-width: 1180px;
+  margin: 0 auto;
+  grid-template-columns: minmax(0, 1.55fr) minmax(260px, 1fr);
+  grid-template-areas: "deck setup" "deck info";
+  grid-template-rows: auto 1fr;
+  align-items: start;
+  gap: clamp(10px, 1.5vw, 20px);
+}
+#app :is(#view-prepare, #view-decks) .window {
+  min-width: 0;
+  border: 0;
+  border-block-start: 1px solid var(--deck-edge);
+  border-block-end: 1px solid var(--deck-steel);
+  border-radius: 0;
+  background: var(--deck-surface);
+  box-shadow: 0 3px #0b1019;
+}
+#app #homeDeckSlots { max-width: clamp(18rem, 52dvh, 32rem); }
+.frame-prep-deck-heading > div { flex: 1 1 12ch; min-width: 0; }
+.frame-prep-deck-heading #currentDeck { color: var(--ink); overflow-wrap: anywhere; }
+:is(#currentDeckCount,#deckSummary)[data-valid=false] { color: var(--rose); }
+#currentDeckStatus { margin: .7rem 0 0; overflow-wrap: anywhere; }
+.prep-challenger {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(3.6rem, 8vw, 7rem);
+  gap: 10px 16px;
+  align-items: start;
+}
+#app .prep-challenger:has(#prepReward[hidden]) { grid-template-columns: minmax(0, 1fr); }
+#app .prep-challenger h2 { margin: 0 0 .5rem; padding: 0; border: 0; overflow-wrap: anywhere; }
+#opponentInfo { overflow-wrap: anywhere; }
+#app #view-prepare .d4-home-setup { background: linear-gradient(120deg, var(--deck-surface), #2e2832); }
+#app #view-prepare .home-actions button { flex: 0 1 auto; min-width: min(100%, 10rem); max-width: 100%; }
+#app #view-prepare .d4-inspector, #app #view-decks .d4-inspector { background: var(--deck-recess); }
+.frame-deck-bank { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 5px; }
+#prepareDeckBank { max-width: 24rem; margin-bottom: .7rem; }
+#editorDeckBank { flex: 1 1 18rem; max-width: 24rem; }
+#app .frame-deck-slot {
+  padding: 0;
+  min-height: 40px;
+  font-variant-numeric: tabular-nums;
+  font-family: var(--frame-title);
+  background: linear-gradient(0deg, #313b48, #17202a 55%);
+  border-color: var(--deck-steel);
+}
+#app .frame-deck-slot[data-empty] { border-style: dashed; color: var(--muted); }
+#app .frame-deck-slot[aria-pressed=true] {
+  border-color: #e0c184;
+  color: #221c17;
+  background: linear-gradient(0deg, #ba9455, #edd49e 64%);
+  box-shadow: inset 0 0 0 2px #5b4935a8;
+}
+#infoDialog .frame-option-list button[aria-pressed=true] { color: var(--gold); border-color: var(--frame-copper); }
+#app .d4-home-deck-choice { justify-content: flex-end; margin-top: .75rem; padding-top: .65rem; border-top: 1px solid var(--deck-steel); }
+#app #view-prepare #changeDeck { border-color: #b59c72; }
+.frame-prepare-hints { margin-top: .75rem; }
+#app #homeDeckSelect, #app #savedDecks, #app #deckTemplate { display: none; }
+.frame-option-list { display: grid; gap: 7px; }
+.frame-option-list button { text-align: start; overflow-wrap: anywhere; }
+.frame-preset-preview { display: grid; grid-template-columns: minmax(130px, 1fr) minmax(0, 2fr); gap: 12px; align-items: start; }
+.frame-preset-preview .primary { grid-column: 1 / -1; justify-self: end; }
+#app .d4-deck-tabs { background: var(--frame-ground); }
+#app .d4-deck-tabs [aria-pressed=true] { color: var(--gold); border-color: var(--gold); }
+#app #view-decks .d4-deck-footer { background: var(--deck-recess); }
+#app .d4-inspector .qb-description { display: block; overflow: visible; overflow-wrap: anywhere; }
+#app #deckInfo .qb-trigger { display: block; grid-column: 1 / -1; overflow-wrap: anywhere; }
+#app #deckInfo .qb-details { grid-template-columns: minmax(0, 1fr) clamp(78px, 7vw, 102px); }
+#app #deckInfo .qb-details > .qb-pattern { width: 100%; height: auto; aspect-ratio: 1; }
+#app #view-decks :is(.d4-inspector-actions, #deckPager) button { scroll-margin-block-end: 5rem; }
+#app .d4-panel-heading h2, #app .d4-deck-panel h3, #app .d4-inspector > h3 {
+  font-family: var(--frame-title);
+  color: var(--gold);
+}
+#app .d4-inspector > h3 { border-block-end: 1px solid var(--deck-steel); padding-block-end: .4rem; }
+#app .d4-card-button[aria-pressed=true] { position: relative; }
+#app .d4-card-button[aria-pressed=true]::after {
+  content: "";
+  position: absolute;
+  inset: -3px auto auto calc(50% - 3px);
+  width: 7px;
+  height: 7px;
+  background: var(--gold);
+  box-shadow: 0 0 0 1px #3e281c;
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+#app #view-decks .d4-deck-layout { gap: clamp(8px, 1.2vw, 16px); }
+.frame-library-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(8ch, max-content) minmax(7ch, max-content);
+  align-items: start;
+  gap: 6px;
+  margin-bottom: .7rem;
+}
+#deckSearch input { width: 100%; }
+#app #deckFilters { grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.5rem), 1fr)); }
+#app #deckFilters select { width: 100%; }
+#app .frame-library-filters[open] { grid-column: 1 / -1; }
+#app .frame-library-filters summary {
+  width: fit-content;
+  padding: .5rem .65rem;
+  color: var(--gold);
+  border-block-end: 1px solid var(--frame-copper);
+}
+#app .frame-library-filters[open] #deckFilters { margin-top: .55rem; }
+#app :is(#view-prepare,#view-decks) .d4-empty-slot { background: var(--deck-recess); border-color: var(--deck-steel); overflow-wrap: anywhere; }
+#app :is(#view-prepare,#view-decks) .d4-slot-code, #app .d4-library-status { overflow-wrap: anywhere; }
+#app :is(#view-prepare,#view-decks) :is(button,summary) { overflow-wrap: anywhere; }
+#app :is(#view-collection,#view-records) { max-width: 70rem; margin-inline: auto; }
+.frame-library-heading {
+  padding-block: .55rem .85rem;
+  border-block-end: 1px solid var(--frame-copper);
+  margin: 0;
+}
+.frame-library-heading h2 { color: var(--ink); margin: 0 0 .35rem; }
+.frame-library-heading p { font-size: .84rem; line-height: 1.45; }
+.frame-library-heading > :is(button, select) { min-width: 0; max-width: 100%; }
+#app #collectionFilters {
+  display: grid;
+  grid-template-columns: minmax(10rem, 1.5fr) repeat(5, minmax(0, 1fr));
+  margin: .7rem 0 .9rem;
+}
+#app #collectionFilters :is(input,select) { min-width: 0; width: 100%; max-width: none; }
+#app #collectionGrid {
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: clamp(9px, 1.4vw, 18px);
+  padding: clamp(9px, 1.5vw, 20px);
+  border-block: 1px solid var(--deck-steel);
+  background: linear-gradient(155deg, var(--deck-surface), var(--deck-recess));
+  box-shadow: inset 0 3px 10px #0609107a, 0 3px #0b0e16;
+}
+#collectionGrid .empty { grid-column: 1 / -1; }
+#app .collection-card { display: grid; place-items: start stretch; gap: 3px; min-width: 0; width: 100%; border-radius: 0; }
+#app .collection-card .qb-card { box-shadow: 1px 3px 3px #060810b5; }
+#app .collection-card .unavailable-card { background: var(--frame-inset); border-color: var(--deck-steel); overflow-wrap: anywhere; }
+.frame-card-number { color: var(--gold); font: 600 .85rem/1.35 var(--frame-title); font-variant-numeric: tabular-nums; }
+.collection-card > .frame-card-number {
+  color: var(--muted);
+  padding: .24rem .35rem;
+  text-align: center;
+  border-block-end: 1px solid #65788c68;
+}
+:is(.collection-card:focus-visible, :root[data-gamepad-input] .collection-card:focus) > .frame-card-number {
+  color: var(--gold);
+  background: linear-gradient(90deg, transparent, #b582432e, transparent);
+  border-color: var(--gold);
+}
+:is(.collection-card:focus-visible, :root[data-gamepad-input] .collection-card:focus) > .frame-card-number::before {
+  content: "◆";
+  display: inline-block;
+  font-size: .65em;
+  margin-inline-end: .42rem;
+}
+#infoDialog:has(.frame-card-detail, .replay-event-details) .dialog-header h2 {
+  font: 600 1.28rem/1.2 var(--frame-title);
+  overflow-wrap: anywhere;
+}
+#infoDialog .frame-card-detail { grid-template-columns: minmax(9rem, .86fr) minmax(0, 1.4fr); gap: clamp(14px, 3vw, 26px); }
+.frame-card-detail > :is(.qb-card,.unavailable-card) { width: min(100%, 240px); justify-self: center; margin: 0; }
+.frame-card-detail > .qb-card { box-shadow: 0 5px 13px #080b15bf; }
+.frame-card-detail .card-notes { line-height: 1.5; overflow-wrap: anywhere; }
+.frame-card-detail .qb-details {
+  background: linear-gradient(150deg, #262f3d, #141b27);
+  padding: .8rem;
+  border-color: var(--frame-line);
+  color: var(--ink);
+}
+.frame-card-detail .qb-details h3 { font: 600 1.1rem/1.25 var(--frame-title); }
+.frame-card-detail .evidence-list { margin-block: .75rem; padding-inline-start: .75rem; border-inline-start: 1px solid var(--frame-line); }
+.frame-card-detail .evidence-list dt { color: var(--ink); }
+
+#app .record-list { margin-top: .65rem; }
+#app .record-row {
+  display: grid;
+  grid-template-columns: minmax(7.2rem,.7fr) minmax(0,1.4fr) minmax(0,1fr) minmax(10rem,auto);
+  align-items: center;
+  gap: clamp(10px, 1.6vw, 22px);
+  padding: .8rem clamp(10px, 1.35vw, 20px);
+  border-color: var(--deck-steel);
+  background: linear-gradient(90deg, #25303e, var(--deck-recess) 58%);
+  overflow-wrap: anywhere;
+}
+#app .record-row:focus-within { box-shadow: inset 2px 0 var(--gold); }
+.record-score { display: grid; align-self: stretch; align-content: center; padding-inline-end: .7rem; border-inline-end: 1px solid var(--deck-steel); }
+.record-outcome { color: var(--muted); font-size: .84rem; }
+[data-result=win] .record-outcome { color: var(--teal); }
+[data-result=loss] .record-outcome { color: var(--rose); }
+.record-score strong { color: var(--ink); font: 600 clamp(1.45rem, 4vw, 2.25rem)/1.1 var(--frame-title); font-variant-numeric: tabular-nums; }
+.record-info h3 { font: 600 1.08rem/1.25 var(--frame-title); }
+.record-info time, .record-info p, .record-meta { color: var(--muted); font-size: .81rem; }
+.record-meta, .record-actions { display: grid; align-content: center; gap: .3rem; min-width: 0; }
+.record-secondary { display: flex; flex-wrap: wrap; gap: .35rem; }
+#app .record-secondary button { min-height: 32px; padding: .3rem .55rem; font-size: .8rem; color: var(--muted); }
+#app .record-actions [data-open-replay] { color: var(--gold); border-color: var(--frame-copper); }
+#app .record-actions [data-open-replay]:disabled { color: var(--muted); border-color: var(--deck-steel); }
+
+#app .carnival-list {
+  max-width: 66rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+#app .carnival-puzzles { gap: 0; margin-block-start: .6rem; }
+#app .carnival-puzzles > li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(0, .85fr) auto;
+  align-items: center;
+  gap: 10px clamp(12px, 2vw, 24px);
+  padding: clamp(10px, 1.3vw, 18px);
+  border: 0;
+  border-block-end: 1px solid var(--deck-steel);
+  background: linear-gradient(100deg, var(--deck-surface), var(--deck-recess) 72%);
+  overflow-wrap: anywhere;
+}
+#app .carnival-puzzles > li:focus-within { box-shadow: inset 2px 0 var(--gold); }
+.carnival-puzzles h3 { font: 600 clamp(1.06rem, 2vw, 1.3rem)/1.2 var(--frame-title); }
+.carnival-puzzle-status { display: flex; flex-wrap: wrap; gap: .15rem .85rem; color: var(--muted); font-size: .77rem; }
+.carnival-cleared::before { content: "✓ "; }
+.carnival-reward { display: grid; grid-template-columns: clamp(2.5rem, 5vw, 3.65rem) minmax(0, 1fr); align-items: center; gap: .6rem; }
+.carnival-reward-label { display: grid; gap: .2rem; font-size: .82rem; }
+.carnival-reward-label strong { color: var(--gold); font-weight: 500; }
+#app .carnival-start { border-color: var(--frame-copper); color: var(--gold); max-width: 100%; }
+#app .carnival-result, #app .carnival-stage .carnival-table { border-color: var(--frame-copper); }
+
+#app #view-config .narrow-window {
+  max-width: 62rem;
+  background: linear-gradient(130deg, var(--deck-surface), var(--deck-recess));
+  border: 0;
+  border-block: 1px solid var(--deck-edge);
+}
+#app #view-config .view-title { color: var(--ink); margin-block-end: .55rem; }
+.frame-config-grid { display: grid; gap: var(--frame-gap); }
+.frame-config-grid > div { min-width: 0; overflow-wrap: anywhere; }
+.frame-config-display > .field {
+  grid-template-columns: minmax(0,.9fr) minmax(0,1.1fr);
+  align-items: center;
+  margin: 0;
+  padding-block: .65rem;
+  border-block-end: 1px solid var(--deck-steel);
+}
+.frame-config-grid :is(select, input[type=range]) { min-width: 0; max-width: 100%; }
+.frame-config-grid input { accent-color: var(--gold); }
+.frame-config-grid :is(.check-field,.field) { cursor: pointer; }
+.frame-config-grid :is(.check-field,.field):focus-within { color: var(--gold); }
+.frame-config-grid .check-field { margin-block: 1rem .45rem; }
+.frame-config-tools { line-height: 1.5; }
+.frame-config-tools h3 { font: 600 1.15rem/1.3 var(--frame-title); color: var(--gold); }
+.frame-config-tools p, .frame-config-display p, .frame-config-storage { font-size: .85rem; }
+.frame-config-tools p + p { margin-block-start: .35rem; }
+.frame-config-tools .field { margin: .55rem 0 .65rem; }
+.frame-config-storage { border-block-start: 1px solid var(--deck-steel); padding-block-start: .55rem; margin-block-start: 1rem; }
+
+@media (min-width: 761px) {
+  #app .challenge-option { min-height: 38px; }
+  .frame-config-grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .frame-config-tools { border-inline-start: 1px solid var(--deck-steel); padding-inline-start: var(--frame-gap); }
+}
+
+@media (min-width: 1121px) {
+  #app #view-decks .d4-deck-layout {
+    grid-template-columns: minmax(0, 2.4fr) minmax(15rem, 1fr);
+    grid-template-areas: "slots slots" "library inspector";
+  }
+  #app #deckSlotsPanel { grid-area: slots; position: static; }
+  #app #deckLibraryPanel { grid-area: library; }
+  #app #deckInfo { grid-area: inspector; }
+  #app #deckSlots { grid-template-columns: repeat(15, minmax(0, 1fr)); gap: 4px; }
+  #app #deckCards { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+}
+
+@media (max-width: 1120px) {
+  #app #deckSlots { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  #app #collectionGrid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+@media (min-width: 620px) and (max-width: 1120px) {
+  #app #deckCards { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 480px) {
+  .frame-library-tools { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #deckSearch { grid-column: 1 / -1; }
+}
+@media (max-width: 760px) {
+  .challenge-screen { grid-template-columns: minmax(0, 1fr); }
+  .challenge-feature { grid-row: 1; border-inline-start: 0; border-bottom: 1px solid var(--deck-steel); }
+  .challenge-dossier.has-card { grid-template-columns: minmax(0, 1fr) minmax(64px, 5.75rem); }
+  #app .d4-deck-tools .field { flex-wrap: wrap; white-space: normal; }
+  #app .d4-deck-tools .field input { min-width: 0; }
+  .challenge-description { font-size: .84rem; }
+  .challenge-picker { padding-top: 10px; }
+  #view-prepare.home-layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "setup" "deck" "info"; grid-template-rows: auto; }
+  #view-prepare .d4-home-deck-choice { align-items: stretch; }
+  #app #homeDeckSlots { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .frame-preset-preview { grid-template-columns: minmax(0, 1fr); }
+  .frame-preset-preview .frame-option-list { display: flex; flex-wrap: wrap; }
+  #app #collectionGrid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  #app #collectionFilters { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  #app .record-row { grid-template-columns: minmax(4.6rem,.5fr) minmax(0,1.25fr) minmax(0,1fr); }
+  .record-meta { grid-column: 2; }
+  .record-actions { grid-area: 1 / 3 / 3 / 4; }
+  #app .carnival-puzzles > li { grid-template-columns: minmax(0, 1fr) minmax(0, .8fr); }
+  #app .carnival-puzzles > li > button { grid-column: 2; justify-self: start; }
+  .frame-config-tools { padding-block-start: .7rem; border-block-start: 1px solid var(--deck-steel); }
+}
+@media (max-width: 480px) {
+  #app #collectionGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #app #collectionFilters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  #app .record-row { grid-template-columns: minmax(4.2rem,.5fr) minmax(0,1.4fr); }
+  .record-actions { grid-area: auto / 1 / auto / -1; }
+  #app .carnival-puzzles > li { grid-template-columns: minmax(0, 1fr); }
+  #app .carnival-puzzles > li > button { grid-column: 1; }
+  #infoDialog .frame-card-detail { grid-template-columns: minmax(0, 1fr); }
+  .frame-card-detail > :is(.qb-card,.unavailable-card) { width: min(62%, 180px); }
+}

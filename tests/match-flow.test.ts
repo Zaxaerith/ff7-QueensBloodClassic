@@ -16,14 +16,14 @@ test('new game, cancellation and stale worker replies cannot submit old moves',a
   const first=client.choose(view(),{difficulty:'hard'}),second=client.choose(view(),{difficulty:'normal'});
   expect(await first).toBeNull();expect(workers[0].terminated).toBe(true);
   const decision=recommendBot(createPosition({hands:[[],[]],board:[]}));
-  workers[0].complete(decision);workers[1].complete(decision);expect(await second).toEqual(decision);expect(workers[1].terminated).toBe(true);
+  workers[0].complete(decision);workers[1].complete(decision);expect(await second).toMatchObject({...decision,diagnostic:{source:'worker',degraded:false}});expect(workers[1].terminated).toBe(true);
   const next=client.choose(view(),{});client.cancel();expect(await next).toBeNull();
 });
-test('worker deadline/error returns a visible safe PASS and terminates the computation',async()=>{
+test('worker deadline or startup failure reports an error instead of deciding to pass',async()=>{
   vi.useFakeTimers();const worker=new FakeWorker(),client=new BotClient(()=>worker,4000);
-  const pending=client.choose(view(),{difficulty:'hard',seed:7});vi.advanceTimersByTime(4000);
-  const result=await pending;expect(result?.action).toEqual({type:'pass',player:0});expect(result?.warning).toContain('4 秒');expect(worker.terminated).toBe(true);
-  const failed=new BotClient(()=>{throw Error('no worker');});expect((await failed.choose(view(),{}))?.warning).toContain('no worker');
+  const pending=expect(client.choose(view(),{difficulty:'hard',seed:7})).rejects.toThrow('4 秒');
+  vi.advanceTimersByTime(4000);await pending;expect(worker.terminated).toBe(true);
+  const failed=new BotClient(()=>{throw Error('no worker');});await expect(failed.choose(view(),{})).rejects.toThrow('no worker');
 });
 test('Worker receives only public BotView, never full Game',async()=>{
   const worker=new FakeWorker(),client=new BotClient(()=>worker);const pending=client.choose(view(),{});

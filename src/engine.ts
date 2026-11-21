@@ -82,6 +82,21 @@ function shuffle(cards: readonly number[],rng: ()=>number): number[] {
   for(let i=result.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[result[i],result[j]]=[result[j],result[i]];}
   return result;
 }
+function openingBoard(): Tile[][] {
+  return Array.from({length:ROWS},()=>Array.from({length:COLS},(_,c)=>({owner:c===0?0:c===COLS-1?1:null,pawns:c===0||c===COLS-1?1:0,card:null})));
+}
+function initializeGame(
+  {board,hands,decks,discard,phase,passes}: Pick<Game,'board'|'hands'|'decks'|'discard'|'phase'|'passes'>,
+  replay: Replay,
+): Game {
+  const {firstPlayer,rulesVersion}=replay,mulliganDone=phase!=='mulligan';
+  const game: Game={
+    ...(rulesVersion===undefined?{}:{rulesVersion}),board,hands,decks,discard,mulliganDone:[mulliganDone,mulliganDone],
+    phase,turn:firstPlayer,passes,history:[],events:[],nextInstanceId:1,replay,
+  };
+  record(game,{type:'MatchStarted',player:firstPlayer});
+  return game;
+}
 export function createGame(decks: [readonly number[],readonly number[]],seed = 1234,firstPlayer: Player = 0,rules: RulesVersion = TURN_DRAW_RULES_VERSION): Game {
   assertPlayer(firstPlayer);
   if(!Number.isFinite(seed)) throw new Error('Invalid seed');
@@ -97,12 +112,8 @@ export function createGame(decks: [readonly number[],readonly number[]],seed = 1
   }
   const rng=seededRng(seed), d: [number[],number[]]=[shuffle(decks[0],rng),shuffle(decks[1],rng)];
   const hands: [number[],number[]]=[d[0].splice(0,5),d[1].splice(0,5)];
-  const board: Tile[][]=Array.from({length:ROWS},()=>Array.from({length:COLS},(_,c)=>({owner:c===0?0:c===4?1:null,pawns:c===0||c===4?1:0,card:null})));
-  const tag=rulesTag(rules);
-  const game: Game={...tag,board,hands,decks:d,discard:[[],[]],mulliganDone:[false,false],phase:'mulligan',turn:firstPlayer,passes:0,
-    history:[],events:[],nextInstanceId:1,replay:{...tag,version:1,seed,decks:[[...decks[0]],[...decks[1]]],firstPlayer,commands:[]}};
-  record(game,{type:'MatchStarted',player:firstPlayer});
-  return game;
+  return initializeGame({board:openingBoard(),hands,decks:d,discard:[[],[]],phase:'mulligan',passes:0},
+    {...rulesTag(rules),version:1,seed,decks:[[...decks[0]],[...decks[1]]],firstPlayer,commands:[]});
 }
 export function mulligan(game: Game,player: Player,indices: number[]): void {
   assertPlayer(player);
@@ -431,12 +442,12 @@ export function createPosition(input: Position,rules: RulesVersion = TURN_DRAW_R
   assertPlayer(turn);
   if(!Number.isSafeInteger(seed)||seed<0||seed>0xFFFFFFFF) throw new Error('Invalid position seed');
   if(!['mulligan','playing','finished'].includes(phase)||!Number.isInteger(passes)||passes<0||passes>2||(phase==='finished')!==(passes===2)) throw new Error('Invalid phase/pass count');
-  const game=createGame([[1,1,2,2,4,4,5,5,7,7,8,8,9,9,11],[1,1,2,2,4,4,5,5,7,7,8,8,9,9,11]],seed,turn,rules);
-  game.hands=hands;game.decks=decks;game.discard=discard;game.phase=phase;game.turn=turn;game.passes=passes;
-  game.mulliganDone=phase==='mulligan'?[false,false]:[true,true];
+  const tag=rulesTag(rules);
+  const board: Tile[][]=input.board===undefined?openingBoard():
+    Array.from({length:ROWS},()=>Array.from({length:COLS},()=>({owner:null,pawns:0,card:null})));
+  let nextInstanceId=1;
   if(input.board!==undefined){
     if(!Array.isArray(input.board)) throw new Error('Invalid board');
-    game.board=Array.from({length:ROWS},()=>Array.from({length:COLS},()=>({owner:null,pawns:0,card:null})));
     const occupied=new Set<string>();
     for(const tile of input.board){
       if(!tile||!Number.isInteger(tile.row)||!Number.isInteger(tile.col)||!inside(tile.row,tile.col)) throw new Error('Invalid board coordinates (zero-based 3x5)');
@@ -450,18 +461,20 @@ export function createPosition(input: Position,rules: RulesVersion = TURN_DRAW_R
         if(tile.owner===null||pawns!==0||!Number.isSafeInteger(tile.permanentDelta??0)) throw new Error('Invalid card position');
         for(const flag of [tile.enhancedOnce,tile.enfeebledOnce]) if(flag!==undefined&&typeof flag!=='boolean') throw new Error('Invalid once flag');
         if(tile.thresholds!==undefined&&(!Array.isArray(tile.thresholds)||tile.thresholds.some(i=>!Number.isInteger(i)||definition(tile.cardId!).abilities[i]?.timing!=='threshold'))) throw new Error('Invalid threshold flags');
-        game.board[tile.row][tile.col]={owner:tile.owner,pawns:0,card:{id:tile.cardId,owner:tile.owner,instanceId:game.nextInstanceId++,
+        board[tile.row][tile.col]={owner:tile.owner,pawns:0,card:{id:tile.cardId,owner:tile.owner,instanceId:nextInstanceId++,
           permanentDelta:tile.permanentDelta??0,power:definition(tile.cardId).power,enhancedOnce:tile.enhancedOnce??false,enfeebledOnce:tile.enfeebledOnce??false,
           ...(tile.thresholds?{thresholds:[...tile.thresholds]}:{})}};
       } else {
         if((tile.owner===null)!==(pawns===0)) throw new Error('Empty position ownership must match pawn rank');
-        game.board[tile.row][tile.col]={owner:tile.owner,pawns,card:null};
+        board[tile.row][tile.col]={owner:tile.owner,pawns,card:null};
       }
     }
   }
   if(phase==='mulligan'&&(hands.some(h=>h.length!==5)||decks.some(d=>d.length<5))) throw new Error('Mulligan positions require five-card hands and at least five drawable cards');
   const position=structuredClone({...input,seed,turn,phase,passes,hands,decks,discard});
-  game.replay={...rulesTag(rules),version:2,seed,decks:[[],[]],firstPlayer:turn,position,commands:[]};
+  const game=initializeGame({board,hands,decks,discard,phase,passes},
+    {...tag,version:2,seed,decks:[[],[]],firstPlayer:turn,position,commands:[]});
+  game.nextInstanceId=nextInstanceId;
   new Resolution(game).stabilize();
   return game;
 }

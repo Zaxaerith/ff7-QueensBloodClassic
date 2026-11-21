@@ -1,23 +1,34 @@
+import {getLocale,localizePage,setLocale,t} from './i18n/index.js';
+import {isLocale,localeLabels,locales,resolveLocale} from './i18n/locales.js';
+import {deckLabel,difficultyName,presetName,recordedDeckLabel,seedLabel} from './i18n/game-labels.js';
 import {getCardVisual} from './visuals.js';
 import {loadVisualPack} from './visual-pack.js';
 import {mountArtImport} from './ui-art-import.js';
 import {refreshRenderedArtwork} from './browser-art.js';
 import {deckPresets} from './cards.js';
+import {mountChallenge} from './ui-challenge.js';
 import {mountMatch} from './ui-match.js';
 import {mountLibrary} from './ui-library.js';
 import {mountReplay} from './ui-replay.js';
+import {mountCarnival} from './ui-carnival.js';
+import {carnivalMessages} from './i18n/carnival.js';
 import {MatchHistory,readActive,writeActive} from './match-archive.js';
 import {STORAGE,readDecks,readConfig,safeRead,safeWrite,libraryEntries,presetDeck,libraryRuleSummary,type StoragePort,type DeckStore,type SavedDeck} from './ui-data.js';
 import {$,element,button,options,initDialog,openDialog,closeDialog,notice,downloadJson} from './ui-dom.js';
 import {startMatch,rulesLabel,type MatchSettings} from './match-flow.js';
 
-type Route='home'|'game'|'decks'|'collection'|'records'|'config'|'replay';
-const routes:Route[]=['home','game','decks','collection','records','config','replay'];
+type Route='home'|'prepare'|'game'|'decks'|'collection'|'records'|'config'|'replay'|'carnival';
+const routes:Route[]=['home','prepare','game','decks','collection','records','config','replay','carnival'];
 let route:Route='home',resolveVisual=getCardVisual,entries=libraryEntries(null),storage:StoragePort|null=null;
+let deckReturn:'home'|'prepare'='home';
+let replayReturnId:string|undefined;
 try{storage=window.localStorage;}catch{}
+const browserLocale=()=>resolveLocale(navigator.languages?.length?navigator.languages:[navigator.language]);
+setLocale(browserLocale());
+const configRead=safeRead(storage,STORAGE.config);let config=readConfig(configRead.raw);
+if(config.locale)setLocale(config.locale);
 const stored=safeRead(storage,STORAGE.decks),loaded=readDecks(stored.raw);
 let decks=loaded.data,recoveryRaw=loaded.issues.length?stored.raw:null;
-const configRead=safeRead(storage,STORAGE.config);let config=readConfig(configRead.raw);
 const history=new MatchHistory(storage),activeSave=readActive(storage);let slotPresent=activeSave.present;
 let selectedDeck:SavedDeck=decks.decks.find(d=>d.id===decks.selectedId)??presetDeck();
 initDialog();
@@ -29,23 +40,28 @@ function saveDecks(next:DeckStore){
   decks=next;recoveryRaw=null;return true;
 }
 function homeSummary(){
-  library.showHomeDeck(selectedDeck);
   const resume=$('resumeGame'),unfinished=match.unfinished();
+  $('resumeMatch').hidden=!match.hasMatch()&&!activeSave.error;
   resume.hidden=!match.hasMatch();
-  resume.textContent=unfinished?'Continue Game · 继续对局':'查看上局结果';
+  resume.textContent=unfinished?t("resumeGame"):t("viewLastResult");
   const rules=match.rulesVersion();
-  $('continueInfo').textContent=activeSave.error&&!rules?activeSave.error:rules?`${unfinished?'继续对局':'上局结果'} · ${rulesLabel(rules)}。`:'新对局从第二个回合起，在行动方回合开始时抽牌。';
+  $('continueInfo').textContent=activeSave.error&&!rules?readActive(storage).error:rules?`${unfinished?t("continueGame"):t("lastResult")} · ${rulesLabel(rules)}。`:t("turnDrawHint");
   $('continueInfo').title=rules??'';
 }
 function chooseDeck(deck:SavedDeck){
   const savedDeck=decks.decks.find(d=>d.id===deck.id&&d.name===deck.name&&JSON.stringify(d.cards)===JSON.stringify(deck.cards));
   selectedDeck=savedDeck??{...deck,cards:[...deck.cards]};
   const selectedId=savedDeck?.id??null;
-  const saved=saveDecks({...decks,selectedId});navigate('home');
-  if(saved)notice(`已选择「${deck.name}」${selectedId?'':'；如需下次恢复，请在卡组页保存'}`);
+  const saved=saveDecks({...decks,selectedId});
+  if(route==='decks'){
+    navigate(deckReturn);
+    if(saved)notice(t("deckSelected", deckLabel(deck), selectedId?'':t("saveDeckForNextSession")));
+  }else library.showHomeDeck(selectedDeck);
 }
 const library=mountLibrary({entries:()=>entries,visual:id=>resolveVisual(id),decks:()=>decks,save:saveDecks,choose:chooseDeck});
-const match=mountMatch({visual:id=>resolveVisual(id),showCard:library.showCard,menu:()=>navigate('home'),hasCheckpoint:()=>slotPresent,checkpoint:save=>{
+const challenge=mountChallenge(()=>navigate('prepare'),id=>resolveVisual(id));
+const match=mountMatch({visual:id=>resolveVisual(id),showCard:library.showCard,menu:()=>navigate('home'),
+  hasCheckpoint:()=>slotPresent,checkpoint:save=>{
   const error=writeActive(storage,save);if(!error)slotPresent=true;return error;
 },completed:save=>{
   const error=history.add(save);if(error)return error;
@@ -57,40 +73,110 @@ function applyArtwork(resolve:typeof getCardVisual){
   resolveVisual=resolve;
   refreshRenderedArtwork(document,resolveVisual);
 }
-if(import.meta.env.MODE!=='private')mountArtImport($('view-config').querySelector<HTMLElement>('.window')!,applyArtwork);
+const artImport=import.meta.env.MODE==='private'?null:mountArtImport($('view-config').querySelector<HTMLElement>('.window')!,applyArtwork);
+let carnival:ReturnType<typeof mountCarnival>|undefined;
 function navigate(next:Route){
+  const previous=route;
+  if(route==='carnival'&&next!=='carnival')carnival?.leave();
   if(route==='replay'&&next!=='replay')replay.cancel();
-  if(route==='game'&&next!=='game')match.pause();route=next;
+  if(route==='game'&&next!=='game')match.pause();
+  if(next==='decks'&&route!=='decks')deckReturn=route==='prepare'?'prepare':'home';
+  route=next;
   $('app').dataset.view=next;
   for(const name of routes)$('view-'+name).hidden=name!==next;
   $('mainNav').hidden=next==='game'||next==='replay';$('backMenu').hidden=next==='home';
-  document.querySelectorAll<HTMLButtonElement>('[data-route]').forEach(node=>{if(node.dataset.route===next)node.setAttribute('aria-current','page');else node.removeAttribute('aria-current');});
-  if(next==='home')homeSummary();if(next==='decks')library.showDecks();if(next==='collection')library.showCollection();if(next==='records')renderRecords();if(next==='game')match.resume();
-  document.querySelector<HTMLElement>(`#view-${next} .view-title`)?.focus({preventScroll:true});
+  document.querySelectorAll<HTMLButtonElement>('[data-route]').forEach(node=>{if(node.dataset.route===(next==='prepare'?'home':next))node.setAttribute('aria-current','page');else node.removeAttribute('aria-current');});
+  if(next==='home')homeSummary();if(next==='prepare')library.showHomeDeck(selectedDeck);if(next==='decks')library.showDecks();if(next==='collection')library.showCollection();if(next==='records')renderRecords();if(next==='game')match.resume();if(next==='replay')replay.refresh();
+  if(next==='carnival'){
+    carnival??=mountCarnival($('view-carnival'),{visual:id=>resolveVisual(id),showCard:library.showCard});
+    carnival.showList();
+  }else if(next==='home')challenge.focus();
+  else if(next==='prepare'){
+    const start=$<HTMLButtonElement>('startGame');
+    const target=previous==='decks'?$('changeDeck'):start.disabled?$('prepareDeckBank').querySelector<HTMLElement>('[aria-pressed=true]'):start;
+    (target??$('prepOpponent')).focus({preventScroll:true});
+  }
+  else if(next==='replay'){
+    ($('view-replay').querySelector<HTMLElement>('#replayNext:not(:disabled)')??$('replayExit')).focus({preventScroll:true});
+  }
+  else if(next==='records'&&previous==='replay'&&replayReturnId){
+    const opener=$('recordList').querySelector<HTMLElement>(`[data-record-id="${CSS.escape(replayReturnId)}"] [data-open-replay]`);
+    (opener??$('view-records').querySelector<HTMLElement>('.view-title'))?.focus();
+    return;
+  }
+  else document.querySelector<HTMLElement>(`#view-${next} .view-title`)?.focus({preventScroll:true});
   window.scrollTo(0,0);
 }
 function renderRecords(){
   const root=$('recordList');root.replaceChildren();
-  for(const record of history.records){const [a,b]=record.scores,row=element('li','record-row'),rules=history.rulesVersion(record.id),actions=element('div','button-row');
+  for(const [index,record] of history.records.entries()){
+    const [a,b]=record.scores,row=element('li','record-row'),rules=history.rulesVersion(record.id);
     row.dataset.recordId=record.id;
-    const replayStatus=element('span','muted',rules?`可回放 · ${rulesLabel(rules)}`:'仅摘要，无法回放：没有兼容的完整行动记录');
+    row.dataset.result=a===b?'draw':a>b?'win':'loss';
+    const score=element('div','record-score');
+    score.append(element('span','record-outcome',a===b?t("draw"):a>b?t("victory"):t("defeat")),element('strong','',`${a} : ${b}`));
+    const replayStatus=element('span','muted record-status',rules?t("replayAvailable", rulesLabel(rules)):t("recordSummaryOnly"));
     if(rules)replayStatus.title=rules;
-    row.append(element('strong','',`${a===b?'平局':a>b?'胜利':'败北'} · ${a} : ${b}`),element('span','',`${record.deckName} · ${record.difficulty.toUpperCase()}`),element('span','muted',`${new Date(record.date).toLocaleString()} · Seed ${record.seed}`),replayStatus);
-    const open=button('打开回放',()=>{try{replay.open(history.replay(record.id));navigate('replay');}catch{notice('该回放无法通过完整性或规则校验；结果摘要仍保留');}});open.disabled=!rules;
-    actions.append(open,button(rules?'导出 JSON 回放':'导出摘要',()=>{try{downloadJson(rules?history.replay(record.id):record,`queens-blood-${record.seed}.json`);}catch{notice('回放校验失败，无法导出；摘要仍保留');}}),button('删除',()=>{
-      const content=element('div');content.append(element('p','','删除这条结果及其完整回放？'),button('取消',closeDialog),button('确认删除',()=>{const error=history.remove(record.id);closeDialog();if(error)notice(error);renderRecords();},'danger'));openDialog('RECORDS / 删除',content);
-    }));row.append(actions);root.append(row);}
-  if(!history.records.length)root.append(element('li','empty','尚无对局记录。完成一局后自动记录结果和回放。'));
+    const deck=recordedDeckLabel(record.deckName,history.startingDeck(record.id));
+    const time=element('time','',new Date(record.date).toLocaleString(getLocale()));
+    time.dateTime=record.date;
+    const info=element('div','record-info'),meta=element('div','record-meta');
+    info.append(element('h3','',`${t("computer")} · ${difficultyName(record.difficulty)}`),time,element('p','muted',deck));
+    meta.append(replayStatus,element('span','muted',`${seedLabel()} ${record.seed}`));
+    const open=button(t("openReplay"),()=>{try{replay.open(history.replay(record.id));replayReturnId=record.id;navigate('replay');}catch{notice(t("replayIntegrityFailed"));}});
+    open.disabled=!rules;open.dataset.openReplay='';
+    const actions=element('div','record-actions'),secondary=element('div','record-secondary');
+    secondary.append(button(rules?t("exportReplayJson"):t("exportSummary"),()=>{try{downloadJson(rules?history.replay(record.id):record,`queens-blood-${record.seed}.json`);}catch{notice(t("replayExportFailed"));}}),button(t("delete"),()=>{
+      const content=element('div');
+      content.append(element('p','',t("deleteThisResultAndItsCompleteReplay")),button(t("cancel"),closeDialog),button(t("confirmDeletion"),()=>{
+        const error=history.remove(record.id);closeDialog();
+        if(error){notice(error);return;}
+        renderRecords();
+        const adjacent=root.children[Math.min(index,history.records.length-1)];
+        (adjacent?.querySelector<HTMLElement>('button:not(:disabled)')??$('view-records').querySelector<HTMLElement>('.view-title'))?.focus();
+      },'danger'));
+      openDialog(t("deleteMatchRecord"),content);
+    }));
+    actions.append(open,secondary);
+    row.append(score,info,meta,actions);
+    root.append(row);
+  }
+  if(!history.records.length)root.append(element('li','empty',t("emptyRecordList")));
 }
 function applyConfig(){
   document.documentElement.dataset.density=config.density;document.documentElement.dataset.textSize=config.textSize;document.documentElement.dataset.reduceMotion=String(config.reduceMotion);
 }
 document.querySelectorAll<HTMLButtonElement>('[data-route]').forEach(node=>{node.onclick=()=>navigate(node.dataset.route as Route);});
-$('backMenu').onclick=()=>navigate('home');$('changeDeck').onclick=()=>navigate('decks');$('resumeGame').onclick=()=>navigate('game');
-$('deckBack').onclick=()=>navigate('home');
+$('backMenu').onclick=()=>{
+  if(route==='replay')$('replayExit').click();
+  else navigate(route==='decks'?deckReturn:'home');
+};
+$('changeDeck').onclick=()=>{navigate('decks');library.editDeck(selectedDeck);};
+$('resumeGame').onclick=()=>navigate('game');
+$('deckBack').onclick=()=>navigate(deckReturn);
+const localeSelect=$<HTMLSelectElement>('locale');
+function refreshLocalizedPage(){
+  document.documentElement.lang=getLocale();
+  localizePage(document);
+  $('carnivalNav').textContent=carnivalMessages().title;
+  options(localeSelect,[['',t('systemLanguage')],...locales.map(value=>[value,localeLabels[value]] as const)]);
+  for(const option of Array.from(localeSelect.options))if(isLocale(option.value))option.lang=option.value;
+  localeSelect.value=config.locale??'';
+  challenge.refresh();
+  const preset=$<HTMLSelectElement>('advancedPreset'),selection=preset.value;
+  options(preset,deckPresets.map((_,i)=>[String(i),presetName(i)]));
+  preset.value=selection||'0';
+  library.localize();
+  match.refresh();
+  if(route==='records')renderRecords();
+  if(route==='replay')replay.refresh();
+  artImport?.localize();
+}
 $('startGame').onclick=()=>{
   const input=$<HTMLInputElement>('seed'),seed=input.value.trim()?Number(input.value):Date.now()>>>0;
+  const npc=challenge.opponent();
   const settings:MatchSettings={deck:selectedDeck.cards,seed,difficulty:$<HTMLSelectElement>('difficulty').value as MatchSettings['difficulty'],first:$<HTMLSelectElement>('firstPlayer').value as MatchSettings['first']};
+  if(npc)settings.opponent={npcId:npc.id,deck:npc.deck};
   try{startMatch(settings);if(match.unfinished()||slotPresent){
     const content=element('div'),failure=element('p','warning');
     failure.setAttribute('role','alert');
@@ -99,40 +185,29 @@ $('startGame').onclick=()=>{
       if(error){failure.textContent=error;return;}
       closeDialog();navigate('game');notice('');
     };
-    content.append(element('p','','已有对局。可从原设置重开，或使用当前菜单设置开始新局。'));
-    if(match.hasMatch()){content.append(button(match.unfinished()?'继续现有对局':'查看上局结果',()=>{closeDialog();navigate('game');}),button('从原设置重开',()=>replace(match.restart)));}
-    content.append(button('取消',closeDialog),button('舍弃存档并开始新局',()=>replace(()=>{
-      const error=match.start(settings,selectedDeck.name);
-      if(!error)input.value=String(seed);
-      return error;
-    }),'danger'),failure);openDialog('CONTINUE / 已有存档',content);
-  }else {match.start(settings,selectedDeck.name);input.value=String(seed);navigate('game');notice('');}}
-  catch(error){notice(String(error));}
+    content.append(element('p','',t("existingMatchPrompt")));
+    if(match.hasMatch()){content.append(button(match.unfinished()?t("continueExistingMatch"):t("viewLastResult"),()=>{closeDialog();navigate('game');}),button(t("restartSameSettings"),()=>replace(match.restart)));}
+    content.append(button(t("cancel"),closeDialog),button(t("discardAndStart"),()=>replace(()=>match.start(settings,selectedDeck.name)),'danger'),failure);openDialog(t("existingSave"),content);
+  }else {const error=match.start(settings,selectedDeck.name);if(error){notice(error);return;}navigate('game');notice('');}}
+  catch(error){notice(error instanceof Error?error.message:t('invalidMove'));}
 };
-options($<HTMLSelectElement>('advancedPreset'),deckPresets.map((d,i)=>[String(i),d.name]));
-$('applyPreset').onclick=()=>{selectedDeck=presetDeck(Number($<HTMLSelectElement>('advancedPreset').value));library.load(selectedDeck);homeSummary();notice(`本页使用模板「${selectedDeck.name}」；可在卡组页命名保存`);};
+$('applyPreset').onclick=()=>{selectedDeck=presetDeck(Number($<HTMLSelectElement>('advancedPreset').value));library.showHomeDeck(selectedDeck);notice(t("usingDeckPreset", deckLabel(selectedDeck)));};
 $<HTMLSelectElement>('density').value=config.density;$<HTMLSelectElement>('textSize').value=config.textSize;$<HTMLInputElement>('reduceMotion').checked=config.reduceMotion;
-for(const id of ['density','textSize','reduceMotion'])$(id).onchange=()=>{
-  config={version:1,density:$<HTMLSelectElement>('density').value as typeof config.density,textSize:$<HTMLSelectElement>('textSize').value as typeof config.textSize,reduceMotion:$<HTMLInputElement>('reduceMotion').checked};
-  applyConfig();notice(safeWrite(storage,STORAGE.config,config)??'设置已保存');
+for(const id of ['density','textSize','reduceMotion','locale'])$(id).onchange=()=>{
+  const locale=localeSelect.value;
+  config={version:1,...(isLocale(locale)?{locale}:{}),density:$<HTMLSelectElement>('density').value as typeof config.density,textSize:$<HTMLSelectElement>('textSize').value as typeof config.textSize,reduceMotion:$<HTMLInputElement>('reduceMotion').checked};
+  if(id==='locale'){setLocale(config.locale??browserLocale());refreshLocalizedPage();}
+  applyConfig();notice(safeWrite(storage,STORAGE.config,config)?t('settingsStorageError'):t('settingsSaved'));
 };
 $('exportRecords').onclick=()=>downloadJson({version:1,records:history.records},'queens-blood-records.json');
 $('instructionsBtn').onclick=()=>{
   const content=element('div','guide');
-  for(const text of ['选中手牌，再选择金框落点，最后按“确认出牌”。触屏不会单击格子直接出牌。','黄底表示占格范围，红框表示能力影响格型。这是候选预览，力量尚未改变；实际效果由共享规则结算。','Tab 切换控件，Enter/Space 激活。棋盘方向键移动焦点，手牌左右键切换焦点。Escape 依次关闭窗口、取消落点/选牌、返回菜单。','新对局从第二个回合起，行动方先从牌库抽一张，再检查合法出牌。PASS 保留当前手牌，对方接手时照常抽牌；双方连续 PASS 后直接结算。旧存档和回放沿用出牌后补牌。','电脑思考时操作锁定，返回菜单会取消搜索，继续时只恢复一次行动。','对局在有效行动后自动保存在本机；刷新后使用 Continue Game。存储失败会提示，仍可导出 JSON 回放。未保存的卡组草稿不会恢复。先手设置是本原型自定义设置。','已完成的新对局可在 Records 逐步回放；旧摘要未记录行动，无法补造回放。所有存档仅保存在此浏览器。',`${libraryRuleSummary(entries)}。衍生卡不能组入初始牌库。卡牌资料中的证据状态不等于完整实机核验。`])content.append(element('p','',text));
-  openDialog('操作说明',content);
+  for(const text of [t("helpPlay"),t("helpPattern"),t("helpKeyboard"),t("helpDrawAndPass"),t("helpComputerTurn"),t("helpLocalSaves"),t("helpRecords"),t("helpCardLibrary", libraryRuleSummary(entries))])content.append(element('p','',text));
+  openDialog(t("howToPlay"),content);
 };
-document.addEventListener('keydown',event=>{
-  if(event.key==='Escape'&&route!=='game'&&!$<HTMLDialogElement>('infoDialog').open){event.preventDefault();navigate(route==='replay'?'records':'home');}
-  const node=event.target as HTMLElement;
-  if(node.closest('#mainNav')&&['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(event.key)){
-    event.preventDefault();const buttons=Array.from($('mainNav').querySelectorAll<HTMLButtonElement>('button')),index=buttons.indexOf(node as HTMLButtonElement),step=event.key==='ArrowLeft'||event.key==='ArrowUp'?-1:1;
-    buttons[(index+step+buttons.length)%buttons.length]?.focus();
-  }
-});
 window.addEventListener('pageshow',()=>{if(route==='game')match.resume();});
-applyConfig();library.load(selectedDeck);navigate('home');
-if(stored.error||loaded.issues.length)notice([stored.error,...loaded.issues].filter(Boolean).join('；'));
+applyConfig();refreshLocalizedPage();library.load(selectedDeck);navigate('home');
+if(stored.error||configRead.error||loaded.issues.length)notice([stored.error??configRead.error,...loaded.issues].filter(Boolean).join('；'));
 if(activeSave.error||history.issue)notice([activeSave.error,history.issue].filter(Boolean).join('；'));
-void fetch('./catalog.json').then(response=>{if(!response.ok)throw Error('目录读取失败');return response.json();}).then(catalog=>{entries=libraryEntries(catalog);library.refresh();}).catch(()=>notice('目录未载入：已实现牌仍可用，未实现编号暂用占位名称；刷新可重试'));
-if(import.meta.env.MODE==='private')void loadVisualPack(async()=>{const response=await fetch('./classic/visual-manifest.json');if(!response.ok)throw Error('资源包不可用');return response.json();}).then(applyArtwork);
+void fetch('./catalog.json').then(response=>{if(!response.ok)throw Error(t("couldNotReadTheCardCatalog"));return response.json();}).then(catalog=>{entries=libraryEntries(catalog);library.refresh();}).catch(()=>notice(t("couldNotLoadTheCatalogPlayableCardsAre")));
+if(import.meta.env.MODE==='private')void loadVisualPack(async()=>{const response=await fetch('./classic/visual-manifest.json');if(!response.ok)throw Error(t("artPackUnavailable"));return response.json();}).then(applyArtwork);

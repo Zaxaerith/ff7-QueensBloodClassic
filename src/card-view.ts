@@ -1,9 +1,14 @@
+import {getLocale, hasActiveLocale, translate} from './i18n/index.js';
+import {localizedName} from './i18n/card-names.js';
+import {describeAbilities, localizedStatus} from './i18n/abilities.js';
+import type {Locale} from './i18n/locales.js';
 // Shared presentation only. Values and patterns come from the caller's Card.
 import type {Card,Offset} from './cards.js';
 import type {CardVisual} from './visuals.js';
 import {CARD_FRAME,cardFrameStyle} from './card-frame.js';
 
 export interface CardViewOptions {
+  readonly locale?:Locale;
   readonly compact?:boolean;
   readonly lazy?:boolean;
   readonly variant?:'board'|'hand';
@@ -32,13 +37,15 @@ const pawn=()=>icon('pawn','M5 1h6v2h2v5h-2v3H5V8H3V3h2z M6 12h4v2h2v2h2v3H2v-3h
 const replacement=()=>icon('replacement','M5 1h6v9h4v2l-7 7-7-7v-2h4z');
 const ability=()=>`<svg class="qb-icon" viewBox="0 0 28 24" aria-hidden="true" focusable="false"><path d="M9 0h2v4h2v2h2v2h4v2h-4v2h-2v2h-2v5H9v-5H7v-2H5v-2H0V8h5V6h2V4h2z M22 11l2 4 4 2-4 2-2 4-2-4-4-2 4-2z"/></svg>`;
 const generatedOnly=(card:Card)=>card.rarity==='token'&&card.cost===0&&card.placement!=='replace';
-function rankMarkup(card:Card):string {
-  const replace=card.placement==='replace',generated=generatedOnly(card),label=replace?'替换 / Replacement':generated?'自动生成 / Generated':`放置等级 Rank ${card.cost}（格位要求）`;
-  return `<span class="qb-rank" data-rank="${replace?'replacement':generated?'generated':card.cost}" role="img" aria-label="${label}" title="${label}">${replace?replacement():Array.from({length:card.cost},pawn).join('')}</span>`;
+function rankMarkup(card:Card,locale:Locale|undefined):string {
+  const replace=card.placement==='replace',generated=generatedOnly(card),label=locale?translate(locale,replace?'replace':generated?'generated':'rankHint',card.cost)
+    :replace?'替换 / Replacement':generated?'自动生成 / Generated':'Rank '+card.cost;
+  return `<span class="qb-rank" data-rank="${replace?'replacement':generated?'generated':card.cost}" role="img" aria-label="${escape(label)}" title="${escape(label)}">${replace?replacement():Array.from({length:card.cost},pawn).join('')}</span>`;
 }
-function patternMarkup(card:Card,player:0|1):string {
+function patternMarkup(card:Card,player:0|1,locale:Locale|undefined):string {
   const cells=cardPatternCells(card,player).map(c=>`<span class="qb-cell${c.pawn?' qb-cell--pawn':''}${c.effect?' qb-cell--effect':''}${c.origin?' qb-cell--origin':''}" data-cell="${c.x},${c.y}"></span>`).join('');
-  return `<div class="qb-pattern" role="img" aria-label="5乘5格型，${player===0?'左':'右'}侧玩家视角；白格放置点，黄格占格范围，红框能力范围">${cells}</div>`;
+  const label=locale?translate(locale,'patternLabel',translate(locale,player===0?'leftSide':'rightSide')):'5×5 · '+(player+1);
+  return `<div class="qb-pattern" role="img" aria-label="${escape(label)}">${cells}</div>`;
 }
 
 export function renderCardMarkup(card:Card,visual:CardVisual,player:0|1=0,options:CardViewOptions={}):string {
@@ -51,25 +58,50 @@ export function renderCardMarkup(card:Card,visual:CardVisual,player:0|1=0,option
   if(!['neutral','enhanced','enfeebled'].includes(state))throw Error('Invalid displayed state');
   const stateText=state==='enhanced'?'强化':state==='enfeebled'?'弱化':'中性',markers=live?options.markers??[]:[];
   const status=[...(delta?[`${delta>0?'+':''}${delta}`]:[]),...(markers.length?['◆']:[])].join(' ');
-  const statusTitle=[`当前力量 ${current}，基础力量 ${card.power}，${stateText}`,...markers].join('；');
+  const locale=options.locale, name=locale?localizedName(card.id,card.name,locale):card.name;
+  const lang=locale??(/[\u3400-\u9fff]/u.test(name)?'zh':'en');
+  const localizedRank=locale?translate(locale,card.placement==='replace'?'replace':generatedOnly(card)?'generated':'playableRank',card.cost):'';
+  const currentLabel=locale?translate(locale,'currentPower',current):'当前力量 '+current;
+  const baseLabel=locale?translate(locale,'basePowerValue',card.power):'基础力量 '+card.power;
+  const stateLabel=locale?localizedStatus(state,locale):stateText;
+  const powerLabel=live?currentLabel:baseLabel;
+  const powerTitle=[currentLabel,baseLabel,stateLabel,...markers].join(' · ');
+  const abilityLabel=locale?translate(locale,'abilityMark'):'特殊能力，查看详情';
+  const missing=locale?translate(locale,'imageMissing'):'暂无立绘';
   const mode=options.variant??(options.compact?'compact':'full');
   const label=`${card.name}，${card.placement==='replace'?'替换':generatedOnly(card)?'自动生成':`放置等级 ${card.cost}`}，基础力量 ${card.power}${live?`，当前力量 ${current}，${stateText}`:''}`;
-  return `<div class="qb-card${mode==='full'?'':` qb-card--${mode}`}${card.rarity==='legendary'?' qb-card--legendary':''}" style="${cardFrameStyle()}" data-frame-version="${CARD_FRAME.version}" data-mode="${mode}" data-card-id="${card.id}" data-base-power="${card.power}" data-power-state="${state}" aria-label="${escape(label)}">
+  return `<div class="qb-card${mode==='full'?'':` qb-card--${mode}`}${card.rarity==='legendary'?' qb-card--legendary':''}" style="${cardFrameStyle()}" data-frame-version="${CARD_FRAME.version}" data-mode="${mode}" data-card-id="${card.id}" data-base-power="${card.power}" data-power-state="${state}" aria-label="${escape(locale?[name,localizedRank,baseLabel,...(live?[currentLabel,stateLabel]:[])].join(' · '):label)}">
     <div class="qb-hero${visual.portraitPath?'':' qb-art--missing'}"${options.lazy?' data-art-lazy':''}>
-      <span class="qb-placeholder" aria-label="暂无立绘">${escape(visual.placeholder.glyph)}</span>
-      ${visual.portraitPath?`<img class="qb-image"${options.lazy?' loading="lazy" decoding="async"':''} src="${escape(visual.portraitPath)}" alt="${escape(card.name)}">`:''}
+      <span class="qb-placeholder" aria-label="${escape(missing)}">${escape(visual.placeholder.glyph)}</span>
+      ${visual.portraitPath?`<img class="qb-image"${options.lazy?' loading="lazy" decoding="async"':''} src="${escape(visual.portraitPath)}" alt="${escape(name)}">`:''}
     </div>
-    ${rankMarkup(card)}
-    <span class="qb-power${String(current).length>2?' qb-power--wide':''}" aria-label="${live?'当前':'基础'}力量 ${current}" title="${escape(live?statusTitle:`基础力量 ${card.power}`)}"><b>${current}</b></span>
-    ${patternMarkup(card,player)}
-    ${cardHasAbility(card)?`<span class="qb-ability-mark" role="img" aria-label="特殊能力，查看详情" title="特殊能力，查看详情">${ability()}</span>`:''}
-    ${status?`<span class="qb-state" title="${escape(statusTitle)}">${escape(status)}</span>`:''}
-    <div class="qb-nameband"><span class="qb-name" lang="${/[\u3400-\u9fff]/u.test(card.name)?'zh':'en'}">${escape(card.name)}</span></div>
+    ${rankMarkup(card,locale)}
+    <span class="qb-power${String(current).length>2?' qb-power--wide':''}" aria-label="${escape(powerLabel)}" title="${escape(live?powerTitle:baseLabel)}"><b>${current}</b></span>
+    ${patternMarkup(card,player,locale)}
+    ${cardHasAbility(card)?`<span class="qb-ability-mark" role="img" aria-label="${escape(abilityLabel)}" title="${escape(abilityLabel)}">${ability()}</span>`:''}
+    ${status?`<span class="qb-state" title="${escape(powerTitle)}">${escape(status)}</span>`:''}
+    <div class="qb-nameband"><span class="qb-name" lang="${lang}" title="${escape(name)}"${name.length>24?' data-long-name':''}>${escape(name)}</span></div>
   </div>`;
 }
 
 /** Separate OG menu window. All activation paths read the same Card. */
-export function renderCardDetailsMarkup(card:Card,player:0|1=0):string {
+export function renderCardDetailsMarkup(card:Card,player:0|1=0,locale?:Locale):string {
+  if(locale){
+    const label=translate(locale,'cardDetails');
+    const name=localizedName(card.id,card.name,locale);
+    const rank=translate(locale,card.placement==='replace'?'replace':generatedOnly(card)?'generated':'rankValue',card.cost);
+    const notes=describeAbilities(card,locale);
+    if(card.placement==='replace')notes.unshift(translate(locale,'replacementHelp'));
+    else if(!generatedOnly(card))notes.unshift(translate(locale,'placementHelp',card.cost));
+    if(card.rarity==='token')notes.push(translate(locale,generatedOnly(card)?'generatedPlacementHelp':'tokenPlacementHelp'));
+    const code=card.rarity==='token'?translate(locale,'token')+' #'+card.id:'No. '+String(card.id).padStart(3,'0');
+    return `<section class="qb-details" data-card-id="${card.id}" data-base-power="${card.power}" aria-label="${escape(label)}">
+      <h3>${escape(code)} · ${escape(name)}</h3>
+      <dl class="qb-facts"><dt>${escape(translate(locale,'placement'))}</dt><dd>${escape(rank)}</dd><dt>${escape(translate(locale,'basePower'))}</dt><dd>${card.power}</dd></dl>
+      ${patternMarkup(card,player,locale)}<p class="qb-key">${escape(translate(locale,'patternKey'))}</p>
+      <div class="qb-description">${notes.map(note=>'<p>'+escape(note)+'</p>').join('')}</div>
+    </section>`;
+  }
   const triggers:Record<string,string>={aura:'持续生效',dynamic:'随场上状态更新',threshold:'首次达到力量阈值',onPlay:'入场时',onDestroy:'被摧毁时',onReplace:'被替换时',firstEnhanced:'首次强化时',firstEnfeebled:'首次弱化时',onCardPlayed:'其他牌从手牌出场时',onCardDestroyed:'其他牌被摧毁时',onCardAddedToHand:'其他牌加入手牌时'};
   const notes=[...new Set(card.abilities.map(a=>triggers[a.timing]))];
   if(card.placement==='replace')notes.unshift('摧毁一张友方牌并占据其位置；不要求普通棋子等级');
@@ -78,7 +110,7 @@ export function renderCardDetailsMarkup(card:Card,player:0|1=0):string {
   return `<section class="qb-details" data-card-id="${card.id}" data-base-power="${card.power}" aria-label="卡牌详情">
     <h3>${card.rarity==='token'?'TOKEN':'No. '+String(card.id).padStart(3,'0')} · ${escape(card.name)}</h3>
     <dl class="qb-facts"><dt>放置</dt><dd>${card.placement==='replace'?'Replacement / 替换':generatedOnly(card)?'Generated / 自动生成':`Rank ${card.cost}`}</dd><dt>基础力量</dt><dd>${card.power}</dd></dl>
-    ${patternMarkup(card,player)}<p class="qb-key">白格：放置位置 · 黄格：占格范围 · 红框：能力范围</p>
+    ${patternMarkup(card,player,undefined)}<p class="qb-key">白格：放置位置 · 黄格：占格范围 · 红框：能力范围</p>
     <p class="qb-description">${escape(card.description)}</p>
     ${notes.map(note=>`<p class="qb-trigger">${escape(note)}</p>`).join('')}
   </section>`;
@@ -92,9 +124,9 @@ export function bindCardArtwork(root:ParentNode):void {
   });
 }
 export function createCardView(card:Card,visual:CardVisual,options:CardViewOptions={}):HTMLElement {
-  const host=document.createElement('div');host.innerHTML=renderCardMarkup(card,visual,0,options);
+  const host=document.createElement('div');host.innerHTML=renderCardMarkup(card,visual,0,hasActiveLocale()?{locale:getLocale(),...options}:options);
   bindCardArtwork(host);return host.firstElementChild as HTMLElement;
 }
 export function createCardDetails(card:Card,player:0|1=0):HTMLElement {
-  const host=document.createElement('div');host.innerHTML=renderCardDetailsMarkup(card,player);return host.firstElementChild as HTMLElement;
+  const host=document.createElement('div');host.innerHTML=renderCardDetailsMarkup(card,player,hasActiveLocale()?getLocale():undefined);return host.firstElementChild as HTMLElement;
 }

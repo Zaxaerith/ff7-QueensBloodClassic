@@ -1,4 +1,6 @@
 // Public visual evidence only: never constructs an intermediate Game.
+import {t} from './i18n/index.js';
+import {displayName} from './i18n/card-names.js';
 import type {RuleEvent} from './engine.js';
 import type {PublicBatch,PublicMatch} from './match-presentation.js';
 import {byId} from './cards.js';
@@ -13,30 +15,30 @@ export interface MatchEffect {
   scoring?:{result:PublicMatch['result'];revealed:number;totals:boolean};
 }
 const location=(e:RuleEvent)=>e.row!==undefined&&e.col!==undefined&&e.row>=0&&e.row<3&&e.col>=0&&e.col<5;
-const name=(e:RuleEvent)=>byId.get(e.cardId??-1)?.name??'卡牌';
+const name=(e:RuleEvent)=>displayName(e.cardId??-1,byId.get(e.cardId??-1)?.name??t("card"));
 /** Only the card explicitly identified by its OWN trigger event is a known
  * source. PowerChanged.reason alone cannot identify the upstream source. */
 export function eventSource(e:RuleEvent):string|null {
   const timing=({CardPlayed:'onPlay',CardDestroyed:'onDestroy',CardEnhanced:'firstEnhanced',CardEnfeebled:'firstEnfeebled',ThresholdReached:'threshold'} as Record<string,string>)[e.type];
   if(!timing||!byId.get(e.cardId??-1)?.abilities.some(a=>a.timing===timing))return null;
-  return ({onPlay:'入场能力',onDestroy:'离场能力',firstEnhanced:'强化能力',firstEnfeebled:'弱化能力',threshold:'阈值能力'} as Record<string,string>)[timing];
+  return ({onPlay:t("onPlayAbility"),onDestroy:t("onDestructionAbility"),firstEnhanced:t("enhancementAbility"),firstEnfeebled:t("enfeeblementAbility"),threshold:t("thresholdAbility")} as Record<string,string>)[timing];
 }
 export function effectText(e:RuleEvent):string {
   const signed=(n:number)=>`${n>=0?'+':''}${n}`;
   switch(e.type){
-    case 'CardPlayed':return `${name(e)} 落牌 ${e.row!+1}-${e.col!+1}`;
-    case 'CardReplaced':return `替换旧牌 ${name(e)}`;
-    case 'CardDestroyed':return `${name(e)} ${e.reason==='replaced'?'被替换离场':'被摧毁'}`;
+    case 'CardPlayed':return t("playedCardAt", name(e), e.row!+1, e.col!+1);
+    case 'CardReplaced':return t("replacedCard", name(e));
+    case 'CardDestroyed':return `${name(e)} ${e.reason==='replaced'?t("replaced"):t("destroyed")}`;
     // These events record a rule modifier, not every intermediate displayed power.
-    case 'PowerChanged':return `${name(e)} 力量修正 ${signed(e.amount!)}`;
-    case 'DerivedPowerChanged':return `${name(e)} 持续/动态力量重算`;
-    case 'CardEnhanced':return `${name(e)} 首次强化${byId.get(e.cardId??-1)?.abilities.some(a=>a.timing==='firstEnhanced')?'能力触发':'状态'}`;
-    case 'CardEnfeebled':return `${name(e)} 首次弱化${byId.get(e.cardId??-1)?.abilities.some(a=>a.timing==='firstEnfeebled')?'能力触发':'状态'}`;
-    case 'ThresholdReached':return `${name(e)} 力量阈值触发`;
-    case 'CardSpawned':return `${name(e)} 生成于 ${e.row!+1}-${e.col!+1}`;
-    case 'PawnsClaimed':return `占格 ${e.row!+1}-${e.col!+1} · 记录等级 ${e.amount}`;
-    case 'CardAddedToHand':return e.player===1?`电脑${e.reason==='draw'?'补牌':'生成手牌'} 1 张`:e.reason==='draw'?'你补牌 1 张':`生成手牌 ${name(e)}`;
-    case 'TurnPassed':return `${e.player===0?'你':'电脑'} PASS`;
+    case 'PowerChanged':return t("cardPowerDelta", name(e), signed(e.amount!));
+    case 'DerivedPowerChanged':return t("cardDerivedPowerChanged", name(e));
+    case 'CardEnhanced':return t("firstEnhancementEvent", name(e), byId.get(e.cardId??-1)?.abilities.some(a=>a.timing==='firstEnhanced')?t("abilityTriggered"):t("statusApplied"));
+    case 'CardEnfeebled':return t("firstEnfeeblementEvent", name(e), byId.get(e.cardId??-1)?.abilities.some(a=>a.timing==='firstEnfeebled')?t("abilityTriggered"):t("statusApplied"));
+    case 'ThresholdReached':return t("thresholdTriggeredEvent", name(e));
+    case 'CardSpawned':return t("cardSpawnedEvent", name(e), e.row!+1, e.col!+1);
+    case 'PawnsClaimed':return t("pawnsAtPosition", e.row!+1, e.col!+1, e.amount);
+    case 'CardAddedToHand':return e.player===1?t("computerHandEvent", e.reason==='draw'?t("drew"):t("generatedInHand")):e.reason==='draw'?t("youDrewOneCard"):t("playerHandGeneration", name(e));
+    case 'TurnPassed':return `${e.player===0?t("you"):t("computer")} · ${t("pass")}`;
     default:return '';
   }
 }
@@ -48,7 +50,7 @@ export function netChanges(before:PublicMatch,after:PublicMatch):CellChange[]{
       const delta=b.card.power-a.card.power;
       changes.push({row,col,kind:'power',delta,text:`${a.card.power} → ${b.card.power} (${delta>0?'+':''}${delta})`});
     }else if(!a.card&&!b.card&&(a.owner!==b.owner||a.pawns!==b.pawns)){
-      const label=(t:typeof a)=>t.owner===null?'空格':`${t.owner===0?'你':'电脑'} ♟${t.pawns}`;
+      const label=(tile:typeof a)=>tile.owner===null?t("emptyTile"):`${tile.owner===0?t("you"):t("computer")} ♟${tile.pawns}`;
       changes.push({row,col,kind:'pawns',delta:b.pawns-a.pawns,text:`${label(a)} → ${label(b)}`});
     }
   }

@@ -1,3 +1,5 @@
+import {getLocale,t} from './i18n/index.js';
+import {displayName} from './i18n/card-names.js';
 import {byId, type Card} from './cards.js';
 import {createCardDetails, createCardView} from './card-view.js';
 import {deckCardAvailability, type LibraryEntry} from './ui-data.js';
@@ -9,7 +11,7 @@ export const cardNumber = (id: number) => `#${String(id).padStart(3, '0')}`;
 export function browseCard(entry: LibraryEntry, face: HTMLElement, focus: () => void, activate: () => void) {
   const item = button('', activate, 'd4-card-button');
   item.dataset.cardId = String(entry.id);
-  item.setAttribute('aria-label', `${cardNumber(entry.id)} ${face.getAttribute('aria-label') ?? entry.name}，查看信息`);
+  item.setAttribute('aria-label', t("inspectCardLabel", cardNumber(entry.id), face.getAttribute('aria-label') ?? entry.name));
   item.onfocus = focus;
   item.append(face);
   return item;
@@ -32,8 +34,8 @@ export function renderDeckSlots(
       control.dataset.slot = String(slot);
       item.append(control, element('span', 'd4-slot-code', cardNumber(card.id)));
     } else {
-      const empty = element('div', 'd4-empty-slot', '空位');
-      empty.setAttribute('aria-label', `第 ${slot + 1} 槽，空位`);
+      const empty = element('div', 'd4-empty-slot', t("empty"));
+      empty.setAttribute('aria-label', t("emptyDeckSlot", slot + 1));
       item.append(empty);
     }
     host.append(item);
@@ -62,13 +64,15 @@ export function mountDeckInspector(
 ) {
   let current: LibraryEntry | undefined;
   let rendered: Card | null | undefined;
+  let renderedLocale: string;
   const body = element('div', 'd4-inspector-body');
   const count = element('p', 'd4-copy-count');
   const reason = element('p', 'warning d4-limit');
   const controls = element('div', 'button-row d4-inspector-actions');
-  const details = button('完整资料', () => { if (current) showCard(current.id); });
-  const add = button('加入一张', () => { if (current) edits?.add(current.id); }, 'primary');
-  const remove = button('移除一张', () => edits?.remove());
+  const details = button(t("fullDetails"), () => { if (current) showCard(current.id); });
+  details.dataset.cardDetails = '';
+  const add = button(t("addOne"), () => { if (current) edits?.add(current.id); }, 'primary');
+  const remove = button(t("removeOne"), () => edits?.remove());
   if (edits) {
     add.id = 'deckAdd';
     remove.id = 'deckRemove';
@@ -79,23 +83,24 @@ export function mountDeckInspector(
 
   return {
     update(entry: LibraryEntry | undefined, cards: readonly number[]) {
-      if (entry?.id !== current?.id || entry?.card !== rendered || !body.firstChild) {
-        rendered = entry?.card;
+      details.textContent=t('fullDetails');add.textContent=t('addOne');remove.textContent=t('removeOne');
+      const locale=getLocale();
+      if (renderedLocale!==locale || entry?.id !== current?.id || entry?.card !== rendered || !body.firstChild) {
+        rendered = entry?.card;renderedLocale=locale;
         body.replaceChildren();
         if (entry?.card) {
           const detail = createCardDetails(entry.card);
-          if (entry.card.placement === 'replace') detail.querySelector('dd')!.textContent = '替换己方牌';
-          if (entry.rarity === 'token') detail.querySelector('h3')!.textContent = `衍生 ${cardNumber(entry.id)} · ${entry.name}`;
-          detail.querySelector<HTMLElement>('.qb-description')!.title = entry.card.description;
+          if (entry.card.placement === 'replace') detail.querySelector('dd')!.textContent = t("replaceAnAlliedCard");
+          if (entry.rarity === 'token') detail.querySelector('h3')!.textContent = t("tokenDetailsHeading", cardNumber(entry.id), displayName(entry.id,entry.name));
           body.append(detail);
         } else {
-          body.append(element('p', 'muted', entry ? `${cardNumber(entry.id)} ${entry.name} · 资料未载入` : '选择一张卡牌查看信息。'));
+          body.append(element('p', 'muted', entry ? t("cardDataMissing", cardNumber(entry.id), displayName(entry.id,entry.name)) : t("selectACardToViewItsDetails")));
         }
       }
       current = entry;
       const availability = entry ? deckCardAvailability(cards, entry.id) : null;
       count.hidden = !availability;
-      count.textContent = availability ? `已入组 ${availability.count} 张${edits ? ` · 可再加入 ${availability.available} 张` : ''}` : '';
+      count.textContent = availability ? t("deckCopyCounts", availability.count, edits ? t("copiesAvailableSuffix", availability.available) : '') : '';
       reason.hidden = !edits || !availability?.reason;
       reason.textContent = availability?.reason ?? '';
       const focused = document.activeElement;

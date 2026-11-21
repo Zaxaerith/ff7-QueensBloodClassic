@@ -1,4 +1,8 @@
-import {deckPresets} from './cards.js';
+import {getLocale,t} from './i18n/index.js';
+import {localizeEvidenceNote} from './i18n/research-text.js';
+import {displayName,termRecord} from './i18n/card-names.js';
+import {deckLabel,presetName} from './i18n/game-labels.js';
+import {byId,deckPresets} from './cards.js';
 import {createCardView,createCardDetails} from './card-view.js';
 import {getCardEvidence,evidenceDimensions} from './evidence.js';
 import type {CardVisual} from './visuals.js';
@@ -11,9 +15,9 @@ export interface LibraryHooks {
   entries:()=>LibraryEntry[];visual:(id:number)=>CardVisual;decks:()=>DeckStore;
   save:(data:DeckStore)=>boolean;choose:(deck:SavedDeck)=>void;
 }
-const rarity=(value:string|null)=>value==='legendary'?'传奇':value==='token'?'衍生':value==='standard'?'普通':'类别待核实';
-const dimensionNames=['编号与稀有度','等级与力量','占格格型','能力格型','技能效果','复杂时序','项目实现'];
-const statusNames={verified:'已核对（见范围）',candidate:'候选',conflict:'资料冲突',missing:'缺少资料'};
+const rarity=(value:string|null)=>value==='legendary'?t("legendary"):value==='token'?t("token"):value==='standard'?t("normal"):t("rarityPendingReview");
+const dimensionNames=()=>[t("numberAndRarity"),t("rankAndBasePower"),t("territoryPattern"),t("abilityPattern"),t("abilityEffects"),t("triggerOrder"),t("projectImplementation")];
+const statusNames=()=>({verified:t("checkedSeeScope"),candidate:t("candidate"),conflict:t("conflictingSources"),missing:t("evidenceMissing")});
 export function mountLibrary(hooks:LibraryHooks){
   const copyDeck = (deck: SavedDeck): SavedDeck => ({...deck, cards: [...deck.cards]});
   const editor = $('view-decks');
@@ -33,45 +37,54 @@ export function mountLibrary(hooks:LibraryHooks){
   function unavailable(entry:LibraryEntry){
     const root=element('div','unavailable-card'),visual=hooks.visual(entry.id),facts=getCardEvidence(entry.id).knownFacts;
     const hero=element('div','unknown-hero',visual.placeholder.glyph);
-    if(visual.portraitPath){const image=element('img');image.src=visual.portraitPath;image.alt=entry.name;image.onerror=()=>image.replaceWith(document.createTextNode(visual.placeholder.glyph));hero.replaceChildren(image);}
-    root.append(hero,element('h3','',`#${String(entry.id).padStart(3,'0')} ${entry.name}`),element('p','',facts?`等级 ${facts.cost} · 力量 ${facts.power} · ${rarity(entry.rarity)}`:'牌面资料暂未载入'),element('p','warning','未实现 · 不可加入当前对局'));
-    if(facts){const grid=element('div','qb-pattern');grid.setAttribute('aria-label','5乘5母牌占格为空，衍生能力格型未知');
+    if(visual.portraitPath){const image=element('img');image.src=visual.portraitPath;image.alt=displayName(entry.id,entry.name);image.onerror=()=>image.replaceWith(document.createTextNode(visual.placeholder.glyph));hero.replaceChildren(image);}
+    root.append(hero,element('h3','',`#${String(entry.id).padStart(3,'0')} ${displayName(entry.id,entry.name)}`),element('p','',facts?t("knownCardFacts", facts.cost, facts.power, rarity(entry.rarity)):t("cardDataUnavailable")),element('p','warning',t("unavailableForPlay")));
+    if(facts){const grid=element('div','qb-pattern');grid.setAttribute('aria-label',t("emptyTerritoryPatternTheGeneratedCardsAbilityPattern"));
       for(let i=0;i<25;i++)grid.append(element('span','qb-cell'+(i===12?' qb-cell--origin':''),i===12?'◆':''));
-      root.append(grid,element('p','muted','母牌无占格；衍生能力格型仍缺资料'),element('p','',facts.effect));}
+      root.append(grid,element('p','muted',t("theParentCardClaimsNoTilesEvidenceFor")),element('p','',localizeEvidenceNote(facts.effect)));}
     return root;
   }
   function showCard(id:number){
     const entry=entryFor(id);if(!entry)return;
-    const root=element('div','card-detail'),face=entry.card?createCardView(entry.card,hooks.visual(id)):unavailable(entry);
+    const readingView=['collection','replay','carnival'].includes($('app').dataset.view??'');
+    const root=element('div',readingView?'card-detail frame-card-detail':'card-detail');
+    const face=entry.card?createCardView(entry.card,hooks.visual(id)):unavailable(entry);
     const notes=element('div','card-notes');
     if(entry.card)notes.append(createCardDetails(entry.card));
-    notes.append(element('p','',`${rarity(entry.rarity)} · ${entry.card?'规则候选，可用于当前版本':'尚未实现'}`));
+    notes.append(element('p','',`${rarity(entry.rarity)} · ${entry.card?t("playableRulesCandidate"):t("notImplemented")}`));
     if(id<=145){
-      const evidence=getCardEvidence(id);notes.append(element('p','muted','证据可靠程度与项目测试分开记录，不代表完整实机核验。'));
+      const evidence=getCardEvidence(id);notes.append(element('p','muted',t("ruleEvidenceScope")));
       const list=element('dl','evidence-list');
-      evidenceDimensions.forEach((key,i)=>{const data=evidence.dimensions[key];list.append(element('dt','',`${dimensionNames[i]} · ${statusNames[data.status]}`),element('dd','',`${data.scope==='project'?'本项目范围：':''}${data.note}`));});
-      notes.append(list);for(const issue of evidence.issues)notes.append(element('p','warning',issue));
-    }else notes.append(element('p','muted',`衍生卡由对局能力生成，不属于${hooks.entries().length}张编号收藏，不能组入初始牌库。`));
-    root.append(face,notes);openDialog(entry.name,root);
+      evidenceDimensions.forEach((key,i)=>{const data=evidence.dimensions[key];list.append(element('dt','',`${dimensionNames()[i]} · ${statusNames()[data.status]}`),element('dd','',`${data.scope==='project'?t("projectEvidence"):''}${localizeEvidenceNote(data.note)}`));});
+      notes.append(list);for(const issue of evidence.issues)notes.append(element('p','warning',localizeEvidenceNote(issue)));
+    }else notes.append(element('p','muted',t("tokenCollectionHelp", hooks.entries().length)));
+    const source=termRecord(id,getLocale());
+    if(source){
+      const link=element('a','',t('reference'));link.href=source.sourceUrl;link.target='_blank';link.rel='noopener noreferrer';
+      const status=t(source.status==='guide'?'guideNameStatus':source.status==='official'?'officialNameStatus':source.status==='fallback'?'fallbackNameStatus':'provisionalNameStatus');
+      const label=element('p','muted',status+' · ');label.append(link);notes.append(label);
+    }
+    root.append(face,notes);openDialog(displayName(id,entry.name),root);
   }
-  function filters(host:HTMLElement,state:FilterState,refresh:()=>void){
-    const search=element('input');search.type='search';search.placeholder='编号 / 名称';search.setAttribute('aria-label','搜索卡牌编号或名称');
+  function filters(host:HTMLElement,state:FilterState,refresh:()=>void,searchHost=host){
+    host.replaceChildren();
+    const search=element('input');search.value=state.query;search.type='search';search.placeholder=t("numberOrName");search.setAttribute('aria-label',t("searchByCardNumberOrName"));
     search.oninput=()=>{state.query=search.value;refresh();};
     const fields:readonly [keyof FilterState,string,readonly (readonly [string,string])[]][]=[
-      ['rank','等级',[['all','全部等级'],['0','替换'],['1','等级 1'],['2','等级 2'],['3','等级 3']]],
-      ['power','力量',[['all','全部力量'],['low','力量 0–2'],['mid','力量 3–5'],['high','力量 6+']]],
-      ['rarity','类别',[['all','全部类别'],['standard','普通'],['legendary','传奇']]],
-      ['ability','能力',[['all','全部能力'],['none','无能力'],['entry','入场'],['aura','持续 / 动态'],['death','摧毁 / 替换'],['generate','生成'],['condition','首次 / 阈值'],['special','计分 / 占格']]],
-      ['sort','排序',[['id','按编号'],['name','按名称'],['rank','等级 ↑'],['power','力量 ↓']]]];
-    host.append(search);
-    for(const [key,label,rows] of fields){const select=element('select');select.setAttribute('aria-label',label);options(select,rows);select.onchange=()=>{Object.assign(state,{[key]:select.value});refresh();};host.append(select);}
+      ['rank',t("rank"),[['all',t("allRanks")],['0',t("replace")],['1',t("rank1")],['2',t("rank2")],['3',t("rank3")]]],
+      ['power',t("power"),[['all',t("anyPower")],['low',t("power02")],['mid',t("power35")],['high',t("power6")]]],
+      ['rarity',t("rarity"),[['all',t("allRarities")],['standard',t("normal")],['legendary',t("legendary")]]],
+      ['ability',t("ability"),[['all',t("allAbilities")],['none',t("noAbility2")],['entry',t("onPlay")],['aura',t("continuousDynamic")],['death',t("destroyReplace")],['generate',t("generate")],['condition',t("firstTriggerThreshold")],['special',t("scoringTerritory")]]],
+      ['sort',t("sort"),[['id',t("cardNumber")],['name',t("name")],['rank',t("rank4")],['power',t("power2")]]]];
+    searchHost.replaceChildren(search);
+    for(const [key,label,rows] of fields){const select=element('select');select.dataset.filter=key;select.setAttribute('aria-label',label);options(select,rows);select.value=String(state[key as keyof typeof state]);select.onchange=()=>{Object.assign(state,{[key]:select.value});refresh();};host.append(select);}
   }
   function pager(host:HTMLElement,page:number,total:number,change:(page:number)=>void,size=16){
-    const count=Math.max(1,Math.ceil(total/size)),previous=button('← 上页',()=>change(page-1)),next=button('下页 →',()=>change(page+1));
+    const count=Math.max(1,Math.ceil(total/size)),previous=button(t("previous"),()=>change(page-1)),next=button(t("next"),()=>change(page+1));
     const active = document.activeElement;
     const restore = active instanceof HTMLButtonElement && host.contains(active) ? active.dataset.pageDirection : undefined;
     previous.dataset.pageDirection = 'previous'; next.dataset.pageDirection = 'next';
-    previous.disabled=page===0;next.disabled=page+1>=count;host.replaceChildren(previous,element('span','',`${page+1} / ${count} · ${total} 张`),next);
+    previous.disabled=page===0;next.disabled=page+1>=count;host.replaceChildren(previous,element('span','',t("pagination", page+1, count, total)),next);
     if (restore) {
       const preferred = restore === 'previous' ? previous : next;
       const other = preferred === previous ? next : previous;
@@ -82,37 +95,49 @@ export function mountLibrary(hooks:LibraryHooks){
   function refreshCollection(){
     const showTokens=$<HTMLSelectElement>('collectionKind').value==='tokens',all=showTokens?tokens:hooks.entries();
     const rows=sortLibraryEntries(all.filter(e=>matchesEntry(e,collectionFilter)),collectionFilter.sort);collectionPage=Math.min(collectionPage,Math.max(0,Math.ceil(rows.length/16)-1));
-    $('collectionCount').textContent=showTokens?`衍生卡 ${all.length} 种 · 不计入${hooks.entries().length}张编号牌`:libraryRuleSummary(all);
-    $<HTMLSelectElement>('collectionKind').querySelector<HTMLOptionElement>('option[value="numbered"]')!.textContent=`${hooks.entries().length} 张编号牌`;
-    const grid=$('collectionGrid');grid.replaceChildren();
+    $('collectionCount').textContent=showTokens?t("tokenCollectionCount", all.length, hooks.entries().length):libraryRuleSummary(all);
+    $<HTMLSelectElement>('collectionKind').querySelector<HTMLOptionElement>('option[value="numbered"]')!.textContent=t("numberedCardCount", hooks.entries().length);
+    const grid=$('collectionGrid'),active=document.activeElement;
+    const focusedId=active instanceof HTMLButtonElement&&grid.contains(active)?active.dataset.collectionId:undefined;
+    grid.replaceChildren();
     for(const entry of rows.slice(collectionPage*16,collectionPage*16+16)){
-      const item=button('',()=>showCard(entry.id),'collection-card');item.setAttribute('aria-label',`查看 #${entry.id} ${entry.name}`);
-      item.append(entry.card?createCardView(entry.card,hooks.visual(entry.id),{lazy:true}):unavailable(entry));grid.append(item);
+      const item=button('',()=>showCard(entry.id),'collection-card');item.setAttribute('aria-label',t("viewCardById", entry.id, displayName(entry.id,entry.name)));
+      item.dataset.collectionId=String(entry.id);
+      item.append(entry.card?createCardView(entry.card,hooks.visual(entry.id),{lazy:true}):unavailable(entry));
+      if(entry.card)item.append(element('span','frame-card-number',cardNumber(entry.id)));
+      grid.append(item);
+      if(item.dataset.collectionId===focusedId)item.focus({preventScroll:true});
     }
-    if(!rows.length)grid.append(element('p','empty','没有符合筛选条件的卡牌'));
+    if(!rows.length)grid.append(element('p','empty',t("noCardsMatchYourFilters")));
     pager($('collectionPager'),collectionPage,rows.length,page=>{collectionPage=page;refreshCollection();});
   }
   function refreshMenu(){
     const menu = $<HTMLSelectElement>('savedDecks');
     const saved = hooks.decks().decks;
-    options(menu, [['', '新卡组 / 预设'], ...saved.map(d => [d.id, d.name] as const)]);
+    options(menu, [['', t("newDeckPreset")], ...saved.map(d => [d.id, d.name] as const)]);
     menu.value = saved.some(deck => deck.id === draft.id) ? draft.id : '';
+    renderBank($('editorDeckBank'),draft,requestLoad);
   }
   const deckInspector = mountDeckInspector($('deckInfo'), showCard, {add, remove});
   const homeInspector = mountDeckInspector($('homeDeckInfo'), showCard);
   const paneHeadings = {slots: 'deckSlotsTitle', library: 'deckLibraryTitle', info: 'deckInfoTitle'} as const;
 
-  function revealHeading(id: string) {
-    const heading = $(id);
-    heading.focus({preventScroll: true});
-    heading.scrollIntoView({block: 'nearest'});
+  function reveal(target: HTMLElement) {
+    target.focus({preventScroll: true});
+    target.scrollIntoView({block: 'nearest'});
   }
-  function setPane(pane: keyof typeof paneHeadings, reveal = false) {
+  function setPane(pane: keyof typeof paneHeadings, focusPanel = false) {
     editor.dataset.deckPane = pane;
     editor.querySelectorAll<HTMLButtonElement>('[data-deck-tab]').forEach(tab => {
       tab.setAttribute('aria-pressed', String(tab.dataset.deckTab === pane));
     });
-    if (reveal && mobileEditor.matches) revealHeading(paneHeadings[pane]);
+    if (focusPanel && mobileEditor.matches) {
+      const panel=editor.querySelector<HTMLElement>(`[data-deck-panel="${pane}"]`)!;
+      const target=panel.querySelector<HTMLElement>('.d4-card-button[aria-pressed=true]')
+        ?? panel.querySelector<HTMLElement>('.d4-card-button, .d4-inspector-actions button:not(:disabled)')
+        ?? $(paneHeadings[pane]);
+      reveal(target);
+    }
   }
   function focusedEntry() {
     if (!deckFocus) return undefined;
@@ -134,19 +159,20 @@ export function mountLibrary(hooks:LibraryHooks){
   }
   function refreshEditorStatus() {
     const name = $<HTMLInputElement>('deckName');
-    if (document.activeElement !== name) name.value = draft.name;
-    $('deckSummary').textContent = `${draft.cards.length} / 15 张${dirty ? ' · 未保存' : ''}`;
+    if (document.activeElement !== name) name.value = deckLabel(draft);
+    $('deckSummary').textContent = t("draftCardCount", draft.cards.length, dirty ? t("unsavedSuffix") : '');
     const error = validateDeck(draft.cards);
+    $('deckSummary').dataset.valid=String(!error);
     const save = $<HTMLButtonElement>('saveDeck');
     const use = $<HTMLButtonElement>('useDeck');
-    const nameError = name.value.trim() ? null : '请填写卡组名称';
+    const nameError = name.value.trim() ? null : t("enterADeckName");
     save.disabled = !!error || !!nameError;
     use.disabled = !!error;
     const incomplete = error && draft.cards.length < 15;
-    $('deckValidation').textContent = incomplete ? `还需 ${15 - draft.cards.length} 张才可使用`
-      : error ? `尚不可用于对局：${error}` : '卡组合法 · 普通最多2张，传奇最多1张';
-    save.title = nameError ?? error ?? '保存到此浏览器';
-    use.title = error ?? '在主菜单使用这套卡组';
+    $('deckValidation').textContent = incomplete ? t("cardsNeeded", 15 - draft.cards.length)
+      : error ? t("invalidDeckReason", error) : t("validDeckUpToTwoCopiesPerStandard");
+    save.title = nameError ?? error ?? t("saveInThisBrowser");
+    use.title = error ?? t("useThisDeckInTheMainMenu");
     $<HTMLButtonElement>('revertDeck').disabled = !dirty;
     $<HTMLButtonElement>('deleteDeck').disabled = !hooks.decks().decks.some(d => d.id === draft.id);
   }
@@ -155,7 +181,15 @@ export function mountLibrary(hooks:LibraryHooks){
     const active = document.activeElement;
     const slot = active instanceof HTMLButtonElement && $('deckSlots').contains(active) ? active.dataset.slot : undefined;
     renderDeckSlots($('deckSlots'), draft.cards, hooks.visual, (index, activate) => focusEditor({source: 'slots', slot: index}, activate));
-    if (slot !== undefined) $('deckSlots').querySelector<HTMLButtonElement>(`[data-slot="${slot}"]`)?.focus({preventScroll: true});
+    if (slot !== undefined) {
+      const next=Math.min(Number(slot),draft.cards.length-1);
+      const targets=[
+        $('deckSlots').querySelector<HTMLElement>(`[data-slot="${next}"]`),
+        $('deckCards').querySelector<HTMLElement>('.d4-card-button'),
+        editor.querySelector<HTMLElement>('[data-deck-tab=library]'),
+      ];
+      targets.find(target=>target?.getClientRects().length)?.focus({preventScroll:true});
+    }
     updateEditorFocus();
   }
   function updateLibraryAvailability() {
@@ -165,8 +199,8 @@ export function mountLibrary(hooks:LibraryHooks){
       const reason = addReason(draft.cards, id);
       item.dataset.inDeck = String(count > 0);
       item.dataset.blocked = String(!!reason);
-      item.querySelector('.d4-library-status')!.textContent = count ? `已入组 ×${count}` : reason ? '不可加入' : '可加入';
-      item.querySelector<HTMLButtonElement>('button')!.title = reason ?? '查看卡牌信息';
+      item.querySelector('.d4-library-status')!.textContent = count ? t("copiesInDeckBadge", count) : reason ? t("unavailable") : t("available");
+      item.querySelector<HTMLButtonElement>('button')!.title = reason ?? t("viewCardInformation");
     });
   }
   function edited() {
@@ -217,7 +251,7 @@ export function mountLibrary(hooks:LibraryHooks){
     if (!deckFocus || activeId !== undefined && !page.some(entry => entry.id === activeId)) {
       deckFocus = page[0] ? {source: 'library', id: page[0].id} : undefined;
     }
-    if (!page.length) list.append(element('p', 'empty', '没有符合条件的卡牌'));
+    if (!page.length) list.append(element('p', 'empty', t("noCardsMatchYourFilters2")));
     if (focusedId) list.querySelector<HTMLButtonElement>(`button[data-card-id="${focusedId}"]`)?.focus({preventScroll: true});
     updateLibraryAvailability();
     updateEditorFocus();
@@ -238,21 +272,55 @@ export function mountLibrary(hooks:LibraryHooks){
   function requestLoad(deck:SavedDeck){
     if(!dirty){load(deck);return;}
     refreshMenu();
-    const content=element('div');content.append(element('p','','当前卡组有未保存修改。载入其他卡组会替换草稿。'),button('保留草稿',closeDialog),button('载入其他卡组',()=>{closeDialog();load(deck);}));openDialog('切换卡组',content);
+    const content=element('div');content.append(element('p','',t("thisDeckHasUnsavedChangesLoadingAnotherDeck")),button(t("keepDraft"),closeDialog),button(t("loadAnotherDeck"),()=>{closeDialog();load(deck);}));openDialog(t("switchDecks"),content);
+  }
+  function renderBank(host:HTMLElement,selected:SavedDeck,choose:(deck:SavedDeck)=>void) {
+    const bank=[...hooks.decks().decks,...deckPresets.map((_,index)=>presetDeck(index))].slice(0,6);
+    const focused=host.contains(document.activeElement)?(document.activeElement as HTMLElement).dataset.deckSlot:undefined;
+    host.replaceChildren(...Array.from({length:6},(_,index)=>{
+      const deck=bank[index],number=String(index+1);
+      const option=deck??{id:`quick-empty:${number}`,name:t('newDeck'),cards:[]};
+      const slot=button(number,()=>choose(option),'frame-deck-slot');
+      slot.dataset.deckSlot=number;
+      slot.toggleAttribute('data-empty',!deck);
+      slot.title=deck?deckLabel(deck):t('empty2');
+      slot.setAttribute('aria-label',number+' · '+slot.title);
+      slot.setAttribute('aria-pressed',String(option.id===selected.id));
+      return slot;
+    }));
+    if(focused)host.querySelector<HTMLElement>(`[data-deck-slot="${focused}"]:not(:disabled)`)?.focus({preventScroll:true});
+  }
+  function showSavedDecks(choose:(deck:SavedDeck)=>void) {
+    const rows=element('div','frame-option-list');
+    const saved=hooks.decks().decks;
+    if(!saved.length)rows.append(element('p','muted',t('empty2')));
+    for(const deck of saved)rows.append(button(deckLabel(deck),()=>{closeDialog();choose(deck);}));
+    openDialog(t('savedDecks'),rows);
+    rows.querySelector('button')?.focus({preventScroll:true});
   }
   function showHomeDeck(deck: SavedDeck) {
     if (homeDeck?.id !== deck.id || homeSlot >= deck.cards.length) homeSlot = 0;
     homeDeck = deck;
     const current = $('currentDeck');
-    current.textContent = deck.name;
-    $('currentDeckCount').textContent = `${deck.cards.length} / 15 张 · 双方同牌组`;
+    current.textContent = deckLabel(deck);
+    $('currentDeckCount').textContent = t("deckCardCount", deck.cards.length);
+    const start=$<HTMLButtonElement>('startGame'),problem=validateDeck(deck.cards);
+    const status=$('currentDeckStatus');
+    status.textContent=problem??'';
+    status.hidden=!problem;
+    $('currentDeckCount').dataset.valid=String(!problem);
+    const starting=document.activeElement===start;
+    start.disabled=Boolean(problem);
+    start.title=problem??'';
     const menu = $<HTMLSelectElement>('homeDeckSelect');
     const saved = hooks.decks().decks;
     const selected = saved.find(item => item.id === deck.id && item.name === deck.name && item.cards.length === deck.cards.length && item.cards.every((id, i) => id === deck.cards[i]));
-    options(menu, [...(selected ? [] : [['', deck.name] as const]), ...saved.map(item => [item.id, item.name] as const)]);
+    options(menu, [...(selected ? [] : [['', deckLabel(deck)] as const]), ...saved.map(item => [item.id, item.name] as const)]);
     menu.value = selected?.id ?? '';
     menu.hidden = saved.length === 0;
-    current.hidden = !menu.hidden;
+    current.hidden = false;
+    renderBank($('prepareDeckBank'),deck,hooks.choose);
+    if(problem&&starting)$('prepareDeckBank').querySelector<HTMLElement>('[aria-pressed=true]')?.focus({preventScroll:true});
     const host = $('homeDeckSlots');
     const active = document.activeElement;
     const focusedSlot = active instanceof HTMLButtonElement && host.contains(active) ? active.dataset.slot : undefined;
@@ -260,7 +328,7 @@ export function mountLibrary(hooks:LibraryHooks){
       homeSlot = slot;
       homeInspector.update(entryFor(deck.cards[slot]), deck.cards);
       host.querySelectorAll<HTMLButtonElement>('.d4-card-button').forEach(node => node.setAttribute('aria-pressed', String(Number(node.dataset.slot) === slot)));
-      if (activate && mobileHome.matches) revealHeading('homeDeckInfoTitle');
+      if (activate && mobileHome.matches) reveal($('homeDeckInfoTitle'));
     }
     renderDeckSlots(host, deck.cards, hooks.visual, select);
     select(homeSlot, false);
@@ -272,53 +340,82 @@ export function mountLibrary(hooks:LibraryHooks){
     if (!dirty) load(deck);
     hooks.choose(deck);
   };
+  $('prepareSavedDecks').onclick=()=>showSavedDecks(hooks.choose);
+  $('editorSavedDecks').onclick=()=>showSavedDecks(requestLoad);
   for (const id of ['homeDeckSlots', 'deckSlots', 'deckCards']) bindDeckGridKeys($(id));
   editor.querySelectorAll<HTMLButtonElement>('[data-deck-tab]').forEach(tab => {
     tab.onclick = () => setPane(tab.dataset.deckTab as keyof typeof paneHeadings, true);
   });
-  filters($('deckFilters'),deckFilter,()=>{deckPage=0;refreshDeckCards();});
-  filters($('collectionFilters'),collectionFilter,()=>{collectionPage=0;refreshCollection();});
+  function localize(){
+    filters($('deckFilters'),deckFilter,()=>{deckPage=0;refreshDeckCards();},$('deckSearch'));
+    filters($('collectionFilters'),collectionFilter,()=>{collectionPage=0;refreshCollection();});
+    const template=$<HTMLSelectElement>('deckTemplate'),selection=template.value;
+    options(template,deckPresets.map((_,i)=>[String(i),presetName(i)]));
+    template.value=selection||'0';
+    if(homeDeck)showHomeDeck(homeDeck);
+    if(!editor.hidden)showDecks();
+    if(!$('view-collection').hidden)refreshCollection();
+  }
   $('deckKind').onchange = () => {
     deckPage = 0;
     deckFilter.rarity = 'all';
-    $('deckFilters').querySelector<HTMLSelectElement>('select[aria-label="类别"]')!.value = 'all';
+    $('deckFilters').querySelector<HTMLSelectElement>('select[data-filter="rarity"]')!.value = 'all';
     refreshDeckCards();
   };
-  $('collectionKind').onchange=()=>{collectionPage=0;collectionFilter.rarity='all';const rarityMenu=$('collectionFilters').querySelector<HTMLSelectElement>('select[aria-label="类别"]');if(rarityMenu)rarityMenu.value='all';refreshCollection();};
+  $('collectionKind').onchange=()=>{collectionPage=0;collectionFilter.rarity='all';const rarityMenu=$('collectionFilters').querySelector<HTMLSelectElement>('select[data-filter="rarity"]');if(rarityMenu)rarityMenu.value='all';refreshCollection();};
   $('savedDecks').onchange=()=>{const deck=hooks.decks().decks.find(d=>d.id===$<HTMLSelectElement>('savedDecks').value);if(deck)requestLoad(deck);};
-  options($<HTMLSelectElement>('deckTemplate'),deckPresets.map((d,i)=>[String(i),d.name]));
-  $('loadTemplate').onclick=()=>requestLoad(presetDeck(Number($<HTMLSelectElement>('deckTemplate').value)));
-  $('newDeck').onclick=()=>requestLoad({id:'',name:'新卡组',cards:[]});
+  $('loadTemplate').onclick=()=>{
+    const content=element('div','frame-preset-preview'), choices=element('div','frame-option-list');
+    const preview=element('div','d4-deck-grid'),apply=button(t('loadPreset'),()=>{closeDialog();requestLoad(selected);},'primary');
+    let selected=presetDeck(Number($<HTMLSelectElement>('deckTemplate').value));
+    function choose(index:number) {
+      selected=presetDeck(index);
+      $<HTMLSelectElement>('deckTemplate').value=String(index);
+      choices.querySelectorAll('button').forEach((node,i)=>node.setAttribute('aria-pressed',String(i===index)));
+      preview.replaceChildren(...selected.cards.flatMap(id=>{
+        const card=byId.get(id);
+        return card?[createCardView(card,hooks.visual(id),{variant:'hand',lazy:true})]:[];
+      }));
+    }
+    deckPresets.forEach((_,i)=>choices.append(button(presetName(i),()=>choose(i))));
+    content.append(choices,preview,apply);
+    choose(Number($<HTMLSelectElement>('deckTemplate').value));
+    openDialog(t('deckPreset2'),content);
+    choices.querySelector<HTMLButtonElement>('[aria-pressed=true]')?.focus({preventScroll:true});
+  };
+  $('newDeck').onclick=()=>requestLoad({id:'',name:t("newDeck"),cards:[]});
   $('deckName').oninput=()=>{draft.name=$<HTMLInputElement>('deckName').value;dirty=true;refreshEditorStatus();};
   $('revertDeck').onclick = () => {
     if (!dirty) return;
     const content = element('div');
-    content.append(element('p', '', '恢复上次载入或保存的卡组？'), button('保留草稿', closeDialog), button('恢复卡组', () => {
+    content.append(element('p', '', t("restoreTheLastLoadedOrSavedVersionOf")), button(t("keepDraft"), closeDialog), button(t("restoreDeck"), () => {
       closeDialog();
       load(baseline);
     }));
-    openDialog('撤销草稿', content);
+    openDialog(t("revertDraft"), content);
   };
   $('saveDeck').onclick=()=>{
     const error=validateDeck(draft.cards);if(error){notice(error);return;}
     const name=$<HTMLInputElement>('deckName').value.trim();if(!name)return;
     const id=hooks.decks().decks.some(d=>d.id===draft.id)?draft.id:'deck:'+crypto.randomUUID();
-    const data:DeckStore={...hooks.decks(),decks:hooks.decks().decks.filter(d=>d.id!==id).concat({id,name,cards:[...draft.cards]})};
-    if(hooks.save(data)){draft={id,name,cards:[...draft.cards]};baseline=copyDeck(draft);dirty=false;refreshMenu();refreshEditorStatus();notice(`已保存「${name}」`);}
+    const updated={id,name,cards:[...draft.cards]},saved=hooks.decks().decks;
+    const data:DeckStore={...hooks.decks(),decks:saved.some(d=>d.id===id)?saved.map(d=>d.id===id?updated:d):[...saved,updated]};
+    if(hooks.save(data)){draft={id,name,cards:[...draft.cards]};baseline=copyDeck(draft);dirty=false;refreshMenu();refreshEditorStatus();notice(t("deckSaved", name));}
   };
-  $('useDeck').onclick=()=>{if(!validateDeck(draft.cards))hooks.choose({...draft,name:$<HTMLInputElement>('deckName').value.trim()||draft.name,cards:[...draft.cards]});};
+  $('useDeck').onclick=()=>{if(!validateDeck(draft.cards))hooks.choose({...draft,name:draft.name.trim()||draft.name,cards:[...draft.cards]});};
   $('deleteDeck').onclick=()=>{
-    const content=element('div');content.append(element('p','',`删除本地卡组「${draft.name}」？`),button('取消',closeDialog),button('删除',()=>{
+    const content=element('div');content.append(element('p','',t("deleteDeckPrompt", draft.name)),button(t("cancel"),closeDialog),button(t("delete"),()=>{
       const data=hooks.decks(),next={...data,selectedId:data.selectedId===draft.id?null:data.selectedId,decks:data.decks.filter(d=>d.id!==draft.id)};
-      if(hooks.save(next)){closeDialog();load(presetDeck());notice('卡组已删除；对局中的牌组不受影响');}
-    },'danger'));openDialog('删除卡组',content);
+      if(hooks.save(next)){closeDialog();load(presetDeck());notice(t("deckDeletedAnyMatchInProgressStillUses"));}
+    },'danger'));openDialog(t("deleteDeck"),content);
   };
   $('exportDecks').onclick=()=>downloadJson(hooks.decks(),'queens-blood-decks-v1.json');
-  return {showCard, showDecks, showHomeDeck, showCollection: refreshCollection, load,
+  return {showCard, showDecks, showHomeDeck, showCollection: refreshCollection, load, localize,
+    editDeck(deck:SavedDeck){if(deck.id!==draft.id||deck.name!==baseline.name)requestLoad(deck);},
     refresh() {
       if (!editor.hidden) showDecks();
       if (!$('view-collection').hidden) refreshCollection();
-      if (homeDeck && !$('view-home').hidden) showHomeDeck(homeDeck);
+      if (homeDeck && !$('view-prepare').hidden) showHomeDeck(homeDeck);
     },
   };
 }

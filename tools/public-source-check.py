@@ -60,6 +60,8 @@ PRIVATE_PARTS = {
 PRIVATE_SUFFIXES = {
     '.png', '.jpg', '.jpeg', '.webp', '.gif', '.bmp', '.lgp', '.tex', '.hrc',
     '.rsd', '.obj', '.blend', '.pdb', '.zip', '.7z', '.rar',
+    '.wav', '.ogg', '.mp3', '.mid', '.midi', '.sf2', '.sfz', '.flac',
+    '.aiff', '.opus', '.aac', '.wma', '.bank', '.xm', '.it', '.mod', '.s3m',
 }
 SCAN_SUFFIXES = {
     '.py', '.ts', '.tsx', '.js', '.mjs', '.json', '.md', '.txt', '.css',

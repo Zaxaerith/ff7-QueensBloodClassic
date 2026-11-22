@@ -16,7 +16,7 @@ try {
   }
   // Only local private development has a default. Builds and previews of
   // existing private builds retain explicit pack selection.
-  const selection=options['--pack']??(command==='dev'?'private-assets/m6-e/integrated-145':undefined);
+  const selection=options['--pack']??(command==='dev'?'private-assets/accepted/queen-145':undefined);
   const pack=selectArtPack(root,selection,readLocalPaths(root,options['--paths']));
   const vite=fileURLToPath(new URL('../node_modules/vite/bin/vite.js',import.meta.url));
   const result=spawnSync(process.execPath,[vite,...(command==='dev'?[]:[command]),'--mode','private',...forward],

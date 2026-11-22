@@ -6,7 +6,7 @@ import {privateAudio} from './tools/private-audio.js';
 export default defineConfig(({mode})=>{
 const privateMode=mode==='private';
 // External paths are read-only and reached only through an explicit private mode.
-const privateFiles=privateMode?readPrivatePack(fileURLToPath(new URL('.',import.meta.url)),process.env.QB_PRIVATE_ASSETS??'private-assets/card-art',{allowExternal:true}):new Map<string,Buffer>();
+const privateFiles=privateMode?readPrivatePack(fileURLToPath(new URL('.',import.meta.url)),process.env.QB_PRIVATE_ASSETS??'private-assets/accepted/queen-145',{allowExternal:true}):new Map<string,Buffer>();
 return {
   root: 'site',
   base: './',

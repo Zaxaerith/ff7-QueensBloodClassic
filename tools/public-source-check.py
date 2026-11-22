@@ -19,7 +19,7 @@ EXACT = {
     'data/classic-models.json', 'data/classic-technical.json', 'data/classic-art-mapping.json',
     'data/generator/r1a-recipes.json', 'data/generator/r1b-recipes.json',
     'data/generator/r1b-dependencies.json', 'data/release/public-distribution-policy.json',
-    'docs/GAMEPLAY.md', 'docs/ART_PACK_CONTRACT.md', 'docs/ASSETS.md', 'docs/CLI.md',
+    'docs/GAMEPLAY.md', 'docs/LOCAL_AUDIO.md', 'docs/ART_PACK_CONTRACT.md', 'docs/ASSETS.md', 'docs/CLI.md',
     'docs/ENGINE.md', 'docs/LOCAL_ART_GENERATOR.md', 'docs/LOCAL_OUTPUTS.md',
     'docs/CLOUD_RELEASE.md',
     'desktop/.gitignore', 'desktop/build-game.mjs', 'desktop/PORTABLE_README.txt',
@@ -32,7 +32,7 @@ EXACT = {
     'desktop/ui/setup.js', 'desktop/licenses/Microsoft-WebView2-SDK-LICENSE.txt',
     'desktop/licenses/Microsoft-WebView2-SDK-NOTICE.txt',
     'desktop/tests/make-fixture.mjs', 'desktop/tests/test_host.py',
-    'desktop/tests/test_portable.py',
+    'desktop/tests/test_portable.py', 'tools/private-audio.ts',
     'tools/assets.py', 'tools/asset-tests.py', 'tools/path-config-tests.py',
     'tools/qb-assets.py', 'tools/qb-assets-tests.py', 'tools/qb-assets-preview.py',
     'tools/qb-assets-pack-check.mjs', 'tools/art-pack.mjs',
@@ -54,7 +54,7 @@ SECRET_PATTERNS = [
     re.compile(rb'-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----'),
 ]
 PRIVATE_PARTS = {
-    '.parallel-check', '.research-cache', 'private-assets', 'browser-profile',
+    '.parallel-check', '.research-cache', 'private-assets', 'private-audio', 'browser-profile',
     'browser-runtime-cache', 'browser-temp', 'node_modules', '__pycache__',
 }
 PRIVATE_SUFFIXES = {

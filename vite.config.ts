@@ -1,6 +1,7 @@
 import {defineConfig} from 'vitest/config';
 import {fileURLToPath} from 'node:url';
 import {readPrivatePack} from './tools/private-pack.mjs';
+import {privateAudio} from './tools/private-audio.js';
 
 export default defineConfig(({mode})=>{
 const privateMode=mode==='private';
@@ -11,10 +12,10 @@ return {
   base: './',
   publicDir: false,
   resolve: {alias: {'/src': fileURLToPath(new URL('./src',import.meta.url))}},
-  server: {host:'127.0.0.1',port:5173,strictPort:true},
+  server: {host:'127.0.0.1',port:5173,strictPort:true,fs:{deny:['.env','.env.*','*.{crt,pem,key,p12,pfx,cer,der}','.npmrc','.yarnrc.yml','**/.git/**','**/private-audio/**']}},
   build: {outDir:privateMode?'../dist-private':'../dist',emptyOutDir:true},
   preview: {host:'127.0.0.1',port:5173,strictPort:true},
-  plugins: [{name:'catalog',generateBundle(){
+  plugins: [privateAudio(fileURLToPath(new URL('.',import.meta.url))),{name:'catalog',generateBundle(){
     // Keep the catalog in the standalone production artifact as well as dev.
     this.emitFile({type:'asset',fileName:'catalog.json',source:catalog});
     for(const [fileName,source] of privateFiles)this.emitFile({type:'asset',fileName,source});

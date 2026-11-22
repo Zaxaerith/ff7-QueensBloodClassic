@@ -30,3 +30,6 @@ venv/
 # Blender working files/backups remain in the private production workspace.
 *.blend
 *.blend[0-9]
+
+# Local audio packs are never source assets.
+private-audio/

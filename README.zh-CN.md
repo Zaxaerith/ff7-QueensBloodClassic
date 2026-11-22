@@ -9,6 +9,7 @@
 - 3×5 棋盘、145 张编号卡牌定义、牌组编辑、换牌、对局存档、回放和对局分析。
 - 三档 Bot、命名 NPC 挑战者，以及键盘和手柄操作。
 - 11 种界面语言与 Classic Frame 风格界面。
+- 可选的本地 BGM 播放、音量与静音设置；仓库不含音乐文件。
 - Card Carnival 目前有 3 关可玩谜题，完整的 22 关尚未实现。
 - 145 张 Classic Art 卡牌的候选本地生成路线。
 
@@ -42,7 +43,7 @@ npm test
 npm run build
 ```
 
-另见[玩法与当前限制](docs/GAMEPLAY.md)、[Art Pack v1 契约](docs/ART_PACK_CONTRACT.md)和[第三方来源说明](THIRD_PARTY_NOTICES.md)。
+另见[玩法与当前限制](docs/GAMEPLAY.md)、[本地音乐设置](docs/LOCAL_AUDIO.md)、[Art Pack v1 契约](docs/ART_PACK_CONTRACT.md)和[第三方来源说明](THIRD_PARTY_NOTICES.md)。
 
 ## 许可证与项目说明
 

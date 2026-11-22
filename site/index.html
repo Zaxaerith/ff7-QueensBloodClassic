@@ -41,7 +41,7 @@
 <div class="battle-feedback"><p id="status" role="status"></p><p aria-live="polite" id="feedback"></p></div>
 <div class="hand-area"><div class="hand-heading"><strong data-i18n="hand">手牌</strong><span id="handHelp"></span></div><div aria-label="你的手牌，可横向滚动" class="battle-hand" data-i18n-aria-label="yourHandScrollHorizontallyToSeeMoreCards" id="hand"></div></div>
 <div aria-label="操作" class="battle-actions" role="group" data-i18n-aria-label="controls"><button class="primary" data-i18n="confirmMulligan" id="confirmMulligan">完成换牌</button><button class="primary" data-i18n="confirmPlay" hidden="" id="confirmPlay">确认出牌</button><button data-i18n="cardDetails2" id="cardDetails">卡牌详情</button><button data-i18n="gamepadHoldPass" id="passBtn">长按跳过</button><button data-i18n="matchResult2" hidden="" id="resultsBtn">对局结果</button><details class="action-more"><summary>暂停</summary><div>
-<button data-i18n="continueGame" id="matchContinue">继续对局</button><button data-i18n="restartSameSettings" id="matchRestart">重新开始</button><button data-i18n="howToPlay" id="matchHelp">帮助</button><button data-i18n="exportReplay" id="replayBtn">导出回放</button><button data-i18n="eventLog" id="battleLogBtn">事件日志</button><details class="background-history"><summary data-i18n="advancedAppearance">高级外观</summary><label class="background-picker"><span data-i18n="historicalBackgrounds">历史背景对照</span><select aria-label="高级背景对照" data-i18n-aria-label="compareHistoricalBackgrounds" id="battleBackground"></select></label></details><button data-i18n="backToMenu" id="matchLeave">返回菜单</button></div></details></div></div></section>
+<button data-i18n="continueGame" id="matchContinue">继续对局</button><button data-i18n="restartSameSettings" id="matchRestart">重新开始</button><button data-i18n="howToPlay" id="matchHelp">帮助</button><button data-i18n="exportReplay" id="replayBtn">导出回放</button><button data-i18n="eventLog" id="battleLogBtn">事件日志</button><button type="button" data-i18n="audioSettings" id="matchAudioSettings" hidden>音频设置</button><details class="background-history"><summary data-i18n="advancedAppearance">高级外观</summary><label class="background-picker"><span data-i18n="historicalBackgrounds">历史背景对照</span><select aria-label="高级背景对照" data-i18n-aria-label="compareHistoricalBackgrounds" id="battleBackground"></select></label></details><button data-i18n="backToMenu" id="matchLeave">返回菜单</button></div></details></div></div></section>
 <section class="view" data-deck-pane="library" hidden="" id="view-decks">
 <div class="d4-panel-heading"><h2 class="view-title" data-i18n="decks" tabindex="-1">卡组</h2><p id="deckSummary" role="status"></p></div>
 <div class="window d4-deck-tools">
@@ -107,6 +107,16 @@
     <p data-i18n="mouseOrTouchSelectACardSelectA">鼠标 / 触屏：选卡 → 选格 → 确认。</p>
     <p data-i18n="tabMovesBetweenControlsEnterOrSpaceActivates">Tab 切换控件，Enter / Space 激活，方向键浏览棋盘或手牌，Escape 返回或取消。</p>
   </section>
+  <div id="audioSettings" hidden>
+    <h3 data-i18n="audioSettings">音频设置</h3>
+    <div id="audioSettingsControls">
+      <label class="field">
+        <span><span data-i18n="bgmVolume">背景音乐音量</span> <span data-bgm-level aria-hidden="true"></span></span>
+        <input type="range" min="0" max="100" step="1" data-bgm-volume>
+      </label>
+      <label class="check-field"><input type="checkbox" data-bgm-mute><span data-i18n="muteBgm">静音背景音乐</span></label>
+    </div>
+  </div>
 </div></div><p class="muted frame-config-storage" data-i18n="decksAndSettingsAreStoredInThisBrowser">本地卡组与设置保存在当前浏览器，不上传。</p></div></section>
 <section class="view" hidden="" id="view-carnival"></section>
 </main><footer class="app-footer" data-i18n="fanProjectFooter">非官方同人项目 · FINAL FANTASY VII 与 QUEEN'S BLOOD 权利归各自权利人所有</footer></div>

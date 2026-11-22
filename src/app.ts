@@ -13,9 +13,10 @@ import {mountReplay} from './ui-replay.js';
 import {mountCarnival} from './ui-carnival.js';
 import {carnivalMessages} from './i18n/carnival.js';
 import {MatchHistory,readActive,writeActive} from './match-archive.js';
-import {STORAGE,readDecks,readConfig,safeRead,safeWrite,libraryEntries,presetDeck,libraryRuleSummary,type StoragePort,type DeckStore,type SavedDeck} from './ui-data.js';
+import {STORAGE,readDecks,readConfig,readAudioConfig,safeRead,safeWrite,libraryEntries,presetDeck,libraryRuleSummary,type StoragePort,type DeckStore,type SavedDeck} from './ui-data.js';
 import {$,element,button,options,initDialog,openDialog,closeDialog,notice,downloadJson} from './ui-dom.js';
 import {startMatch,rulesLabel,type MatchSettings} from './match-flow.js';
+import {createAudioController} from './audio-controller.js';
 
 type Route='home'|'prepare'|'game'|'decks'|'collection'|'records'|'config'|'replay'|'carnival';
 const routes:Route[]=['home','prepare','game','decks','collection','records','config','replay','carnival'];
@@ -60,7 +61,61 @@ function chooseDeck(deck:SavedDeck){
 }
 const library=mountLibrary({entries:()=>entries,visual:id=>resolveVisual(id),decks:()=>decks,save:saveDecks,choose:chooseDeck});
 const challenge=mountChallenge(()=>navigate('prepare'),id=>resolveVisual(id));
+const audio=createAudioController();
+const audioConfig=readAudioConfig(safeRead(storage,STORAGE.audio).raw);
+audio.setVolume('bgm',audioConfig.bgmVolume);
+audio.setMuted('bgm',audioConfig.bgmMuted);
+audio.setVolume('sfx',audioConfig.sfxVolume);
+audio.setMuted('sfx',audioConfig.sfxMuted);
+if(audio.hasAudio){
+  const activateAudio=(event:Event)=>{
+    if(event.isTrusted&&!document.hidden)void audio.activateFromGesture();
+  };
+  for(const type of ['click','keydown','touchend'])document.addEventListener(type,activateAudio,{capture:true});
+  const settingsAudio=$('audioSettings');
+  const controls=$('audioSettingsControls');
+  settingsAudio.hidden=false;
+  const saveAudio=()=>{
+    const message=t(safeWrite(storage,STORAGE.audio,audioConfig)?'settingsStorageError':'settingsSaved');
+    if($('appNotice').textContent!==message)notice(message);
+  };
+  function bindAudioControls(root:HTMLElement,onUpdate?:()=>void){
+    const volume=root.querySelector<HTMLInputElement>('[data-bgm-volume]')!;
+    const readout=root.querySelector<HTMLElement>('[data-bgm-level]')!;
+    const mute=root.querySelector<HTMLInputElement>('[data-bgm-mute]')!;
+    const refresh=()=>{
+      volume.value=String(audioConfig.bgmVolume);
+      readout.textContent=volume.value+'%';
+      mute.checked=audioConfig.bgmMuted;
+    };
+    volume.oninput=()=>{
+      audioConfig.bgmVolume=volume.valueAsNumber;
+      audio.setVolume('bgm',audioConfig.bgmVolume);
+      refresh();
+      onUpdate?.();
+      saveAudio();
+    };
+    mute.onchange=()=>{
+      audioConfig.bgmMuted=mute.checked;
+      audio.setMuted('bgm',audioConfig.bgmMuted);
+      onUpdate?.();
+      saveAudio();
+    };
+    refresh();
+    return refresh;
+  }
+  const refreshSettings=bindAudioControls(controls);
+  const matchAudioButton=$<HTMLButtonElement>('matchAudioSettings');
+  matchAudioButton.hidden=false;
+  matchAudioButton.onclick=()=>{
+    const content=controls.cloneNode(true) as HTMLElement;
+    content.removeAttribute('id');
+    bindAudioControls(content,refreshSettings);
+    openDialog(t('audioSettings'),content);
+  };
+}
 const match=mountMatch({visual:id=>resolveVisual(id),showCard:library.showCard,menu:()=>navigate('home'),
+  ...(audio.hasAudio?{audio:{controller:audio,visible:()=>route==='game'&&!document.hidden}}:{}),
   hasCheckpoint:()=>slotPresent,checkpoint:save=>{
   const error=writeActive(storage,save);if(!error)slotPresent=true;return error;
 },completed:save=>{

@@ -20,6 +20,7 @@ import {mountMatchFeedback} from './ui-match-feedback.js';
 import {mountMatchInput} from './input/match-input.js';
 import {gridStep,legalTarget} from './input/match-cursor.js';
 import type {MatchControl} from './input/input-manager.js';
+import type {AudioController,MatchAudioSession} from './audio-controller.js';
 import '../site/match-presentation.css';
 
 export function boardNextCell(index:number,key:string):number {
@@ -43,6 +44,7 @@ function placementFeedback(card:Card,target:Move|null):string {
 interface MatchHooks {
   visual:(id:number)=>CardVisual;showCard:(id:number)=>void;menu:()=>void;
   hasCheckpoint:()=>boolean;checkpoint:(save:SavedMatch)=>string|null;completed:(save:SavedMatch)=>string|null;
+  audio?:{controller:AudioController;visible:()=>boolean};
 }
 export function mountMatch(hooks:MatchHooks){
   let renderedLocale=getLocale();
@@ -52,6 +54,8 @@ export function mountMatch(hooks:MatchHooks){
   const selectedMulligan=new Set<number>(),botClient=new BotClient();
   let lastMessage='',deckName='',activeSettings:MatchSettings;
   let matchId='',saveIssue='';
+  const audio=hooks.audio;
+  let audioSession:MatchAudioSession|undefined;
   let inspected:number|null=null;
   const chosen=()=>selected!==null?byId.get(presentation.frame?.hand[selected]??game?.hands[0][selected]??-1):undefined;
   const table=$('board').parentElement!,peek=element('aside','board-peek');peek.hidden=true;peek.id='boardPeek';peek.setAttribute('role','tooltip');table.parentElement!.append(peek);
@@ -64,11 +68,24 @@ export function mountMatch(hooks:MatchHooks){
   const warning=element('p','match-storage-warning');warning.hidden=true;warning.setAttribute('role','alert');table.parentElement!.append(warning);
   const currentSave=()=>saveMatch(game!,activeSettings,deckName,matchId);
   function defaultBackground(){table.parentElement!.dataset.background='hybrid';$<HTMLSelectElement>('battleBackground').value='hybrid';}
+  function resumeAudio(){
+    if(!game||!audio?.visible())return;
+    try{audioSession=audio.controller.startOrResumeMatch(matchId,game.phase);}catch{/* Audio is optional. */}
+  }
+  function pauseAudio(immediate=false){
+    const session=audioSession;
+    audioSession=undefined;
+    if(!audio||(!session&&!immediate))return;
+    try{audio.controller.pauseOrExitMatch(session,immediate);}catch{/* Audio is optional. */}
+  }
   const presentation=new MatchPresentation({
     game:()=>game,
     choose:()=>{const view=observeGame(game!,1);return botClient.choose(view,botOptionsForMatch(view,activeSettings));},
     cancelBot:()=>botClient.cancel(),checkpoint:()=>hooks.checkpoint(currentSave()),completed:()=>hooks.completed(currentSave()),
     changed:()=>{lastMessage=presentation.message;render();},result:showResult,
+    paused:()=>pauseAudio(),
+    matchEnded:(sequence,winner)=>{if(audioSession&&audio?.visible())audio.controller.enterScoring(audioSession,sequence,winner);},
+    totalsRevealed:sequence=>{if(audioSession&&audio?.visible())audio.controller.revealResult(audioSession,sequence);},
     diagnostic:diagnostic=>{if(import.meta.env.DEV)console.info('[QB Bot]',diagnostic);},
   },()=>document.documentElement.dataset.reduceMotion==='true'||window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const skip=button(t("skipAnimation"),()=>input.dispatch({type:'control',control:'presentationSkip'}));skip.id='presentationSkip';skip.hidden=true;
@@ -279,7 +296,7 @@ export function mountMatch(hooks:MatchHooks){
     if(error&&hooks.hasCheckpoint())return t("newMatchSaveFailed");
     pause();activeSettings=save.settings;deckName=name;game=next;presentation.reset();
     matchId=id;saveIssue=error??'';defaultBackground();selected=null;focusedCard=0;target=null;lastBoard=null;selectedMulligan.clear();lastMessage=t("newGameStartingPlayer", name);
-    presentation.resume();render();
+    resumeAudio();presentation.resume();render();
     return null;
   }
   function restore(restored:ReturnType<typeof restoreMatch>){
@@ -355,7 +372,10 @@ export function mountMatch(hooks:MatchHooks){
     browse:browseHand,select:selectHand,aim,peek:peekCell,cancel:cancelTarget,leave:hooks.menu,
     control:control=>actions[control](),
   });
-  window.addEventListener('pagehide',pause);
-  document.addEventListener('visibilitychange',()=>{if(document.hidden)presentation.skip();});
-  return {start,restore,pause,refresh:()=>{if(presentation.active)render(true);},hasMatch:()=>game!==null,rulesVersion:()=>game&&replayRulesVersion(game.rulesVersion),unfinished:()=>!!game&&game.phase!=='finished',restart:()=>start(activeSettings,deckName),resume:()=>{if(game){defaultBackground();presentation.resume();render();}},exportCurrent};
+  window.addEventListener('pagehide',()=>{pauseAudio(true);pause();});
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden){pauseAudio(true);presentation.skip();}
+    else if(presentation.active)resumeAudio();
+  });
+  return {start,restore,pause,refresh:()=>{if(presentation.active)render(true);},hasMatch:()=>game!==null,rulesVersion:()=>game&&replayRulesVersion(game.rulesVersion),unfinished:()=>!!game&&game.phase!=='finished',restart:()=>start(activeSettings,deckName),resume:()=>{if(game){defaultBackground();resumeAudio();presentation.resume();render();}},exportCurrent};
 }

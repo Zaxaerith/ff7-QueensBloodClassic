@@ -5,12 +5,20 @@ import {byId,playableCards,tokenCards,deckPresets,type Card} from './cards.js';
 import {createGame} from './engine.js';
 import {getCardEvidence} from './evidence.js';
 import type {BotDifficulty} from './bot.js';
+import {defaultAudioVolumes} from './audio-controller.js';
 
-export const STORAGE={decks:'qbclassic.decks.v1',config:'qbclassic.config.v1',records:'qbclassic.records.v1'} as const;
+export const STORAGE={decks:'qbclassic.decks.v1',config:'qbclassic.config.v1',records:'qbclassic.records.v1',audio:'qbclassic.audio.v1'} as const;
 export interface StoragePort {getItem(key:string):string|null;setItem(key:string,value:string):void;}
 export interface SavedDeck {id:string;name:string;cards:number[];}
 export interface DeckStore {version:1;selectedId:string|null;decks:SavedDeck[];}
 export interface UiConfig {version:1;density:'comfortable'|'compact';textSize:'normal'|'large';reduceMotion:boolean;locale?:Locale;}
+export interface AudioConfig {
+  version:1;
+  bgmVolume:number;
+  bgmMuted:boolean;
+  sfxVolume:number;
+  sfxMuted:boolean;
+}
 export interface MatchRecord {id:string;date:string;deckName:string;difficulty:BotDifficulty;seed:number;scores:[number,number];}
 export const defaultConfig:UiConfig={version:1,density:'comfortable',textSize:'normal',reduceMotion:false};
 export function validateDeck(cards:readonly number[]):string|null {
@@ -60,6 +68,22 @@ export function readConfig(raw:string|null):UiConfig {
   if(!raw)return {...defaultConfig};
   try{const v=JSON.parse(raw);if(v?.version===1&&['comfortable','compact'].includes(v.density)&&['normal','large'].includes(v.textSize)&&typeof v.reduceMotion==='boolean')return {version:1,density:v.density,textSize:v.textSize,reduceMotion:v.reduceMotion,...(isLocale(v.locale)?{locale:v.locale}:{})};}catch{}
   return {...defaultConfig};
+}
+export function readAudioConfig(raw:string|null):AudioConfig {
+  const defaults:AudioConfig={version:1,bgmVolume:defaultAudioVolumes.bgm,bgmMuted:false,
+    sfxVolume:defaultAudioVolumes.sfx,sfxMuted:false};
+  let value:unknown;
+  try{value=JSON.parse(raw??'null');}catch{return defaults;}
+  if(!object(value)||value.version!==1)return defaults;
+  const volume=(stored:unknown,fallback:number)=>typeof stored==='number'&&Number.isFinite(stored)
+    ?Math.round(Math.min(100,Math.max(0,stored))):fallback;
+  return {
+    version:1,
+    bgmVolume:volume(value.bgmVolume,defaults.bgmVolume),
+    bgmMuted:value.bgmMuted===true,
+    sfxVolume:volume(value.sfxVolume,defaults.sfxVolume),
+    sfxMuted:value.sfxMuted===true,
+  };
 }
 export function readRecords(raw:string|null):MatchRecord[]{
   try{const v=JSON.parse(raw??'null');if(v?.version!==1||!Array.isArray(v.records))return [];

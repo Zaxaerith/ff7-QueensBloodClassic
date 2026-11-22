@@ -2,7 +2,7 @@ import {expect,test} from 'vitest';
 import {readFileSync} from 'node:fs';
 import {byId,starterDeck} from '../src/cards.js';
 import {createPosition,legalMoves} from '../src/engine.js';
-import {readDecks,validateDeck,addReason,deckCardAvailability,sortLibraryEntries,readConfig,defaultConfig,readRecords,safeRead,safeWrite,libraryEntries,tokenEntries,matchesEntry,emptyFilter,libraryRuleSummary,STORAGE,type StoragePort} from '../src/ui-data.js';
+import {readDecks,validateDeck,addReason,deckCardAvailability,sortLibraryEntries,readConfig,readAudioConfig,defaultConfig,readRecords,safeRead,safeWrite,libraryEntries,tokenEntries,matchesEntry,emptyFilter,libraryRuleSummary,STORAGE,type StoragePort} from '../src/ui-data.js';
 import {boardNextCell,confirmable,publicEventLabel} from '../src/ui-match.js';
 const catalog=JSON.parse(readFileSync(new URL('../data/card-catalog.json',import.meta.url),'utf8'));
 const rows=libraryEntries(catalog);
@@ -34,6 +34,18 @@ test('settings default safely; stored summaries contain neither hands nor Game s
   const record={id:'x',date:'2026-10-31T00:00:00Z',deckName:'经典',difficulty:'normal',seed:701,scores:[10,2]};
   expect(readRecords(JSON.stringify({version:1,records:[record]}))).toEqual([record]);expect(readRecords('{')).toEqual([]);
   expect(readRecords(JSON.stringify({version:1,records:[{...record,game:{hands:[[145],[]]}}]}))[0]).not.toHaveProperty('game');
+});
+test('audio preferences round-trip separately and tolerate partial or malformed values',()=>{
+  const values=new Map<string,string>([[STORAGE.config,JSON.stringify(defaultConfig)]]);
+  const storage:StoragePort={getItem:key=>values.get(key)??null,setItem:(key,value)=>void values.set(key,value)};
+  const settings={version:1,bgmVolume:0,bgmMuted:true,sfxVolume:43,sfxMuted:false};
+  expect(STORAGE.audio).toBe('qbclassic.audio.v1');
+  expect(safeWrite(storage,STORAGE.audio,settings)).toBeNull();
+  expect(readAudioConfig(safeRead(storage,STORAGE.audio).raw)).toEqual(settings);
+  expect(readConfig(safeRead(storage,STORAGE.config).raw)).toEqual(defaultConfig);
+  expect(readAudioConfig('{"version":1,"bgmVolume":120,"bgmMuted":"true","sfxMuted":true}'))
+    .toEqual({version:1,bgmVolume:100,bgmMuted:false,sfxVolume:80,sfxMuted:true});
+  expect(readAudioConfig('{')).toEqual({version:1,bgmVolume:65,bgmMuted:false,sfxVolume:80,sfxMuted:false});
 });
 test('145 numbered entries include the sourced J-Squad candidate and separate generated tokens',()=>{
   expect(rows).toHaveLength(145);expect(rows.map(r=>r.id)).toEqual(Array.from({length:145},(_,i)=>i+1));

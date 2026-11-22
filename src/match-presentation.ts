@@ -35,6 +35,9 @@ interface Hooks {
   game:()=>Game|null;choose:()=>Promise<BotDecision|null>;cancelBot:()=>void;
   checkpoint:()=>string|null;completed:()=>string|null;changed:()=>void;result:()=>void;
   diagnostic?:(diagnostic:BotDiagnostic)=>void;
+  paused?:()=>void;
+  matchEnded?:(sequence:number,winner:PublicMatch['result']['winner'])=>void;
+  totalsRevealed?:(sequence:number)=>void;
 }
 type SearchReply={decision:BotDecision|null;warning:string;diagnostic?:BotDiagnostic};
 type Search={game:Game;command:number;automaticPass:boolean;reply:Promise<SearchReply>};
@@ -70,7 +73,9 @@ export class MatchPresentation {
   setFast(value:boolean){this.fast=value;if(value)this.skip();this.notify();}
   preview(pending:boolean){if(this.canPlay){this.effect=null;this.state(pending?'Preview':'PlayerSelect');}}
   pause(){
-    this.active=false;this.generation++;this.waiting?.finish(false);this.hooks.cancelBot();
+    this.active=false;this.generation++;this.waiting?.finish(false);
+    try{this.hooks.paused?.();}catch{/* Optional observers cannot interrupt a pause. */}
+    this.hooks.cancelBot();
     this.batch=null;this.frame=null;this.effect=null;this.skipBatch=false;this.state('Suspended');
   }
   /** Called only when binding a NEW/restored authoritative match, never on art refresh. */
@@ -181,6 +186,11 @@ export class MatchPresentation {
   }
   private async resolveBatch(epoch:number,opening=false,warning=''):Promise<boolean>{
     const batch=this.batch!;this.skipBatch=false;this.frame=batch.before;
+    const ended=batch.before.phase!=='finished'&&batch.after.phase==='finished'
+      ?batch.events.find(event=>event.type==='MatchEnded'):undefined;
+    if(ended&&this.alive(epoch)){
+      try{this.hooks.matchEnded?.(ended.seq,batch.after.result.winner);}catch{/* Optional observers cannot interrupt a commit. */}
+    }
     const plan=effectPlan(batch),batchNumber=++this.batchNumber;
     const cue=(stage:MatchEffect['stage'],events:readonly RuleEvent[]=[])=>{
       this.effect={key:++this.effectNumber,batch:batchNumber,stage,actor:batch.actor,action:plan.placement?'play':batch.events.some(e=>e.type==='TurnPassed')?'pass':'mulligan',motion:!this.fast&&!this.reduced()&&!this.skipBatch,
@@ -213,6 +223,9 @@ export class MatchPresentation {
       }
       cue('scoring');this.effect!.scoring={result:batch.after.result,revealed:3,totals:true};
       this.message=`${batch.after.result.winner===null?t("draw2"):batch.after.result.winner===0?t("victory2"):t("defeat2")} · ${batch.after.result.scores.join(' : ')}`;this.notify();
+      if(ended&&this.alive(epoch)){
+        try{this.hooks.totalsRevealed?.(ended.seq);}catch{/* Optional observers cannot interrupt scoring. */}
+      }
       if(!await this.wait(this.duration(PRESENTATION_MS.total),epoch))return false;
     }else{
       cue('summary');this.notify();

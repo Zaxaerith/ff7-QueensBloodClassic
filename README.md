@@ -9,6 +9,7 @@ An unofficial, open-source single-player card game inspired by Queen’s Blood. 
 - A 3×5 board, 145 numbered card definitions, deck editing, mulligan, saved matches, replay, and match analysis.
 - Three Bot difficulty levels, named NPC challengers, and keyboard or gamepad controls.
 - An 11-language interface and Classic Frame presentation.
+- Optional local BGM playback with volume and mute settings; no music files are included.
 - Card Carnival currently offers three playable puzzles. The full set of 22 puzzles is not implemented.
 - Candidate local generation routes for all 145 Classic Art cards.
 
@@ -42,7 +43,7 @@ npm test
 npm run build
 ```
 
-See [gameplay and current limits](docs/GAMEPLAY.md), [Art Pack v1 contract](docs/ART_PACK_CONTRACT.md), and [third-party notices](THIRD_PARTY_NOTICES.md).
+See [gameplay and current limits](docs/GAMEPLAY.md), [local music setup](docs/LOCAL_AUDIO.md), [Art Pack v1 contract](docs/ART_PACK_CONTRACT.md), and [third-party notices](THIRD_PARTY_NOTICES.md).
 
 ## License and project status
 

@@ -1,0 +1,51 @@
+{
+  "operations": [
+    {
+      "op": "importPosition",
+      "position": {
+        "seed": 612,
+        "turn": 0,
+        "hands": [
+          [
+            13,
+            1
+          ],
+          [
+            7,
+            1
+          ]
+        ],
+        "decks": [
+          [],
+          []
+        ],
+        "board": [
+          {
+            "row": 1,
+            "col": 0,
+            "owner": 0,
+            "pawns": 1
+          },
+          {
+            "row": 0,
+            "col": 0,
+            "owner": 0,
+            "cardId": 7
+          },
+          {
+            "row": 1,
+            "col": 4,
+            "owner": 1,
+            "pawns": 1
+          }
+        ]
+      }
+    },
+    {
+      "op": "legal"
+    },
+    {
+      "op": "score"
+    }
+  ]
+}

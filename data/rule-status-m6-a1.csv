@@ -1,0 +1,146 @@
+id,name,executable,evidence_status,priority,mechanisms,timing,evidence_refs
+001,Security Officer,true,candidate,P3,influence,candidate,locations;wiki;engine
+002,Riot Trooper,true,candidate,P3,influence,candidate,locations;wiki;engine
+003,Grenadier,true,candidate,P3,onPlay;power,candidate,locations;wiki;engine
+004,J-Unit Sweeper,true,candidate,P3,influence,candidate,locations;wiki;engine
+005,Queen Bee,true,candidate,P3,influence,candidate,locations;wiki;engine
+006,Toxirat,true,candidate,P3,influence;onPlay;power,candidate,locations;wiki;engine
+007,Levrikon,true,candidate,P3,influence,candidate,locations;wiki;engine
+008,Grasslands Wolf,true,candidate,P3,influence,candidate,locations;wiki;engine
+009,Mu,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+010,Mandragora,true,candidate,P3,influence;onPlay;addToHand,candidate,locations;wiki;engine
+011,Elphadunk,true,candidate,P3,influence,candidate,locations;wiki;engine
+012,Cactuar,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+013,Crystalline Crab,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+014,Quetzalcoatl,true,candidate,P3,influence,candidate,locations;wiki;engine
+015,Zu,true,candidate,P3,influence,candidate,locations;wiki;engine
+016,Devil Rider,true,candidate,P3,influence,candidate,locations;wiki;engine
+017,Screamer,true,candidate,P3,influence,candidate,locations;wiki;engine
+018,Flan,true,candidate,P3,influence,candidate,locations;wiki;engine
+019,Crawler,true,candidate,P3,influence,candidate,locations;wiki;engine
+020,Archdragon,true,candidate,P3,influence;onPlay;power,candidate,locations;wiki;engine
+021,Ogre,true,candidate,P3,influence,candidate,locations;wiki;engine
+022,Deathwheel,true,candidate,P3,onPlay;power,candidate,locations;wiki;engine
+023,Fleetwing,true,candidate,P3,influence,candidate,locations;wiki;engine
+024,Zemzelett,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+025,Ignilisk,true,conflict,P2,influence;aura,candidate,gw25;ggStandard;gamespot;image25;grid25;wiki;engine;m3Tests
+026,Capparwire,true,candidate,P3,influence;onPlay;power,candidate,locations;wiki;engine
+027,Mindflayer,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+028,Scrutineye,true,conflict,P2,influence;aura,candidate,gw28;ggStandard;gamespot;image28;grid28;wiki;engine;m3Tests
+029,Hell Rider II,true,candidate,P3,influence;onPlay;power,candidate,locations;wiki;engine
+030,Flametrooper,true,candidate,P2,influence;onDestroy;power,candidate,locations;wiki;engine
+031,Spearhawk,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+032,Sea Devil,true,candidate,P3,influence;onCardPlayed;power,candidate,locations;wiki;engine
+033,Shoalopod,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+034,Crown Lance,true,candidate,P3,influence;onPlay;power,candidate,locations;wiki;engine
+035,Tonberry King,true,candidate,P2,influence;onCardDestroyed;power,candidate,locations;wiki;engine
+036,Sandhog Pie,true,candidate,P2,influence;onDestroy;power,candidate,locations;wiki;engine
+037,Bloatfloat,true,candidate,P2,influence;onDestroy;power,candidate,locations;wiki;engine
+038,Bagnadrana,true,candidate,P3,influence;onCardPlayed;power,candidate,locations;wiki;engine
+039,Cockatrice,true,candidate,P3,influence;onPlay;destroy,candidate,locations;wiki;engine
+040,Heatseeker,true,candidate,P2,influence;onDestroy;addToHand,candidate,locations;wiki;engine
+041,Bomb,true,candidate,P2,influence;onDestroy;power,candidate,locations;wiki;engine
+042,Thug,true,candidate,P3,influence,candidate,locations;wiki;engine
+043,Death Claw,true,candidate,P2,influence;onCardDestroyed;power,candidate,locations;wiki;engine
+044,Landworm,true,candidate,P2,influence;onCardDestroyed;power,candidate,locations;wiki;engine
+045,Sandspitter,true,candidate,P3,influence;onPlay;power,candidate,locations;wiki;engine
+046,Chimera,true,candidate,P2,influence;dynamic,candidate,locations;wiki;engine
+047,Joker,true,candidate,P2,influence;onCardDestroyed;power,candidate,locations;wiki;engine
+048,Amphidex,true,candidate,P2,influence;firstEnhanced;power,candidate,locations;wiki;engine
+049,Frightflower,true,candidate,P2,influence;onDestroy;power,candidate,locations;wiki;engine
+050,Gagighandi,true,candidate,P2,influence;firstEnhanced;power,candidate,locations;wiki;engine
+051,Insectoid Chimera,true,candidate,P2,influence;replacement,candidate,locations;wiki;engine
+052,Gigantoad,true,candidate,P2,influence;replacement,candidate,locations;wiki;engine
+053,Maloceros,true,candidate,P2,influence;lane-bonus,candidate,locations;wiki;engine
+054,Grandhorn,true,candidate,P2,influence;replacement,candidate,locations;wiki;engine
+055,Great Malboro,true,candidate,P3,influence;onPlay;power,candidate,locations;wiki;engine
+056,Grangalan,true,candidate,P3,influence;onPlay;addToHand,candidate,locations;wiki;engine
+057,Amalgam,true,candidate,P2,influence;onDestroy;addToHand,candidate,locations;wiki;engine
+058,Skeeskee,true,candidate,P2,influence;onCardDestroyed;power,candidate,locations;wiki;engine
+059,Griffon,true,candidate,P2,influence;onPlay;power;replacement,candidate,locations;wiki;engine
+060,Basilisk,true,candidate,P3,influence;onPlay;destroy,candidate,locations;wiki;engine
+061,Reapertail,true,candidate,P2,influence;firstEnfeebled;power,candidate,locations;wiki;engine
+062,Jabberwock,true,candidate,P3,influence;onPlay;power,candidate,locations;wiki;engine
+063,Desert Sahagin,true,conflict,P2,influence;firstEnfeebled;power,candidate,gw63;ggStandard;gamespot;image63;grid63;wiki;ggPuzzles;engine;m3Tests
+064,Cavestalker,true,candidate,P2,influence;firstEnfeebled;power,candidate,locations;wiki;engine
+065,Stone Golem,true,candidate,P2,firstEnhanced;power,candidate,locations;wiki;engine
+066,Two Face,true,insufficient,P1,influence;aura;conditional,candidate,locations;wiki;engine
+067,Gi Specter,true,candidate,P2,influence;onPlay;power;replacement,candidate,locations;wiki;engine
+068,Valron,true,conflict,P2,influence;dynamic,candidate,locations;wiki;engine
+069,Disgorgon,true,candidate,P3,influence;pawn-rank,candidate,locations;wiki;engine
+070,Dragon,true,candidate,P3,influence;onPlay;power,candidate,locations;wiki;engine
+071,Twin Brain,true,candidate,P3,influence;pawn-rank,candidate,locations;wiki;engine
+072,Black Bat,true,candidate,P3,influence;onPlay;power,candidate,locations;wiki;engine
+073,Bahba Velamyu,true,conflict,P2,influence;onDestroy;power,candidate,gw73;ggStandard;gamespot;image73;grid73;wiki;engine;m3Tests
+074,Rictus,true,candidate,P2,influence;dynamic,candidate,locations;wiki;engine
+075,Adjudicator,true,conflict,P2,dynamic,candidate,gw75;ggStandard;gamespot;image75;grid75;wiki;ggPuzzles;engine;m3Tests
+076,Yin & Yang,true,candidate,P2,influence;onPlay;power;replacement,candidate,locations;wiki;engine
+077,Diabolic Variant,true,candidate,P2,influence;onPlay;power;replacement,candidate,locations;wiki;engine
+078,Special Forces Operator,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+079,2-C SOLDIER Operator,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+080,Kelzmelzer,true,candidate,P2,influence;onPlay;power;replacement,candidate,locations;wiki;engine
+081,Panthera Protector,true,candidate,P2,influence;firstEnhanced;power,candidate,locations;wiki;engine
+082,Hecteyes,true,candidate,P2,onDestroy;power,candidate,locations;wiki;engine
+083,Floating Death,true,candidate,P3,onPlay;power,candidate,locations;wiki;engine
+084,Ironclad,true,candidate,P2,influence;dynamic,candidate,locations;wiki;engine
+085,Moss-Grown Adamantoise,true,candidate,P3,influence;pawn-rank,candidate,locations;wiki;engine
+086,Cloud,true,candidate,P2,influence;threshold;power,candidate,locations;wiki;engine
+087,Barret,true,candidate,P3,influence;onPlay;power,candidate,locations;wiki;engine
+088,Tifa,true,candidate,P2,influence;lane-bonus,candidate,locations;wiki;engine
+089,Aerith,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+090,Red XIII,true,candidate,P2,influence;firstEnfeebled;power,candidate,locations;wiki;engine
+091,Yuffie,true,candidate,P2,influence;onPlay;power;replacement,candidate,locations;wiki;engine
+092,Cait Sith,true,candidate,P3,influence;onPlay;addToHand,candidate,locations;wiki;engine
+093,Cid,true,candidate,P3,influence;onPlay;addToHand,candidate,locations;wiki;engine
+094,Vincent,true,candidate,P2,influence;onDestroy;addToHand,candidate,locations;wiki;engine
+095,Ifrit,true,candidate,P2,influence;dynamic,candidate,locations;wiki;engine
+096,Shiva,true,candidate,P3,onPlay;spawn,candidate,locations;wiki;engine
+097,Ramuh,true,candidate,P3,influence;onPlay;power,candidate,locations;wiki;engine
+098,Titan,true,candidate,P3,influence;pawn-rank,candidate,locations;wiki;engine
+099,Kujata,true,candidate,P2,influence;firstEnhanced;power,candidate,locations;wiki;engine
+100,Odin,true,candidate,P2,influence;dynamic,candidate,locations;wiki;engine
+101,Phoenix,true,candidate,P2,influence;onDestroy;power,candidate,locations;wiki;engine
+102,Leviathan,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+103,Alexander,true,candidate,P2,influence;dynamic,candidate,locations;wiki;engine
+104,Bahamut,true,candidate,P3,influence;onPlay;power,candidate,locations;wiki;engine
+105,Bahamut Arisen,true,candidate,P3,onPlay;spawn,candidate,locations;wiki;engine
+106,Gilgamesh,true,supported,P2,onPlay;power;replacement,candidate,gw106;ggLegendary;gamespot;image106;grid106;engine;m3Tests
+107,Chocobo & Moogle,true,candidate,P2,influence;dynamic,candidate,locations;wiki;engine
+108,Fat Chocobo,true,candidate,P3,influence,candidate,locations;wiki;engine
+109,Posh Chocobo,true,candidate,P2,influence;lane-bonus,candidate,locations;wiki;engine
+110,Moogle Trio,true,candidate,P3,influence;onPlay;addToHand,candidate,locations;wiki;engine
+111,Magic Pot,true,candidate,P3,aura,candidate,locations;wiki;engine
+112,Materia Guardian,true,candidate,P2,influence;firstEnfeebled;power,candidate,locations;wiki;engine
+113,Midgardsormr,true,candidate,P2,influence;onCardDestroyed;power,candidate,locations;wiki;engine
+114,Mythril Golem,true,candidate,P3,influence,candidate,locations;wiki;engine
+115,Terror of the Deep,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+116,Grasptropod,true,conflict,P2,influence;firstEnhanced;power,candidate,locations;wiki;engine
+117,Custom Valkyrie,true,candidate,P3,influence;onPlay;power,candidate,locations;wiki;engine
+118,Gigatrice,true,candidate,P3,influence;onPlay;destroy,candidate,locations;wiki;engine
+119,Dyne,true,candidate,P3,influence;onPlay;power,candidate,locations;wiki;engine
+120,Anuran Suppressor,true,candidate,P2,influence;onCardDestroyed;power,candidate,locations;wiki;engine
+121,Specimen H1024,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+122,Crimson Mare Mk. II,true,candidate,P2,influence;firstEnfeebled;power,candidate,locations;wiki;engine
+123,Gi Nattak,true,candidate,P2,influence;onPlay;power;replacement,candidate,locations;wiki;engine
+124,Forgotten Specimen,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+125,Don Corneo & Abzu,true,candidate,P3,onPlay;addToHand,candidate,locations;wiki;engine
+126,Red Dragon,true,candidate,P3,influence;onPlay;power,candidate,locations;wiki;engine
+127,Demon Gate,true,candidate,P2,influence;onDestroy;power,candidate,locations;wiki;engine
+128,Reno,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+129,Rude,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+130,Elena,true,candidate,P2,influence;firstEnhanced;power,candidate,locations;wiki;engine
+131,Tseng,true,candidate,P2,influence;firstEnhanced;power,candidate,locations;wiki;engine
+132,Rufus,true,candidate,P3,influence,candidate,locations;wiki;engine
+133,Roche,true,supported,P3,influence;onPlay;power,candidate,gw133;ggLegendary;gamespot;image133;grid133;engine;m3Tests
+134,J-Squad,true,conflict,P1,onPlay;spawn,candidate,gw134;ggLegendary;gamespot;image134;grid134;wiki;johnnyTest;johnnyDiscussion;engine;m6a1Tests
+135,Chocobo Jockey,true,candidate,P2,influence;lane-bonus,candidate,locations;wiki;engine
+136,Space Ranger,true,conflict,P2,influence;dynamic,candidate,locations;wiki;engine
+137,Haunted Hotel,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+138,Skywheel,true,candidate,P3,influence,candidate,locations;wiki;engine
+139,Loveless,true,candidate,P3,onPlay;power,candidate,locations;wiki;engine
+140,Saucer Squad,true,candidate,P3,influence,candidate,locations;wiki;engine
+141,Dio,true,candidate,P2,influence;dynamic,candidate,locations;wiki;engine
+142,Ultimate Party Animal,true,candidate,P2,influence;special-score,candidate,locations;wiki;ggLegendary;gamespot;engine
+143,Sephiroth,true,candidate,P3,influence;onPlay;destroy,candidate,locations;wiki;engine
+144,Emerald Witch,true,candidate,P3,influence;aura,candidate,locations;wiki;engine
+145,Shadowblood Queen,true,candidate,P2,influence;dynamic,candidate,locations;wiki;engine

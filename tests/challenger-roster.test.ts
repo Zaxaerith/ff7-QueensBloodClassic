@@ -40,8 +40,9 @@ const crowsNestTerms: Record<Locale, readonly [region:string,michaela:string,nei
 
 afterEach(() => setLocale('zh-CN'));
 
-test('the ten unique challengers have legal numbered decks and the twins share only a challenge group', () => {
-  expect(challengers.map(({id}) => id)).toEqual(['nene','zogan','isabelle',...additions.map(({id}) => id)]);
+test('all twenty unique challengers have legal numbered decks and the twins share only a challenge group', () => {
+  expect(challengers).toHaveLength(20);
+  expect(challengers.slice(0,10).map(({id}) => id)).toEqual(['nene','zogan','isabelle',...additions.map(({id}) => id)]);
   for (const npc of challengers) {
     expect(validateDeck(npc.deck),npc.id).toBeNull();
     expect(npc.deck.every(id => id >= 1 && id <= 145 && byId.get(id)?.rarity !== 'token'),npc.id).toBe(true);
@@ -107,7 +108,7 @@ test.each(additions)('$id restores the exact snapshot and settles a legal Normal
 
   const view = observeGame(restored.game,1);
   const options = botOptionsForMatch(view,restored.save.settings);
-  expect(options).toMatchObject({difficulty:'normal',strategy:'neutral'});
+  expect(options).toMatchObject({difficulty:'normal',strategy:id});
   const {action} = decideBot(view,options);
   if (action.type !== 'play') throw Error(`${id} did not play in the fixed Normal opening`);
   const {handIndex,row,col,player} = action;

@@ -1,0 +1,14 @@
+{
+  "operations": [
+    {"op":"importPosition","position":{"seed":701,"turn":0,"hands":[[11],[5]],"board":[
+      {"row":0,"col":1,"owner":0,"pawns":2},
+      {"row":1,"col":0,"owner":0,"pawns":2},
+      {"row":0,"col":2,"owner":1,"pawns":2},
+      {"row":0,"col":4,"owner":1,"cardId":20}
+    ]}},
+    {"op":"bot","player":0,"difficulty":"easy","seed":5,"explain":true},
+    {"op":"bot","player":0,"difficulty":"normal","seed":5,"explain":true},
+    {"op":"bot","player":0,"difficulty":"hard","seed":5,"maxNodes":256,"explain":true},
+    {"op":"state"}
+  ]
+}

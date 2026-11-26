@@ -7,7 +7,6 @@ import {restoreMatch,saveMatch,type SavedMatch} from '../src/match-archive.js';
 import {startMatch,type MatchSettings} from '../src/match-flow.js';
 
 const seed=701;
-const profiled=new Set(['nene','zogan','isabelle']);
 
 test.each(challengers)('$id honors first player, the saved ordered decks and independent Bot difficulty',npc=>{
   const opponent={npcId:npc.id,deck:npc.deck};
@@ -23,7 +22,7 @@ test.each(challengers)('$id honors first player, the saved ordered decks and ind
       const view=observeGame(game,1);
       for(const difficulty of ['easy','normal','hard'] as const){
         expect(botOptionsForMatch(view,{...settings,difficulty})).toMatchObject({
-          difficulty,strategy:profiled.has(npc.id)?npc.id:'neutral',
+          difficulty,strategy:npc.id,
         });
       }
     }

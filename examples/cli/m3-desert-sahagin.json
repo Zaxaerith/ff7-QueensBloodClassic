@@ -1,0 +1,18 @@
+{
+  "operations": [
+    {"op":"importPosition","position":{
+      "seed":3003,"turn":0,"hands":[[26],[]],"decks":[[],[]],
+      "board":[
+        {"row":0,"col":2,"owner":0,"pawns":1},
+        {"row":1,"col":2,"owner":0,"cardId":63},
+        {"row":2,"col":2,"owner":0,"cardId":7}
+      ]
+    }},
+    {"op":"play","cardId":26,"row":0,"col":2},
+    {"op":"pass"},
+    {"op":"pass"},
+    {"op":"score"},
+    {"op":"events"},
+    {"op":"replay"}
+  ]
+}

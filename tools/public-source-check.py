@@ -15,7 +15,7 @@ EXACT = {
     'package-lock.json', 'tsconfig.json', 'vite.config.ts',
     '.github/workflows/windows-build.yml',
     '.github/workflows/publish-release.yml',
-    'data/card-catalog.json', 'data/card-names.txt', 'data/card-index.json',
+    'data/card-catalog.json', 'data/card-names.txt', 'data/card-index.json', 'data/rule-status-m6-a1.csv',
     'data/classic-models.json', 'data/classic-technical.json', 'data/classic-art-mapping.json',
     'data/generator/r1a-recipes.json', 'data/generator/r1b-recipes.json',
     'data/generator/r1b-dependencies.json', 'data/release/public-distribution-policy.json',

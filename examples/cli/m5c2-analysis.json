@@ -1,0 +1,8 @@
+{
+  "operations": [
+    {"op":"importPosition","position":{"hands":[[20,7],[]],"board":[{"owner":0,"row":0,"col":0,"pawns":1},{"owner":1,"row":0,"col":1,"cardId":7}]}},
+    {"op":"analyze","difficulty":"normal","seed":7,"maxNodes":256,"actual":{"type":"pass","player":0}},
+    {"op":"analyze","difficulty":"hard","seed":7,"maxNodes":512,"actual":{"type":"pass","player":0}},
+    {"op":"state"}
+  ]
+}

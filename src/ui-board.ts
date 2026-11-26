@@ -18,6 +18,21 @@ export function placedCardView(placed:PlacedCard,visual:CardVisual){
   const markers=[...(placed.enhancedOnce?[t("firstEnhancementTriggered")]:[]),...(placed.enfeebledOnce?[t("firstEnfeeblementTriggered")]:[]),...(placed.thresholds?.length?[t("thresholdTriggered")]:[])];
   return createCardView(byId.get(placed.id)!,visual,{variant:'board',currentPower:placed.power,state:cardStatus(placed),markers});
 }
+
+export function tileBonusBadge(bonus?:number):HTMLSpanElement|null {
+  if(!bonus)return null;
+  const text=bonus>0?`+${bonus}`:String(bonus);
+  const badge=element('span','tile-bonus-badge',text);
+  badge.dataset.tileBonus=String(bonus);
+  badge.setAttribute('aria-hidden','true');
+  return badge;
+}
+
+export function tileBonusAriaSuffix(bonus?:number):string {
+  if(!bonus)return '';
+  const text=bonus>0?`+${bonus}`:String(bonus);
+  return ' · '+t('tileBonusAria',text);
+}
 /** Same portrait geometry for a live match and a separate read-only replay. */
 export function observeTable(table:HTMLElement){
   const scores=table.querySelector<HTMLElement>('.lane-scores')!;

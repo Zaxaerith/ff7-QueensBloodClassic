@@ -1,6 +1,40 @@
 /* Original menu styling. SPDX-License-Identifier: GPL-3.0-only */
-.art-import{margin:1rem 0 1.5rem;padding-top:1rem;border-top:3px double var(--silver,#bfcbe4)}
-.art-import-status{overflow-wrap:anywhere;min-height:1.6em;color:#ead49c}
-.art-import progress{display:block;width:100%;height:14px;margin:.7rem 0;accent-color:#afcbea}
-.art-import progress[hidden]{display:none}
-.art-import .button-row{flex-wrap:wrap}
+/* FrameUI v3 · FF7 OG Classic Window System art-import controls. */
+.art-import {
+  margin: 1rem 0 1.4rem;
+  padding-top: .95rem;
+  border-top: 1px solid transparent;
+  border-image: var(--qbc-rule, linear-gradient(90deg, rgba(223, 232, 250, .75), rgba(223, 232, 250, .18) 70%, transparent)) 1;
+}
+.art-import-status {
+  overflow-wrap: anywhere;
+  min-height: 1.6em;
+  color: var(--gold, #f8dc82);
+  font-variant-numeric: tabular-nums;
+  text-shadow: var(--qbc-text-shadow, 1px 1px 0 #03071b);
+}
+.art-import progress {
+  display: block;
+  width: 100%;
+  height: 12px;
+  margin: .7rem 0;
+  appearance: none;
+  border: 1px solid var(--qbc-steel-hi, #8fa3d0);
+  border-radius: 2px;
+  background: var(--qbc-well-flat, #050d2e);
+  box-shadow: var(--qbc-well-shadow, inset 0 2px 6px rgba(0, 0, 0, .72));
+  accent-color: var(--teal, #4ef2d2);
+  overflow: hidden;
+}
+.art-import progress::-webkit-progress-bar {
+  background: var(--qbc-well, linear-gradient(180deg, #060f34 0%, #040a24 100%));
+}
+.art-import progress::-webkit-progress-value {
+  background: linear-gradient(180deg, #9cfbf0 0%, #4ef2d2 45%, #1aa69a 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55);
+}
+.art-import progress::-moz-progress-bar {
+  background: linear-gradient(180deg, #9cfbf0 0%, #4ef2d2 45%, #1aa69a 100%);
+}
+.art-import progress[hidden] { display: none; }
+.art-import .button-row { flex-wrap: wrap; }

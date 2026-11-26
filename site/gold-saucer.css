@@ -1,0 +1,332 @@
+/* FrameUI v3 · Part 2 — Gold Saucer & Survival visual unification.
+   Pre-match list harmonizes with frameui-shell.css; active stage shares the
+   Midgar Mako-Slate obsidian tabletop, 3D crystal pawns & FF7 OG HUD. */
+
+/* ------------------------------------------------------------------ */
+/* 1. Pre-match Gold Saucer & Survival selector list                   */
+/* ------------------------------------------------------------------ */
+.gs-list { max-width: 62rem; margin: auto; }
+.gs-list > h2 { margin-bottom: .35rem; color: var(--gold); }
+.gs-resume {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--teal, #4ef2d2);
+  border-radius: 2px;
+  background: linear-gradient(120deg, rgba(10, 84, 92, .62), rgba(8, 24, 74, .66) 70%);
+  box-shadow: inset 0 0 0 1px #032a2c, 0 0 14px rgba(78, 242, 210, .18);
+}
+.gs-resume p { margin: .2rem 0 0; color: #c4f3e8; }
+.gs-deck-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: 1px solid #2c3d74;
+  border-radius: 3px;
+  background: var(--qbc-well, linear-gradient(180deg, #060f34 0%, #040a24 100%));
+  box-shadow: var(--qbc-well-shadow);
+}
+.gs-section-title { margin: 18px 0 8px; color: #c9d6f4; font-size: .85rem; }
+.gs-cards { list-style: none; display: grid; gap: 6px; padding: 0; margin: 0; }
+.gs-cards > li {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border: 1px solid var(--qbc-steel, #526696);
+  border-radius: 2px;
+  background: linear-gradient(100deg, rgba(20, 50, 140, .9) 0%, rgba(11, 30, 92, .9) 55%, rgba(6, 16, 56, .92) 100%);
+  box-shadow: var(--qbc-bevel-thin), 0 3px 8px rgba(2, 5, 20, .45);
+}
+.gs-cards > li.gs-survival-item {
+  border-color: rgba(255, 100, 126, .55);
+  background: linear-gradient(110deg, rgba(92, 22, 82, .88) 0%, rgba(42, 14, 70, .9) 55%, rgba(18, 8, 44, .92) 100%);
+}
+.gs-cards > li[data-cleared="true"] {
+  border-inline-start: 3px solid var(--gold, #f8dc82);
+}
+.gs-cards > li.gs-survival-item[data-medal="bronze"] { border-inline-start: 3px solid #e2a274; }
+.gs-cards > li.gs-survival-item[data-medal="silver"] { border-inline-start: 3px solid #eef4ff; }
+.gs-cards > li.gs-survival-item[data-medal="gold"] { border-inline-start: 3px solid #fff0b4; }
+.gs-info { min-width: 0; flex: 1 1 240px; }
+.gs-info h4 { margin: 0; color: #f6f8ff; text-shadow: var(--qbc-text-shadow, 1px 1px 0 #03071b); }
+.gs-info p { margin: .28rem 0 0; }
+.gs-targets { color: var(--gold); font-size: .88rem; font-variant-numeric: tabular-nums; text-shadow: var(--qbc-text-shadow, 1px 1px 0 #03071b); }
+.gs-reward { display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+.gs-reward-face { width: 58px; }
+.gs-reward-label { display: grid; gap: 2px; max-width: 11rem; font-size: .82rem; }
+
+/* ------------------------------------------------------------------ */
+/* 2. Active Gold Saucer / Survival Arena Stage                        */
+/* ------------------------------------------------------------------ */
+.gs-stage {
+  --score-width: clamp(28px, 4.4vw, 54px);
+  --score-gap: clamp(4px, .7vw, 8px);
+  --cell-gap: clamp(3px, .45vw, 6px);
+  --table-inset: clamp(8px, 1vw, 14px);
+  --hand-width: 92px;
+  --hand-height: 132px;
+  --hand-lift: 9px;
+  position: relative;
+  isolation: isolate;
+  max-width: 74rem;
+  margin: auto;
+  padding: clamp(10px, 1.3vw, 16px);
+  display: grid;
+  gap: 8px;
+  border: 2px solid var(--silver, #dfe8fa);
+  border-radius: 4px;
+  background:
+    radial-gradient(ellipse 68% 46% at 50% 22%, #132347 0%, #09122b 58%, #050919 100%);
+  box-shadow:
+    inset 0 0 0 1px #526696,
+    inset 0 0 28px rgba(2, 5, 18, .72),
+    0 12px 30px rgba(1, 3, 12, .8);
+}
+.gs-stage .match-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(8ch, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(6px, 1.2vw, 14px);
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+/* Survival telemetry HUD & No-Draw alert */
+.gs-survival-hud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 7px 12px;
+  border: 1px solid var(--qbc-steel-hi, #8fa3d0);
+  border-radius: 3px;
+  background: var(--qbc-window-deep, linear-gradient(160deg, #163591 0%, #0c1f60 50%, #06103a 100%));
+  box-shadow: var(--qbc-bevel-thin), 0 3px 10px rgba(2, 5, 18, .55);
+  color: #e4ecff;
+  font-size: .88rem;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 1px 1px 0 #03071b;
+}
+.gs-survival-hud strong { color: var(--gold); }
+.gs-bonus-row-hint {
+  color: #fff3c0;
+  padding: 2px 8px;
+  border: 1px solid var(--gold);
+  border-radius: 2px;
+  background: linear-gradient(180deg, #274ba8 0%, #102568 100%);
+  box-shadow: 0 0 8px rgba(248, 220, 130, .26);
+  font-weight: 700;
+}
+.gs-no-draw-banner {
+  margin: 0 auto;
+  padding: 6px 14px;
+  max-width: 44rem;
+  width: 100%;
+  border: 1px solid var(--rose, #ff647e);
+  border-inline-start: 3px solid var(--rose, #ff647e);
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(112, 18, 52, .9), rgba(54, 12, 36, .88));
+  box-shadow: 0 2px 10px rgba(2, 5, 18, .65);
+  color: #ffe3e9;
+  font-weight: 700;
+  font-size: .88rem;
+  text-align: center;
+  text-shadow: 1px 1px 0 #03071b;
+}
+
+/* M12 Shadowblood Queen boss theme on Nightmare Round 5 */
+.gs-stage[data-background="shadowblood-queen"] {
+  border-color: #c94b6a;
+  box-shadow:
+    inset 0 0 0 1px rgba(217, 167, 92, .42),
+    inset 0 0 30px rgba(8, 2, 10, .82),
+    0 14px 34px rgba(4, 1, 8, .9);
+}
+.gs-stage[data-background="shadowblood-queen"] .gs-survival-hud {
+  border-color: #c94b6a;
+  background: linear-gradient(160deg, #3a112a 0%, #20091c 52%, #110512 100%);
+}
+
+/* Board container (obsidian slate tiles & silver disks inherited from frameui-tabletop.css) */
+.gs-stage .gs-table {
+  position: relative;
+  height: clamp(230px, 43vh, 370px);
+  margin-block: 4px;
+  --score-width: inherit;
+  --score-gap: inherit;
+  --cell-gap: inherit;
+  --table-inset: inherit;
+}
+
+/* Survival bonus draw row highlight integrated cleanly with silver/gold lane disk */
+.gs-stage .lane-score { position: relative; font-variant-numeric: tabular-nums; }
+.gs-stage .lane-score.bonus-draw-lane {
+  box-shadow:
+    inset 0 0 0 2px #f8dc82,
+    inset 0 0 14px rgba(248, 220, 130, .28),
+    0 0 10px rgba(248, 220, 130, .32);
+}
+.gs-bonus-draw-tag {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 3;
+  padding: 0 5px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #2145a4 0%, #0d1f5c 100%);
+  border: 1px solid #f8dc82;
+  color: #fff3c0;
+  font: 700 9.5px/1.25 var(--qbc-sans);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 1px 1px 0 #03071b;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .82);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.gs-bonus-earned {
+  display: inline-block;
+  margin: 4px 0 8px;
+  padding: 4px 12px;
+  border: 1px solid var(--gold);
+  border-radius: 2px;
+  background: linear-gradient(180deg, #2145a4 0%, #0e2266 100%);
+  color: #fff2b8;
+  font-weight: 700;
+  text-shadow: 1px 1px 0 #03071b;
+}
+.gs-lane {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  color: rgba(190, 210, 250, .72);
+  font: 700 10px/1 var(--qbc-sans);
+  text-shadow: 1px 1px 0 #03071b;
+}
+.gs-stage .gs-range { position: absolute; inset: 3px; z-index: 2; pointer-events: none; }
+
+/* Feedback bar */
+.gs-battle-feedback {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding: 5px 12px;
+  min-height: 30px;
+  border: 1px solid rgba(143, 163, 208, .34);
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(11, 24, 68, .85), rgba(7, 16, 44, .75));
+  font-size: .86rem;
+  text-shadow: 1px 1px 0 #03071b;
+}
+.gs-battle-feedback p { margin: 0; }
+
+/* Hand dock + FF7 OG side inspector */
+.gs-hand-area {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 23rem);
+  gap: 10px;
+  align-items: start;
+}
+.gs-hand-area .hand-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  color: var(--muted);
+}
+.gs-hand-area .gs-hand {
+  min-height: calc(var(--hand-height) + 2 * var(--hand-lift) + 12px);
+  padding: calc(var(--hand-lift) + 8px) 10px 8px;
+  border: 1px solid rgba(143, 163, 208, .36);
+  border-radius: 3px;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 0%, rgba(42, 86, 198, .22), transparent 72%),
+    linear-gradient(180deg, #07102c 0%, #0a173e 54%, #060d26 100%);
+  box-shadow: inset 0 4px 12px rgba(1, 3, 12, .82);
+}
+
+/* Action bar */
+.gs-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid transparent;
+  border-image: var(--qbc-rule, linear-gradient(90deg, rgba(223, 232, 250, .7), rgba(223, 232, 250, .18) 70%, transparent)) 1;
+}
+.gs-fast-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: .82rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+.gs-gamepad-hints { margin: 0; text-align: center; }
+
+/* Result sheet: FF7 OG double-silver royal blue window */
+.gs-result {
+  margin-top: 6px;
+  padding: 12px 14px;
+  border: 2px solid var(--silver, #dfe8fa);
+  border-radius: 3px;
+  background: var(--qbc-window, linear-gradient(155deg, #1d42a6 0%, #102670 48%, #071242 100%));
+  box-shadow: var(--qbc-bevel-flat), 0 8px 24px rgba(2, 5, 18, .75);
+  text-align: center;
+}
+.gs-result:empty { display: none; }
+.gs-result h3 {
+  color: var(--gold);
+  margin: 0 0 6px;
+  font-family: var(--qbc-display, var(--qbc-sans));
+  text-shadow: 1px 1px 0 #03071b;
+}
+.gs-result-rank {
+  display: inline-block;
+  margin: 4px 0 8px;
+  padding: 4px 14px;
+  border: 1px solid var(--gold);
+  border-radius: 2px;
+  background: linear-gradient(180deg, #2145a4 0%, #0e2266 100%);
+  box-shadow: 0 0 12px rgba(248, 220, 130, .28);
+  color: #fff3c0;
+  font-weight: 700;
+  text-shadow: 1px 1px 0 #03071b;
+}
+.gs-result-rank[data-status="failed"] {
+  border-color: var(--rose, #ff647e);
+  background: linear-gradient(180deg, #6e183a 0%, #380c20 100%);
+  box-shadow: 0 0 12px rgba(255, 84, 114, .28);
+  color: #ffdce3;
+}
+.gs-result table { margin: 8px auto 0; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 820px) {
+  .gs-hand-area { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .gs-cards > li { display: grid; }
+  .gs-stage { padding: 10px; --hand-width: 76px; --hand-height: 109px; --score-width: 28px; }
+  .gs-stage .gs-table { height: clamp(195px, 62vw, 285px); }
+  .gs-actions button { min-height: 44px; }
+}
+@media (max-width: 420px) {
+  .gs-stage .match-top { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .gs-stage .match-top h2 { grid-column: 1 / -1; order: -1; }
+}

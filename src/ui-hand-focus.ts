@@ -17,10 +17,10 @@ export function rangeNote(card:Card):string {
     ?t("seeTheAbilityDescriptionForReplacementGlobalConditional")
     :t("aRedOutlineShowsTheAbilitysRangeCheck");
 }
-export function mountHandFocus(host:HTMLElement,showCard:(id:number)=>void){
+export function mountHandFocus(host:HTMLElement,showCard:(id:number)=>void,idPrefix='handFocus'){
   const panel=element('aside','hand-focus'),caption=element('p','hand-focus-caption');
-  panel.id='handFocus';panel.setAttribute('aria-label',t("selectedHandCardInformation"));
-  caption.id='handFocusCaption';caption.setAttribute('aria-live','polite');
+  panel.id=idPrefix;panel.setAttribute('aria-label',t("selectedHandCardInformation"));
+  caption.id=idPrefix+'Caption';caption.setAttribute('aria-live','polite');
   const body=element('div','hand-focus-body'),empty=element('p','hand-focus-empty',t("browseOrSelectAHandCardToSee"));
   body.append(empty);
   const more=button(t("fullDetails"),()=>{if(current)showCard(current.id);});more.dataset.focus='hand-focus-details';

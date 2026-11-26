@@ -2,7 +2,7 @@ import {test,expect,vi} from 'vitest';
 import {createHash} from 'node:crypto';
 import {deflateSync} from 'node:zlib';
 import {ART_LIMITS,checkPng,verifyBrowserArt,type SelectedArtFile} from '../src/art-import.js';
-import {ArtImportClient,projectBrowserArt,type ImportWorker} from '../src/browser-art.js';
+import {ART_CACHE_DB,ArtImportClient,clearCachedArtPack,loadCachedArtPack,projectBrowserArt,saveCachedArtPack,type ImportWorker} from '../src/browser-art.js';
 import {createVisualResolver,getCardVisual} from '../src/visuals.js';
 
 const hash=(b:Uint8Array|string)=>createHash('sha256').update(b).digest('hex');
@@ -94,4 +94,145 @@ test('old Worker completion cannot win after cancel or a newer import',async()=>
   const second=client.verify([],progress);expect(await first).toBeNull();old({data:{type:'verified',pack:{name:'old'}}} as MessageEvent);
   workers[1]!.onmessage!({data:{type:'verified',pack:{name:'new'}}} as MessageEvent);expect(await second).toMatchObject({name:'new'});expect(workers[0]!.terminate).toHaveBeenCalledOnce();
   const third=client.verify([],progress);client.cancel();expect(await third).toBeNull();
+});
+
+function memoryIdb(): {factory: IDBFactory; stores: Map<string, Map<string, unknown>>; opened: string[]} {
+  const stores = new Map<string, Map<string, unknown>>();
+  const opened: string[] = [];
+  const factory = {
+    open(name: string) {
+      opened.push(name);
+      const req: Record<string, unknown> = {result: null, onupgradeneeded: null, onsuccess: null, onerror: null, onblocked: null};
+      const db = {
+        objectStoreNames: {contains: (store: string) => stores.has(store)},
+        createObjectStore: (store: string) => { if (!stores.has(store)) stores.set(store, new Map()); },
+        close: vi.fn(),
+        transaction: (store: string) => {
+          const tx: Record<string, unknown> = {oncomplete: null, onerror: null, onabort: null};
+          const bucket = stores.get(store) ?? new Map<string, unknown>();
+          stores.set(store, bucket);
+          tx.objectStore = () => ({
+            put(value: unknown, key: string) {
+              bucket.set(key, value);
+              queueMicrotask(() => (tx.oncomplete as (() => void) | null)?.());
+              return {};
+            },
+            get(key: string) {
+              const getReq: Record<string, unknown> = {result: bucket.get(key), onsuccess: null, onerror: null};
+              queueMicrotask(() => (getReq.onsuccess as (() => void) | null)?.());
+              return getReq;
+            },
+            delete(key: string) {
+              bucket.delete(key);
+              queueMicrotask(() => (tx.oncomplete as (() => void) | null)?.());
+              return {};
+            },
+          });
+          return tx;
+        },
+      };
+      req.result = db;
+      queueMicrotask(() => {
+        if (!stores.size) (req.onupgradeneeded as (() => void) | null)?.();
+        (req.onsuccess as (() => void) | null)?.();
+      });
+      return req;
+    },
+  } as unknown as IDBFactory;
+  return {factory, stores, opened};
+}
+
+test('IndexedDB art cache saves, restores, clears and degrades silently when unavailable or corrupted', async () => {
+  const verified = await verify(fixture().files());
+  // Unavailable IndexedDB degrades gracefully without throwing.
+  expect(await saveCachedArtPack(verified, null)).toBe(false);
+  expect(await loadCachedArtPack(null)).toBeNull();
+  expect(await clearCachedArtPack(null)).toBe(false);
+
+  const throwingIdb = {open() { throw Error('blocked'); }} as unknown as IDBFactory;
+  expect(await saveCachedArtPack(verified, throwingIdb)).toBe(false);
+  expect(await loadCachedArtPack(throwingIdb)).toBeNull();
+  expect(await clearCachedArtPack(throwingIdb)).toBe(false);
+
+  // Full save -> load -> clear round-trip using qbclassic.artpack.v1.
+  const idb = memoryIdb();
+  expect(await saveCachedArtPack(verified, idb.factory)).toBe(true);
+  expect(idb.opened[0]).toBe(ART_CACHE_DB);
+  const restored = await loadCachedArtPack(idb.factory);
+  expect(restored).not.toBeNull();
+  expect(restored!.name).toBe(verified.name);
+  expect(restored!.numberedPortraits).toBe(1);
+  expect(restored!.manifest).toEqual(verified.manifest);
+  expect(restored!.portraits).toHaveLength(1);
+
+  // Corrupted cache entry returns null without throwing.
+  idb.stores.get('packs')!.set('active', {version: 1, name: 'bad', manifest: {version: 2, cards: []}, portraits: [], numberedPortraits: 0});
+  expect(await loadCachedArtPack(idb.factory)).toBeNull();
+
+  // Re-save and clear removes cached entry.
+  expect(await saveCachedArtPack(verified, idb.factory)).toBe(true);
+  expect(await clearCachedArtPack(idb.factory)).toBe(true);
+  expect(await loadCachedArtPack(idb.factory)).toBeNull();
+});
+
+test('mountArtImport auto-restores cached art pack on startup and clears cache on unload', async () => {
+  const verified = await verify(fixture().files());
+  const createUrl = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:cached-portrait');
+  const revokeUrl = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {});
+  const nodes = new Map<string, Record<string, unknown>>();
+  const makeNode = (tag = 'div') => {
+    const n: Record<string, unknown> = {
+      tag, id: '', hidden: false, disabled: false, textContent: '', value: '', max: 1,
+      children: [] as unknown[],
+      setAttribute: vi.fn(),
+      append(...c: unknown[]) { (this.children as unknown[]).push(...c); },
+      after: vi.fn(),
+      querySelector: () => null,
+      addEventListener: vi.fn(),
+      click: vi.fn(),
+    };
+    return n;
+  };
+  vi.stubGlobal('window', {addEventListener: vi.fn()});
+  vi.doMock('../src/ui-dom.js', () => ({
+    element: (tag: string, _cls?: string, text = '') => Object.assign(makeNode(tag), {textContent: text, ...(tag === 'input' ? {webkitdirectory: ''} : {})}),
+    button: (text: string, onclick: () => void) => {
+      const btn = Object.assign(makeNode('button'), {textContent: text, onclick});
+      return btn;
+    },
+  }));
+  try {
+    const {mountArtImport} = await import('../src/ui-art-import.js');
+    const host = makeNode('section');
+    const applied: ReturnType<typeof getCardVisual>[] = [];
+    const apply = vi.fn((resolve: (id: number) => ReturnType<typeof getCardVisual>) => { applied.push(resolve(86)); });
+    const cache = {
+      load: vi.fn(async () => verified),
+      save: vi.fn(async () => true),
+      clear: vi.fn(async () => true),
+    };
+    mountArtImport(host as unknown as HTMLElement, apply, cache);
+    await vi.waitFor(() => expect(apply).toHaveBeenCalledOnce());
+    expect(applied[0].portraitPath).toBe('blob:cached-portrait');
+    const panel = (host.children as Record<string, unknown>[])[0];
+    const collect = (node: Record<string, unknown>): void => {
+      if (node.id) nodes.set(String(node.id), node);
+      for (const child of (node.children as Record<string, unknown>[])) collect(child);
+    };
+    collect(panel);
+    expect(String(nodes.get('artImportStatus')?.textContent)).toContain(verified.name);
+    expect(nodes.get('artImportUnload')?.disabled).toBe(false);
+
+    // Unload clears cache, revokes blob URL, and restores default symbols.
+    (nodes.get('artImportUnload')!.onclick as () => void)();
+    expect(cache.clear).toHaveBeenCalledOnce();
+    expect(revokeUrl).toHaveBeenCalledWith('blob:cached-portrait');
+    expect(applied[1].portraitPath).toBeNull();
+  } finally {
+    createUrl.mockRestore();
+    revokeUrl.mockRestore();
+    vi.doUnmock('../src/ui-dom.js');
+    vi.unstubAllGlobals();
+    vi.resetModules();
+  }
 });

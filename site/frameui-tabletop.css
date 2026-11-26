@@ -1,0 +1,448 @@
+/* FrameUI v3 · Part 2 — Midgar Mako-Slate Obsidian Tabletop System.
+   Unified across Standard Match, M12 Shadowblood Queen Boss, Replay, Gold Saucer & Card Carnival.
+   All visual surfaces stay strictly inside painted layers; hit targets & fitTable coordinates are unchanged. */
+
+/* ------------------------------------------------------------------ */
+/* 1. Stage backdrops & outer Shinra steel-slate tabletop mat          */
+/* ------------------------------------------------------------------ */
+#app :is(#view-game, #view-replay).view :is(.frame-battle, .replay-window)[data-background=hybrid] {
+  background:
+    radial-gradient(ellipse 68% 46% at 50% 24%, #132347 0%, #09122b 58%, #050919 100%);
+}
+
+/* Outer tabletop apron behind top bar, board & hand shelf (Match & Replay). */
+:is(#view-game, #view-replay).view :is(.frame-battle, .replay-window)::before {
+  content: "";
+  position: absolute;
+  grid-area: 1 / 1 / 4 / 2;
+  inset: 0;
+  z-index: -1;
+  box-sizing: border-box;
+  width: min(100%, calc(var(--r10-content-width, var(--table-edge)) + 2 * var(--table-shoulder)));
+  margin: -3px auto -6px;
+  pointer-events: none;
+  opacity: 1;
+  border: clamp(2px, .45cqi, 6px) solid transparent;
+  border-radius: 5px;
+  background:
+    radial-gradient(ellipse 72% 48% at 50% 22%, rgba(56, 108, 224, .18), transparent 72%) padding-box,
+    linear-gradient(90deg, rgba(58, 242, 210, .1), transparent 24% 76%, rgba(255, 84, 114, .1)) padding-box,
+    repeating-linear-gradient(0deg, rgba(190, 210, 250, .025) 0 1px, transparent 1px 4px) padding-box,
+    linear-gradient(165deg, #0d1a3d 0%, #070f28 52%, #050a1d 100%) padding-box,
+    linear-gradient(155deg, #b8c9ea 0%, #3b4f7e 38%, #1d2a4d 68%, #8fa3d0 100%) border-box;
+  box-shadow:
+    inset 0 0 0 1px rgba(223, 232, 250, .38),
+    inset 0 0 28px rgba(2, 5, 18, .72),
+    0 2px 0 #1e2d54,
+    0 6px 0 #091024,
+    0 16px 32px rgba(1, 3, 12, .85);
+}
+
+/* ------------------------------------------------------------------ */
+/* 2. Inner Shinra Obsidian-Silver Beveled Board Frame (All 4 Modes)   */
+/* ------------------------------------------------------------------ */
+#app .frame-table::before,
+#app .battle-window:is([data-background=hybrid], [data-background=shadowblood-queen]) .frame-table::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: min(100%, calc(var(--board-width) + 2 * var(--score-width) + 2 * var(--score-gap) + 2 * var(--table-inset)));
+  height: min(100%, calc(var(--board-height) + 2 * var(--table-inset)));
+  margin: auto;
+  pointer-events: none;
+  border: 1px solid #bccbe8;
+  border-radius: 4px;
+  background:
+    linear-gradient(135deg, rgba(223, 232, 250, .14) 0%, transparent 26%, transparent 74%, rgba(143, 163, 208, .12) 100%),
+    linear-gradient(145deg, #263558 0%, #131d38 30%, #070d20 70%, #1c294a 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .48),
+    inset 0 0 0 2px #263558,
+    inset 0 0 0 4px #091024,
+    inset 0 0 18px rgba(2, 5, 16, .85),
+    0 3px 0 #233256,
+    0 6px 0 #091024,
+    0 12px 24px rgba(1, 3, 12, .82);
+}
+#app .battle-window:is([data-background=hybrid], [data-background=shadowblood-queen]) .frame-table::after { content: none; }
+
+#app .frame-table .board {
+  border-radius: 2px;
+  background: #040814;
+  box-shadow: 0 0 0 1px #1d2b4e, 0 2px 6px rgba(0, 0, 0, .82);
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. 3x5 Obsidian Metal Slate Tiles (Zero Checkerboard)               */
+/* ------------------------------------------------------------------ */
+#app .frame-table .tile {
+  --slate-top: #162447;
+  --slate-bottom: #0c152e;
+  --slate-rim: rgba(164, 188, 232, .22);
+  border: 1px solid #283a66;
+  border-radius: 2px;
+  background:
+    linear-gradient(160deg, rgba(223, 232, 250, .06) 0%, transparent 38%),
+    repeating-linear-gradient(135deg, rgba(190, 210, 250, .022) 0 1px, transparent 1px 5px),
+    linear-gradient(150deg, var(--slate-top), var(--slate-bottom));
+  box-shadow:
+    inset 1px 1px 0 var(--slate-rim),
+    inset -1px -1px 0 rgba(3, 6, 18, .92),
+    inset 0 3px 9px rgba(2, 5, 16, .68);
+}
+/* Ultra-restrained 3-4% tonal shift purely for coordinate clarity; never whitish/grey. */
+#app .frame-table .tile:nth-child(odd) {
+  --slate-top: #1b2b52;
+  --slate-bottom: #0f1a38;
+}
+#app .frame-table .tile:hover:not(:disabled) {
+  border-color: rgba(198, 216, 248, .55);
+  filter: brightness(1.08);
+}
+
+/* Player Territory: Deep Mako-Slate + Luminous Mako-Cyan Inner Glow */
+#app .frame-table .tile:is(.pawn-0, .owner-0) {
+  --slate-top: #0d313d;
+  --slate-bottom: #081e2c;
+  --slate-rim: rgba(124, 252, 230, .42);
+  --pawn-light: #e2fff8;
+  --pawn-mid: #3af2d2;
+  --pawn-shadow: #0a5e60;
+  border-color: rgba(58, 242, 210, .58);
+  box-shadow:
+    inset 0 0 0 1px rgba(58, 242, 210, .38),
+    inset 0 0 16px rgba(58, 242, 210, .2),
+    inset 0 2px 8px rgba(2, 12, 18, .55);
+}
+
+/* Opponent Territory: Deep Crimson-Obsidian + Luminous Summon-Crimson Inner Glow */
+#app .frame-table .tile:is(.pawn-1, .owner-1) {
+  --slate-top: #3d1327;
+  --slate-bottom: #240b1b;
+  --slate-rim: rgba(255, 152, 174, .4);
+  --pawn-light: #ffe2ea;
+  --pawn-mid: #ff5472;
+  --pawn-shadow: #6e1230;
+  border-color: rgba(255, 84, 114, .6);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 84, 114, .38),
+    inset 0 0 16px rgba(255, 84, 114, .22),
+    inset 0 2px 8px rgba(18, 2, 10, .58);
+}
+
+/* Empty anchor etched cold-silver diamond + center tile emblem. */
+#app .frame-table .frame-pawns {
+  display: flex;
+  align-items: end;
+  gap: max(1px, calc(var(--cell-width) * .028));
+}
+#app .frame-table .frame-pawns.empty { padding: 0; }
+#app .frame-table .frame-pawns.empty::before {
+  content: "";
+  width: clamp(4px, calc(var(--cell-width) * .072), 7px);
+  aspect-ratio: 1;
+  border: 1px solid rgba(190, 212, 248, .36);
+  background: rgba(190, 212, 248, .08);
+  box-shadow: inset 0 1px 2px rgba(2, 5, 16, .85), 0 0 4px rgba(143, 163, 208, .18);
+  transform: rotate(45deg);
+}
+#app .frame-table .tile:nth-child(8) > .frame-pawns.empty::before {
+  width: clamp(22px, calc(var(--cell-width) * .46), 60px);
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'%3E%3Cg fill='none' stroke='%23a6bce6' stroke-width='1.1' opacity='.32'%3E%3Cpath d='M40 4 76 40 40 76 4 40ZM40 14 66 40 40 66 14 40ZM14 14h9m-9 0v9m52-9h-9m9 0v9M14 66h9m-9 0v-9m52 9h-9m9 0v-9'/%3E%3Cpath d='M40 21c0 12 6 19 19 19-13 0-19 6-19 19 0-13-6-19-19-19 13 0 19-7 19-19Z'/%3E%3Ccircle cx='40' cy='40' r='5'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+  border: 0;
+  box-shadow: none;
+  transform: none;
+}
+
+/* 3D Luminous Crystal Materia Pawn Pillars. */
+#app .frame-table .frame-pawns:not(.empty) {
+  position: relative;
+  background: radial-gradient(ellipse at 50% 88%, rgba(2, 6, 18, .82) 15%, transparent 72%) 0 100% / 100% 38% no-repeat;
+}
+#app .frame-table .frame-pawn {
+  display: block;
+  position: relative;
+  width: min(29px, calc(var(--cell-width) * .25));
+  aspect-ratio: .76;
+  filter:
+    drop-shadow(0 0 4px color-mix(in srgb, var(--pawn-mid, #3af2d2) 45%, transparent))
+    drop-shadow(1px 3px 2px rgba(2, 4, 14, .88));
+}
+#app .frame-table .frame-pawn::before,
+#app .frame-table .frame-pawn::after { content: ""; position: absolute; }
+#app .frame-table .frame-pawn::before {
+  inset: 22% 3% 0;
+  clip-path: polygon(39% 0, 61% 0, 68% 18%, 63% 38%, 70% 62%, 84% 77%, 95% 84%, 98% 97%, 88% 100%, 12% 100%, 2% 97%, 5% 84%, 16% 77%, 30% 62%, 37% 38%, 32% 18%);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, .42) 0 14%, transparent 24% 86%, rgba(2, 6, 18, .55) 92% 100%),
+    linear-gradient(104deg, var(--pawn-shadow), var(--pawn-mid) 28%, var(--pawn-light) 44%, var(--pawn-mid) 62%, var(--pawn-shadow) 88%);
+}
+#app .frame-table .frame-pawn::after {
+  inset: 0 17% auto;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 24%, #ffffff 0 14%, var(--pawn-light) 26%, var(--pawn-mid) 56%, var(--pawn-shadow) 86%);
+  box-shadow: inset 0 -1px 2px rgba(2, 6, 18, .65), 0 0 6px color-mix(in srgb, var(--pawn-mid, #3af2d2) 65%, transparent);
+}
+
+#app .frame-table .tile > .qb-card--board {
+  box-shadow: 0 0 0 1px #040818, 2px 3px 6px rgba(2, 5, 16, .84);
+}
+
+/* ------------------------------------------------------------------ */
+/* 4. Rebirth Placement, Preview, Ability Reticle & Bonus Tile Marks   */
+/* ------------------------------------------------------------------ */
+#app .frame-table .tile.legal::after {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 1.5px solid #f8dc82;
+  border-radius: 2px;
+  box-shadow: inset 0 0 8px rgba(248, 220, 130, .22), 0 0 0 1px rgba(4, 9, 24, .78);
+  pointer-events: none;
+  z-index: 3;
+}
+#app .frame-table .tile.pending::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid #fff7d6;
+  border-radius: 2px;
+  box-shadow:
+    inset 0 0 0 1px #f8dc82,
+    inset 0 0 14px rgba(248, 220, 130, .38),
+    0 0 10px rgba(248, 220, 130, .45);
+  pointer-events: none;
+  z-index: 4;
+}
+#app .frame-table .tile.replacement-target::after { border-style: double; border-width: 4px; }
+#app .frame-table .tile.blocked-target::after {
+  content: "";
+  position: absolute;
+  inset: 1px;
+  border: 2px dashed #ff8aa0;
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 4;
+}
+
+/* Territory expansion preview: crisp amber-gold diagonal hatch. */
+#app .frame-table .tile.preview-pawn::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  border: 1px solid #f8dc82;
+  border-radius: 1px;
+  background: repeating-linear-gradient(135deg, rgba(248, 220, 130, .28) 0 2px, rgba(248, 220, 130, .05) 2px 7px);
+  pointer-events: none;
+  z-index: 2;
+}
+#app .frame-table .tile.preview-pawn.preview-effect::before { background: none; }
+
+/* Ability target reticle: crisp mako-ice dashed aiming box. */
+#app .frame-table .tile.preview-effect { outline: none; }
+#app .frame-table .tile.preview-effect .range-overlay,
+#app .frame-table .tile.preview-effect .gs-range,
+#app .frame-table .tile.preview-effect .carnival-range {
+  inset: 4px;
+  border: 2px dashed #66f7ff;
+  outline: none;
+  border-radius: 2px;
+  background: repeating-linear-gradient(45deg, rgba(102, 247, 255, .2) 0 2px, rgba(102, 247, 255, .04) 2px 9px);
+  box-shadow: inset 0 0 8px rgba(102, 247, 255, .25), 0 0 4px rgba(3, 8, 24, .85);
+}
+
+/* Ghost aim preview card with floating 3D golden diamond pointer. */
+#app :is(#view-game, #view-gold-saucer) .match-player-preview {
+  left: calc(var(--effect-col) * (var(--cell-width) + var(--cell-gap)) + (var(--cell-width) - var(--cell-height) * .7) / 2);
+  top: calc(var(--effect-row) * (var(--cell-height) + var(--cell-gap)) - clamp(6px, 1.4cqi, 16px));
+  width: calc(var(--cell-height) * .7);
+  opacity: 1;
+  box-shadow:
+    0 0 0 2px #f8dc82,
+    0 0 14px rgba(248, 220, 130, .42),
+    4px 9px 14px rgba(2, 5, 16, .88);
+  transform: scale(1.03);
+}
+#app :is(#view-game, #view-gold-saucer) .match-player-preview:not([data-invalid])::before {
+  content: "";
+  position: absolute;
+  top: -6px;
+  left: calc(50% - 5px);
+  width: 10px;
+  height: 10px;
+  background: linear-gradient(135deg, #fffbe3 0 48%, #e2ae3c 52% 100%);
+  box-shadow: 0 0 0 1px #03071b, 0 0 8px rgba(248, 220, 130, .7);
+  transform: rotate(45deg);
+  z-index: 2;
+}
+#app :is(#view-game, #view-gold-saucer) .match-player-preview[data-invalid] {
+  opacity: .78;
+  outline: 2px dashed #ff8aa0;
+  box-shadow: 3px 8px 12px rgba(2, 5, 16, .82);
+}
+
+/* Gold Saucer / High Ground tile bonus highlight & badge. */
+#app .frame-table .tile.has-tile-bonus {
+  box-shadow:
+    inset 0 0 0 2px #f8dc82,
+    inset 0 0 14px rgba(248, 220, 130, .28);
+}
+.tile-bonus-badge {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  z-index: 3;
+  pointer-events: none;
+  padding: 1px 5px;
+  border-radius: 2px;
+  border: 1px solid #f8dc82;
+  background: linear-gradient(180deg, #1b3a8f 0%, #0b194c 100%);
+  color: #fff2b8;
+  font: 700 11px/1.2 var(--qbc-sans);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 1px 1px 0 #03071b;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .82), 0 0 6px rgba(248, 220, 130, .3);
+}
+
+/* Replay pawn preview highlight. */
+#app #view-replay .tile.preview-pawn {
+  --slate-top: #52421c;
+  --slate-bottom: #33270f;
+}
+
+/* ------------------------------------------------------------------ */
+/* 5. Silver-Rimmed Materia Lane Score Disks (All 4 Modes)             */
+/* ------------------------------------------------------------------ */
+#app .frame-table .lane-scores {
+  --rail-dark: #071026;
+  --rail-face: #102848;
+  --rail-rim: #7de8d8;
+  background: linear-gradient(90deg, #060b1d, #111f46 22% 78%, #060b1d);
+  box-shadow:
+    inset 1px 0 rgba(190, 210, 250, .24),
+    inset -1px 0 rgba(2, 5, 16, .9),
+    0 0 0 1px #1d2c52;
+  border-radius: 3px;
+}
+#app .frame-table .lane-scores ~ .lane-scores {
+  --rail-dark: #160918;
+  --rail-face: #3e1429;
+  --rail-rim: #ff8ea4;
+}
+#app .frame-table .lane-score {
+  position: relative;
+  --score-marker: min(calc(var(--score-width) - 2px), 50px);
+  --medal-ring: var(--rail-rim);
+  width: 100%;
+  justify-self: center;
+  border: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255, 255, 255, .22), transparent 48%) center / var(--score-marker) var(--score-marker) no-repeat,
+    radial-gradient(circle closest-side, var(--rail-face) 62%, var(--rail-dark) 71%, var(--medal-ring) 74% 81%, #c6d6f4 83% 89%, #1c2a4d 91% 96%, transparent 99%) center / var(--score-marker) var(--score-marker) no-repeat,
+    radial-gradient(circle closest-side, rgba(2, 5, 16, .88) 82%, transparent 98%) calc(50% + 1px) calc(50% + 2px) / calc(var(--score-marker) + 4px) calc(var(--score-marker) + 4px) no-repeat;
+  box-shadow: inset 0 1px rgba(190, 210, 250, .14), inset 0 -1px rgba(2, 5, 16, .82);
+  color: #edf3ff;
+  font: 700 clamp(.9rem, 2.05cqi, 1.52rem)/1 var(--qbc-display, var(--qbc-sans));
+  font-variant-numeric: tabular-nums;
+  text-shadow: 1px 1px 0 #03071b;
+}
+
+/* Winning row: radiant gold double-ring + sharp inward golden chevron arrow. */
+#app .frame-table .lane-score.winning {
+  --medal-ring: #f8dc82;
+  color: #fff6c8;
+  text-shadow: 1px 1px 0 #03071b, 0 0 10px rgba(248, 220, 130, .65);
+  background:
+    radial-gradient(circle at 34% 26%, rgba(255, 248, 210, .38), transparent 50%) center / var(--score-marker) var(--score-marker) no-repeat,
+    radial-gradient(circle closest-side, color-mix(in srgb, var(--rail-face) 72%, #594414) 60%, #1b160c 69%, #f8dc82 72% 81%, #fff7d6 83% 88%, #735416 90% 96%, transparent 99%) center / var(--score-marker) var(--score-marker) no-repeat,
+    radial-gradient(circle closest-side, rgba(248, 220, 130, .28) 76%, transparent 100%) center / calc(var(--score-marker) + 10px) calc(var(--score-marker) + 10px) no-repeat;
+}
+#app .frame-table .lane-score::after { position: absolute; content: none; pointer-events: none; }
+#app .frame-table .lane-score.winning::after {
+  content: "";
+  top: calc(50% - 5px);
+  right: 1px;
+  width: 7px;
+  height: 10px;
+  background: linear-gradient(180deg, #fffbe3 0 50%, #e2ae3c 50% 100%);
+  clip-path: polygon(0 0, 100% 50%, 0 100%, 24% 50%);
+  filter: drop-shadow(0 0 3px rgba(248, 220, 130, .75));
+}
+#app .frame-table .lane-scores ~ .lane-scores .lane-score.winning::after {
+  right: auto;
+  left: 1px;
+  transform: scaleX(-1);
+}
+#app .frame-table:not(:has(.winning:nth-child(1))) .lane-score:nth-child(1)::after,
+#app .frame-table:not(:has(.winning:nth-child(2))) .lane-score:nth-child(2)::after,
+#app .frame-table:not(:has(.winning:nth-child(3))) .lane-score:nth-child(3)::after {
+  content: "";
+  bottom: max(3px, calc(50% - var(--score-marker) / 2 - 7px));
+  inset-inline: 0;
+  width: 8px;
+  height: 2px;
+  margin: auto;
+  background: rgba(190, 210, 250, .55);
+}
+
+/* ------------------------------------------------------------------ */
+/* 6. M12 Shadowblood Queen Boss Tabletop Variant                      */
+/*    Shared by Standard Match, Replay & Gold Saucer Nightmare R5      */
+/* ------------------------------------------------------------------ */
+#app :is(.frame-battle, .replay-window, .gs-stage)[data-background="shadowblood-queen"] {
+  background:
+    radial-gradient(ellipse 68% 46% at 50% 22%, rgba(132, 22, 62, .48) 0%, transparent 72%),
+    linear-gradient(160deg, #170718 0%, #0a040e 58%, #150616 100%);
+}
+#app :is(#view-game, #view-replay).view :is(.frame-battle, .replay-window)[data-background="shadowblood-queen"]::before {
+  background:
+    radial-gradient(ellipse 72% 48% at 50% 22%, rgba(201, 75, 106, .2), transparent 72%) padding-box,
+    linear-gradient(90deg, rgba(58, 242, 210, .08), transparent 24% 76%, rgba(201, 75, 106, .18)) padding-box,
+    linear-gradient(165deg, #210a22 0%, #110516 52%, #0a040e 100%) padding-box,
+    linear-gradient(155deg, #d9a75c 0%, #7d2542 36%, #361024 68%, #c94b6a 100%) border-box;
+  box-shadow:
+    inset 0 0 0 1px rgba(217, 167, 92, .48),
+    inset 0 0 28px rgba(8, 2, 10, .82),
+    0 2px 0 #4d172c,
+    0 6px 0 #14050e,
+    0 18px 34px rgba(5, 1, 8, .9);
+}
+#app :is(.frame-battle, .replay-window, .gs-stage)[data-background="shadowblood-queen"] .frame-table::before {
+  border-color: #c94b6a;
+  background:
+    linear-gradient(135deg, rgba(217, 167, 92, .16) 0%, transparent 28%, transparent 72%, rgba(201, 75, 106, .16) 100%),
+    linear-gradient(145deg, #321024 0%, #190817 34%, #0a040e 72%, #290d1f 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(235, 188, 122, .45),
+    inset 0 0 0 2px #401429,
+    inset 0 0 0 4px #110510,
+    inset 0 0 20px rgba(4, 1, 8, .9),
+    0 3px 0 #571d34,
+    0 6px 0 #14050d,
+    0 14px 26px rgba(4, 1, 8, .88);
+}
+#app :is(.frame-battle, .replay-window, .gs-stage)[data-background="shadowblood-queen"] .frame-table .tile:not(.pawn-0, .owner-0, .pawn-1, .owner-1) {
+  --slate-top: #1d0f28;
+  --slate-bottom: #11081a;
+  --slate-rim: rgba(217, 167, 92, .22);
+  border-color: #46203a;
+}
+#app :is(.frame-battle, .replay-window, .gs-stage)[data-background="shadowblood-queen"] .frame-table .tile:nth-child(odd):not(.pawn-0, .owner-0, .pawn-1, .owner-1) {
+  --slate-top: #231230;
+  --slate-bottom: #140a1f;
+}
+#app :is(.frame-battle, .replay-window, .gs-stage)[data-background="shadowblood-queen"] .frame-table .lane-scores {
+  box-shadow:
+    inset 1px 0 rgba(217, 167, 92, .28),
+    inset -1px 0 rgba(4, 1, 8, .92),
+    0 0 0 1px #421a30;
+}
+#app :is(.frame-battle, .replay-window, .gs-stage)[data-background="shadowblood-queen"] .battle-hand {
+  border-color: rgba(201, 75, 106, .48);
+  background:
+    radial-gradient(ellipse 72% 60% at 50% 0%, rgba(168, 36, 76, .2), transparent 72%),
+    linear-gradient(180deg, #160718 0%, #1c0a20 54%, #0c0410 100%);
+}

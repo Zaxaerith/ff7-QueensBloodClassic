@@ -42,7 +42,7 @@ it('retains invalid cursor positions, while only authoritative legal moves may c
 });
 
 it('gives the dialog priority over all match and replay contexts',()=>{
-  for(const route of ['game','replay','home']){
+  for(const route of ['game','replay','home','carnival']){
     expect(inputContext(route,true,'Preview','target')).toBe('DIALOG_MODAL');
   }
   expect(inputContext('game',false,'Mulligan','target')).toBe('MULLIGAN');
@@ -54,6 +54,12 @@ it('gives the dialog priority over all match and replay contexts',()=>{
   expect(inputContext('replay',false,'Preview','target')).toBe('REPLAY');
   expect(inputContext('home',false,'','hand')).toBe('NAV_MENU');
   expect(inputContext('prepare',false,'','hand')).toBe('PREPARE');
+  expect(inputContext('carnival',false,'','hand')).toBe('NAV_MENU');
+  expect(inputContext('carnival',false,'playing','hand')).toBe('CARNIVAL_STAGE');
+  expect(inputContext('carnival',false,'finished','command')).toBe('CARNIVAL_STAGE');
+  expect(inputContext('gold-saucer',false,'','hand')).toBe('NAV_MENU');
+  expect(inputContext('gold-saucer',false,'playing','hand')).toBe('GOLD_SAUCER_STAGE');
+  expect(inputContext('gold-saucer',true,'playing','target')).toBe('DIALOG_MODAL');
 });
 
 it('dispatches modal navigation but never forwards a board move or placement under it',()=>{
@@ -92,9 +98,16 @@ it('allows hold-to-pass when the active player is browsing, inspecting or target
   expect(allowsPass('MATCH_HAND_BROWSE')).toBe(true);
   expect(allowsPass('MATCH_BOARD_TARGET')).toBe(true);
   expect(allowsPass('MATCH_BOARD_INSPECT')).toBe(true);
-  for(const state of ['NPC_TURN','PRESENTATION_LOCK','DIALOG_MODAL','RESULT','MULLIGAN','MATCH_PAUSE','REPLAY'] as const){
+  for(const state of ['NPC_TURN','PRESENTATION_LOCK','DIALOG_MODAL','RESULT','MULLIGAN','MATCH_PAUSE','REPLAY','CARNIVAL_STAGE'] as const){
     expect(acceptsAction(state,{type:'pass'})).toBe(false);
   }
+  expect(acceptsAction('CARNIVAL_STAGE',{type:'move',direction:'right'})).toBe(true);
+  expect(acceptsAction('CARNIVAL_STAGE',{type:'confirm'})).toBe(true);
+  expect(acceptsAction('CARNIVAL_STAGE',{type:'cancel'})).toBe(true);
+  expect(acceptsAction('CARNIVAL_STAGE',{type:'details'})).toBe(true);
+  expect(acceptsAction('CARNIVAL_STAGE',{type:'switch',step:1})).toBe(true);
+  expect(acceptsAction('CARNIVAL_STAGE',{type:'mulliganCommit'})).toBe(false);
+  expect(acceptsAction('CARNIVAL_STAGE',{type:'editDeck'})).toBe(false);
   expect(acceptsAction('NPC_TURN',{type:'control',control:'presentationSkip'})).toBe(true);
   expect(acceptsAction('NPC_TURN',{type:'control',control:'cardDetails'})).toBe(false);
 });

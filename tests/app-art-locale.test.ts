@@ -213,8 +213,9 @@ test('New Game binds every localized NPC and mirror option while Continue keeps 
     app.get('locale').onchange!();
     expect(roster.querySelector('button[aria-current=true]')?.dataset.opponent).toBe(menuOpponent);
     const buttons = rosterButtons();
-    expect(buttons).toHaveLength(11);
+    expect(buttons).toHaveLength(challengers.length + 2);
     expect(buttons.find(button => button.dataset.opponent === '')?.textContent).toBe(t('mirrorPractice'));
+    expect(buttons.find(button => button.dataset.opponent === 'shadowblood-queen')?.textContent).toBe(t('shadowbloodQueenName'));
     const details = new Set<string>();
     for (const npc of challengers) {
       const name = termRecord('npc:'+npc.id,locale)!;
@@ -231,7 +232,7 @@ test('New Game binds every localized NPC and mirror option while Continue keeps 
       expect(difficulty.value).toBe('easy');
       details.add(hint);
     }
-    expect(details.size).toBe(10);
+    expect(details.size).toBe(challengers.length);
     focusOpponent(menuOpponent);
   }
   app.get('resumeGame').onclick!();

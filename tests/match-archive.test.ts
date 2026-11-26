@@ -14,7 +14,7 @@ class MemoryStore implements StoragePort {
 }
 const settings:MatchSettings={deck:starterDeck,seed:701,difficulty:'hard',first:'computer'};
 const snapshot=(game:Game,id='match-1')=>saveMatch(game,{...settings,seed:game.replay.seed},'经典',id);
-const fixture=JSON.parse(readFileSync(new URL('../examples/cli/replay-analysis.json',import.meta.url),'utf8'));
+const fixture=JSON.parse(readFileSync(new URL('../examples/cli/m5c1-replay.json',import.meta.url),'utf8'));
 const finished=()=>replayMatch(fixture.operations[0].replay);
 
 test('save protocol reconstructs opening, partial mulligan, computer and player turns exactly',()=>{

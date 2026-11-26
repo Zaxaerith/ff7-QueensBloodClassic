@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 
-<html lang="zh-CN"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="#161c1b" name="theme-color"/><title data-i18n="applicationTitle">女王之血 · FF7 经典版</title><link href="./card.css" rel="stylesheet"/><link href="./style.css" rel="stylesheet"/><link href="./battle-background.css" rel="stylesheet"/><link href="./art-import.css" rel="stylesheet"/><link href="./frameui-shell.css" rel="stylesheet"/><link href="./frameui-match.css" rel="stylesheet"/></head>
+<html lang="zh-CN"><head><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><meta content="#060d2c" name="theme-color"/><title data-i18n="applicationTitle">女王之血 · FF7 经典版</title><link href="./card.css" rel="stylesheet"/><link href="./style.css" rel="stylesheet"/><link href="./battle-background.css" rel="stylesheet"/><link href="./art-import.css" rel="stylesheet"/><link href="./frameui-shell.css" rel="stylesheet"/><link href="./frameui-match.css" rel="stylesheet"/><link href="./frameui-tabletop.css" rel="stylesheet"/></head>
 <body><div class="app-shell" data-view="home" id="app">
-<header class="app-header"><div class="brand"><span aria-hidden="true" class="brand-mark">Ⅶ</span><div><p class="eyebrow">FINAL FANTASY VII · CLASSIC EDITION</p><h1 data-i18n="brand">女王之血</h1></div></div><div class="header-actions"><button aria-label="操作说明" data-i18n-aria-label="howToPlay" id="instructionsBtn">?</button><button data-i18n="back" hidden="" id="backMenu">返回</button></div></header>
-<nav aria-label="主菜单" class="menu-window" data-i18n-aria-label="mainMenu" id="mainNav"><button aria-current="page" data-i18n="newGame" data-route="home">开始对局</button><button data-i18n="decks" data-route="decks">卡组</button><button data-i18n="collection" data-route="collection">图鉴</button><button data-i18n="records" data-route="records">对局记录</button><button data-i18n="settings" data-route="config">设置</button><button aria-controls="view-carnival" data-route="carnival" id="carnivalNav">卡牌嘉年华</button></nav>
+<header class="app-header"><div class="brand"><span aria-hidden="true" class="brand-mark">Ⅶ</span><div><p class="eyebrow">FINAL FANTASY VII · CLASSIC EDITION</p><h1 data-i18n="brand">女王之血</h1></div></div><div class="header-actions"><button class="blood-rank-pill" hidden="" id="bloodRankBadge" type="button"></button><button aria-label="操作说明" data-i18n-aria-label="howToPlay" id="instructionsBtn">?</button><button data-i18n="back" hidden="" id="backMenu">返回</button></div></header>
+<nav aria-label="主菜单" class="menu-window" data-i18n-aria-label="mainMenu" id="mainNav"><button aria-current="page" data-i18n="newGame" data-route="home">开始对局</button><button data-i18n="decks" data-route="decks">卡组</button><button data-i18n="collection" data-route="collection">图鉴</button><button data-i18n="records" data-route="records">对局记录</button><button data-i18n="settings" data-route="config">设置</button><button aria-controls="view-carnival" data-route="carnival" id="carnivalNav">卡牌嘉年华</button><button aria-controls="view-gold-saucer" data-i18n="goldSaucerTab" data-route="gold-saucer" id="goldSaucerNav">金碟挑战</button><button aria-controls="view-tournament" data-i18n="tournamentTab" data-route="tournament" id="tournamentNav">游轮锦标赛</button></nav>
 <p class="app-notice" id="appNotice" role="status"></p>
 <main id="views">
 <section class="view challenge-screen" id="view-home">
@@ -41,7 +41,7 @@
 <div class="battle-feedback"><p id="status" role="status"></p><p aria-live="polite" id="feedback"></p></div>
 <div class="hand-area"><div class="hand-heading"><strong data-i18n="hand">手牌</strong><span id="handHelp"></span></div><div aria-label="你的手牌，可横向滚动" class="battle-hand" data-i18n-aria-label="yourHandScrollHorizontallyToSeeMoreCards" id="hand"></div></div>
 <div aria-label="操作" class="battle-actions" role="group" data-i18n-aria-label="controls"><button class="primary" data-i18n="confirmMulligan" id="confirmMulligan">完成换牌</button><button class="primary" data-i18n="confirmPlay" hidden="" id="confirmPlay">确认出牌</button><button data-i18n="cardDetails2" id="cardDetails">卡牌详情</button><button data-i18n="gamepadHoldPass" id="passBtn">长按跳过</button><button data-i18n="matchResult2" hidden="" id="resultsBtn">对局结果</button><details class="action-more"><summary>暂停</summary><div>
-<button data-i18n="continueGame" id="matchContinue">继续对局</button><button data-i18n="restartSameSettings" id="matchRestart">重新开始</button><button data-i18n="howToPlay" id="matchHelp">帮助</button><button data-i18n="exportReplay" id="replayBtn">导出回放</button><button data-i18n="eventLog" id="battleLogBtn">事件日志</button><button type="button" data-i18n="audioSettings" id="matchAudioSettings" hidden>音频设置</button><details class="background-history"><summary data-i18n="advancedAppearance">高级外观</summary><label class="background-picker"><span data-i18n="historicalBackgrounds">历史背景对照</span><select aria-label="高级背景对照" data-i18n-aria-label="compareHistoricalBackgrounds" id="battleBackground"></select></label></details><button data-i18n="backToMenu" id="matchLeave">返回菜单</button></div></details></div></div></section>
+<button data-i18n="continueGame" id="matchContinue">继续对局</button><button data-i18n="restartSameSettings" id="matchRestart">重新开始</button><button data-i18n="howToPlay" id="matchHelp">帮助</button><button data-i18n="exportReplay" id="replayBtn">导出回放</button><button data-i18n="eventLog" id="battleLogBtn">事件日志</button><button type="button" data-i18n="audioSettings" id="matchAudioSettings">音频设置</button><details class="background-history"><summary data-i18n="advancedAppearance">高级外观</summary><label class="background-picker"><span data-i18n="historicalBackgrounds">历史背景对照</span><select aria-label="高级背景对照" data-i18n-aria-label="compareHistoricalBackgrounds" id="battleBackground"></select></label></details><button data-i18n="backToMenu" id="matchLeave">返回菜单</button></div></details></div></div></section>
 <section class="view" data-deck-pane="library" hidden="" id="view-decks">
 <div class="d4-panel-heading"><h2 class="view-title" data-i18n="decks" tabindex="-1">卡组</h2><p id="deckSummary" role="status"></p></div>
 <div class="window d4-deck-tools">
@@ -67,7 +67,7 @@
 </section>
 <aside aria-labelledby="deckInfoTitle" class="window d4-inspector" data-deck-panel="info" id="deckInfo"><h3 data-i18n="cardInformation" id="deckInfoTitle" tabindex="-1">卡牌信息</h3></aside>
 </div>
-<div class="window d4-deck-footer"><p class="muted" id="deckValidation" role="status"></p><div class="button-row d4-deck-actions"><button data-i18n="save" id="saveDeck">保存</button><button class="primary" data-i18n="useInNewGame" id="useDeck">用于新对局</button><button data-i18n="revertDraft" id="revertDeck">撤销草稿</button><button class="danger" data-i18n="delete" id="deleteDeck">删除</button><button data-i18n="back" id="deckBack">返回</button></div></div>
+<div class="window d4-deck-footer"><p class="muted" id="deckValidation" role="status"></p><div class="button-row d4-deck-actions"><button data-i18n="save" id="saveDeck">保存</button><button data-i18n="duplicateDeck" id="duplicateDeck">另存为新牌组</button><button class="primary" data-i18n="useInNewGame" id="useDeck">用于新对局</button><button data-i18n="revertDraft" id="revertDeck">撤销草稿</button><button class="danger" data-i18n="delete" id="deleteDeck">删除</button><button data-i18n="back" id="deckBack">返回</button></div></div>
 </section>
 <section class="view" hidden="" id="view-collection">
   <div class="section-heading frame-library-heading">
@@ -102,23 +102,36 @@
 </div></section>
 <section class="view" hidden="" id="view-config"><div class="window narrow-window"><h2 class="view-title" data-i18n="settings" tabindex="-1">设置</h2><div class="frame-config-grid"><div class="frame-config-display"><label class="field"><span data-i18n="language">语言</span><select id="locale"></select></label><label class="field"><span data-i18n="displayDensity">显示密度</span><select id="density"><option data-i18n="standard" value="comfortable">标准</option><option data-i18n="compact" value="compact">紧凑</option></select></label><label class="field"><span data-i18n="textSize">界面文字</span><select id="textSize"><option data-i18n="standard" value="normal">标准</option><option data-i18n="large" value="large">放大</option></select></label><label class="check-field"><input id="reduceMotion" type="checkbox"/><span data-i18n="reduceMotion">减少动效</span></label><p class="muted" data-i18n="reducedMotionHelp">同时遵循系统“减少动态效果”偏好。</p></div>
 <div class="frame-config-tools">
+  <section id="desktopLauncherSection" class="frame-config-controls" hidden><button id="openDesktopLauncher" type="button" data-i18n="openDesktopLauncher">打开桌面启动器（管理卡图与本地音乐）</button></section>
   <section class="frame-config-controls" aria-labelledby="configControlsTitle">
     <h3 data-i18n="controls" id="configControlsTitle">操作提示</h3><div id="configInput"></div>
     <p data-i18n="mouseOrTouchSelectACardSelectA">鼠标 / 触屏：选卡 → 选格 → 确认。</p>
     <p data-i18n="tabMovesBetweenControlsEnterOrSpaceActivates">Tab 切换控件，Enter / Space 激活，方向键浏览棋盘或手牌，Escape 返回或取消。</p>
   </section>
-  <div id="audioSettings" hidden>
+  <div id="audioSettings">
     <h3 data-i18n="audioSettings">音频设置</h3>
     <div id="audioSettingsControls">
-      <label class="field">
-        <span><span data-i18n="bgmVolume">背景音乐音量</span> <span data-bgm-level aria-hidden="true"></span></span>
-        <input type="range" min="0" max="100" step="1" data-bgm-volume>
-      </label>
-      <label class="check-field"><input type="checkbox" data-bgm-mute><span data-i18n="muteBgm">静音背景音乐</span></label>
+      <div data-bgm-group>
+        <label class="field">
+          <span><span data-i18n="bgmVolume">背景音乐音量</span> <span data-bgm-level aria-hidden="true"></span></span>
+          <input type="range" min="0" max="100" step="1" data-bgm-volume>
+        </label>
+        <label class="check-field"><input type="checkbox" data-bgm-mute><span data-i18n="muteBgm">静音背景音乐</span></label>
+      </div>
+      <p class="muted audio-bgm-note" data-bgm-unavailable data-i18n="bgmPackUnavailable" hidden>未载入本地背景音乐包（合成音效已启用）</p>
+      <div data-sfx-group>
+        <label class="field">
+          <span><span data-i18n="sfxVolume">音效音量</span> <span data-sfx-level aria-hidden="true"></span></span>
+          <input type="range" min="0" max="100" step="1" data-sfx-volume>
+        </label>
+        <label class="check-field"><input type="checkbox" data-sfx-mute><span data-i18n="muteSfx">静音音效</span></label>
+      </div>
     </div>
   </div>
 </div></div><p class="muted frame-config-storage" data-i18n="decksAndSettingsAreStoredInThisBrowser">本地卡组与设置保存在当前浏览器，不上传。</p></div></section>
 <section class="view" hidden="" id="view-carnival"></section>
+<section class="view" hidden="" id="view-gold-saucer"></section>
+<section class="view" hidden="" id="view-tournament"></section>
 </main><footer class="app-footer" data-i18n="fanProjectFooter">非官方同人项目 · FINAL FANTASY VII 与 QUEEN'S BLOOD 权利归各自权利人所有</footer></div>
 <dialog aria-labelledby="dialogTitle" id="infoDialog"><header class="dialog-header"><h2 id="dialogTitle"></h2><button aria-label="关闭窗口" data-i18n="close" data-i18n-aria-label="closeDialog" id="dialogClose">返回 ×</button></header><div id="dialogContent"></div></dialog>
 <script src="/src/app.ts" type="module"></script></body></html>

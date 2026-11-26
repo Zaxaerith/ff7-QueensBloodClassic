@@ -2,15 +2,16 @@
 
 [简体中文](README.zh-CN.md)
 
-An unofficial, open-source single-player card game inspired by Queen’s Blood. The public `main` branch is a source snapshot; the latest tagged preview remains [v0.9.0-rc.1](https://github.com/Zaxaerith/ff7-QueensBloodClassic/releases/tag/v0.9.0-rc.1). No accepted Windows executable is included.
+An unofficial, open-source single-player card game inspired by Queen’s Blood. Version **1.0.0** provides the complete Classic candidate experience.
 
 ## Features
 
 - A 3×5 board, 145 numbered card definitions, deck editing, mulligan, saved matches, replay, and match analysis.
-- Three Bot difficulty levels, named NPC challengers, and keyboard or gamepad controls.
+- Three Bot difficulty levels, 20 World Tour challengers, the Shadowblood Queen, and keyboard or gamepad controls.
+- Shinra-8 tournament and Gold Saucer special challenges and survival modes.
 - An 11-language interface and Classic Frame presentation.
 - Optional local BGM playback with volume and mute settings; no music files are included.
-- Card Carnival currently offers three playable puzzles. The full set of 22 puzzles is not implemented.
+- Card Carnival includes 22 playable Classic-candidate puzzles.
 - Candidate local generation routes for all 145 Classic Art cards.
 
 Some complex card interactions remain candidates. #066 Two Face feedback and #134 J-Squad details still need verification against the original game.

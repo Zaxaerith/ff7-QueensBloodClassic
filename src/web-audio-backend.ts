@@ -15,6 +15,8 @@ export interface AudioBackend {
   activate(): Promise<boolean>;
   load(url: string, signal: AbortSignal): Promise<AudioBuffer>;
   play(buffer: AudioBuffer, options: PlaybackOptions, ended: () => void): AudioVoice;
+  createBuffer?(channels: number, length: number, sampleRate: number): AudioBuffer;
+  playSfx?(buffer: AudioBuffer, options?: {gain?: number; when?: number}): void;
   setGain(bus: AudioBus, gain: number): void;
   close(): Promise<void>;
 }
@@ -115,6 +117,34 @@ export class WebAudioBackend implements AudioBackend {
       ramp(envelope.gain, 0, now, stopAt);
       source.stop(stopAt);
     }};
+  }
+
+  createBuffer(channels: number, length: number, sampleRate: number): AudioBuffer {
+    const context = this.context;
+    if (!context) throw new Error('Audio context is unavailable');
+    return context.createBuffer(channels, length, sampleRate);
+  }
+
+  playSfx(buffer: AudioBuffer, options?: {gain?: number; when?: number}): void {
+    const context = this.context, bus = this.buses?.sfx;
+    if (!context || !bus || !this.running) return;
+    const source = context.createBufferSource();
+    const envelope = context.createGain();
+    source.buffer = buffer;
+    envelope.gain.value = options?.gain ?? 1;
+    const disconnect = () => {
+      source.onended = null;
+      source.disconnect();
+      envelope.disconnect();
+    };
+    source.onended = disconnect;
+    try {
+      source.connect(envelope);
+      envelope.connect(bus);
+      source.start(options?.when ?? context.currentTime);
+    } catch {
+      disconnect();
+    }
   }
 
   setGain(bus: AudioBus, gain: number): void {

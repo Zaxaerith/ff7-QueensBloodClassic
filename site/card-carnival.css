@@ -1,33 +1,266 @@
-.carnival-list, .carnival-stage { max-width: 58rem; margin: auto; }
-.carnival-list > h2, .carnival-stage > h2 { margin-bottom: .35rem; color: var(--gold); }
-.carnival-puzzles { list-style: none; display: grid; gap: 8px; padding: 0; margin: 16px 0 0; }
+/* FrameUI v3 · Part 2 — Card Carnival visual unification.
+   Pre-match puzzle list harmonizes with frameui-shell.css; active puzzle stage shares
+   the Midgar Mako-Slate obsidian tabletop, 3D crystal pawns & FF7 OG HUD. */
+
+/* ------------------------------------------------------------------ */
+/* 1. Pre-match Carnival puzzle list                                   */
+/* ------------------------------------------------------------------ */
+.carnival-list,
+.carnival-stage { max-width: 66rem; margin: auto; }
+.carnival-list > h2,
+.carnival-stage > h2,
+.carnival-summary-row > h2 {
+  margin-bottom: .35rem;
+  color: var(--gold);
+  text-shadow: 1px 1px 0 #03071b, 0 0 14px rgba(248, 220, 130, .24);
+}
+.carnival-summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+  align-items: center;
+  justify-content: space-between;
+}
+.carnival-progress {
+  margin: 0;
+  padding: 4px 12px;
+  border: 1px solid rgba(248, 220, 130, .6);
+  border-radius: 2px;
+  background: var(--qbc-window-deep, linear-gradient(160deg, #163591 0%, #0c1f60 50%, #06103a 100%));
+  color: var(--gold, #f8dc82);
+  font-weight: 700;
+  font-size: .88rem;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 1px 1px 0 #03071b;
+}
+.carnival-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.carnival-filter {
+  font-size: .84rem;
+  padding: 5px 10px;
+  min-height: 32px;
+}
+.carnival-filter.is-active {
+  border-color: var(--gold, #f8dc82);
+  box-shadow: 0 0 10px rgba(248, 220, 130, .24);
+}
+.carnival-puzzles { list-style: none; display: grid; gap: 6px; padding: 0; margin: 14px 0 0; }
 .carnival-puzzles > li {
-  display: flex; gap: 12px; align-items: center; justify-content: space-between;
-  padding: 12px; border: 1px solid var(--edge); background: #0a1848b0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border: 1px solid var(--qbc-steel, #526696);
+  border-radius: 2px;
+  background: linear-gradient(100deg, rgba(20, 50, 140, .9) 0%, rgba(11, 30, 92, .9) 55%, rgba(6, 16, 56, .92) 100%);
+  box-shadow: var(--qbc-bevel-thin), 0 3px 8px rgba(2, 5, 20, .45);
+}
+.carnival-puzzles > li[data-cleared="true"] {
+  border-inline-start: 3px solid var(--gold, #f8dc82);
 }
 .carnival-puzzles button { flex: 0 0 auto; }
-.carnival-puzzle-info { min-width: 0; }
+.carnival-puzzle-info { min-width: 0; flex: 1 1 auto; }
 .carnival-puzzle-info p { margin: .25rem 0 0; }
-.carnival-cleared { color: var(--teal); }
-.carnival-stage { --hand-width: 88px; --hand-height: 126px; text-align: center; }
-.carnival-stage .carnival-table { height: clamp(180px, 36vh, 320px); margin-block: 8px; }
-.carnival-legend { color: var(--gold); font-variant-numeric: tabular-nums; }
+.carnival-puzzle-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: .25rem;
+}
+.carnival-tag {
+  display: inline-block;
+  padding: 1px 7px;
+  border: 1px solid rgba(190, 210, 250, .42);
+  border-radius: 2px;
+  background: rgba(6, 15, 48, .72);
+  color: #dce8ff;
+  font-size: .74rem;
+  font-weight: 600;
+  letter-spacing: .02em;
+}
+.carnival-tag--collection {
+  border-color: rgba(248, 220, 130, .65);
+  color: var(--gold, #f8dc82);
+}
+.carnival-tag--advanced {
+  border-color: rgba(124, 216, 255, .55);
+  color: #9be4ff;
+}
+.carnival-tag--skill-drill {
+  border-color: rgba(116, 240, 198, .52);
+  color: var(--teal, #7ef0cb);
+}
+.carnival-reward--none {
+  justify-content: center;
+  min-width: 9rem;
+}
+.carnival-cleared { color: var(--teal); font-weight: 700; }
+
+/* ------------------------------------------------------------------ */
+/* 2. Active Carnival Puzzle Stage (Mako-Slate Tabletop + FF7 OG HUD)  */
+/* ------------------------------------------------------------------ */
+#app .window.carnival-stage {
+  --score-width: clamp(28px, 4.4vw, 54px);
+  --score-gap: clamp(4px, .7vw, 8px);
+  --cell-gap: clamp(3px, .45vw, 6px);
+  --table-inset: clamp(8px, 1vw, 14px);
+  --hand-width: 92px;
+  --hand-height: 132px;
+  --hand-lift: 9px;
+  position: relative;
+  isolation: isolate;
+  padding: clamp(12px, 1.5vw, 18px);
+  text-align: center;
+  border: 2px solid var(--silver, #dfe8fa);
+  border-radius: 4px;
+  background:
+    radial-gradient(ellipse 68% 46% at 50% 22%, #132347 0%, #09122b 58%, #050919 100%);
+  box-shadow:
+    inset 0 0 0 1px #526696,
+    inset 0 0 28px rgba(2, 5, 18, .72),
+    0 12px 30px rgba(1, 3, 12, .8);
+}
+.carnival-legend {
+  display: inline-block;
+  margin: 4px auto 8px;
+  padding: 4px 14px;
+  border: 1px solid rgba(248, 220, 130, .55);
+  border-radius: 2px;
+  background: var(--qbc-window-deep, linear-gradient(160deg, #163591 0%, #0c1f60 50%, #06103a 100%));
+  box-shadow: var(--qbc-bevel-thin);
+  color: var(--gold);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 1px 1px 0 #03071b;
+}
+
+/* Board container (obsidian slate tiles, 3D crystal pawns & silver disks from frameui-tabletop.css) */
+.carnival-stage .carnival-table {
+  height: clamp(210px, 39vh, 345px);
+  margin-block: 6px;
+  --score-width: inherit;
+  --score-gap: inherit;
+  --cell-gap: inherit;
+  --table-inset: inherit;
+}
 .carnival-stage .lane-score { position: relative; font-variant-numeric: tabular-nums; }
-.carnival-lane { position: absolute; top: 2px; left: 4px; color: var(--muted); font: 10px/1 system-ui, sans-serif; }
+.carnival-lane {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  color: rgba(190, 210, 250, .72);
+  font: 700 10px/1 var(--qbc-sans);
+  text-shadow: 1px 1px 0 #03071b;
+}
 .carnival-stage .carnival-range { position: absolute; inset: 3px; z-index: 2; pointer-events: none; }
-.carnival-stage .tile.preview-pawn .carnival-range { box-shadow: inset 0 0 0 2px var(--gold); }
-.carnival-stage .tile.preview-effect .carnival-range { outline: 2px solid var(--rose); }
 .carnival-stage .tile:not(.legal) { cursor: default; }
 .carnival-stage .tile.occupied:not(:disabled) { cursor: pointer; }
-.carnival-actions { justify-content: center; margin-block: .4rem; }
-.carnival-feedback { padding: 0; margin: .35rem 0 0; list-style: none; color: var(--teal); }
-.carnival-feedback:empty, .carnival-result:empty { display: none; }
-.carnival-result { border-top: 1px solid var(--edge); margin-top: 12px; padding-top: 10px; }
-.carnival-result table { margin-bottom: 0; }
+
+/* Recessed deep-indigo hand dock matching Standard Match & Gold Saucer */
+.carnival-stage .carnival-hand {
+  min-height: calc(var(--hand-height) + 2 * var(--hand-lift) + 12px);
+  margin: 8px auto;
+  padding: calc(var(--hand-lift) + 8px) 10px 8px;
+  border: 1px solid rgba(143, 163, 208, .36);
+  border-radius: 3px;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 0%, rgba(42, 86, 198, .22), transparent 72%),
+    linear-gradient(180deg, #07102c 0%, #0a173e 54%, #060d26 100%);
+  box-shadow: inset 0 4px 12px rgba(1, 3, 12, .82);
+}
+
+/* Compact FF7 OG blue-window ability inspector strip below hand */
+.carnival-inspector {
+  margin: 6px auto 4px;
+  padding: 8px 12px;
+  max-width: 52rem;
+  border: 2px solid var(--silver, #dfe8fa);
+  border-radius: 3px;
+  background: var(--qbc-window-deep, linear-gradient(160deg, #163591 0%, #0c1f60 50%, #06103a 100%));
+  box-shadow: var(--qbc-bevel-flat, inset 0 0 0 1px #526696), 0 4px 14px rgba(2, 5, 18, .62);
+  color: var(--ink, #f3f6ff);
+  text-align: start;
+}
+.carnival-inspector[data-source="board"] {
+  border-color: rgba(124, 216, 255, .82);
+}
+.carnival-inspector-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.carnival-inspector-head h3 {
+  margin: 0;
+  font-family: var(--qbc-display, var(--qbc-sans));
+  font-size: .95rem;
+  color: var(--gold, #f8dc82);
+  text-shadow: 1px 1px 0 #03071b;
+}
+.carnival-inspector-facts {
+  margin: 0;
+  font-size: .82rem;
+  color: #cfe0ff;
+  font-variant-numeric: tabular-nums;
+}
+.carnival-inspector-body p {
+  margin: 2px 0 0;
+  font-size: .86rem;
+  line-height: 1.42;
+  color: #eef4ff;
+}
+.carnival-inspector-empty {
+  margin: 0;
+  font-size: .84rem;
+}
+
+/* Rebirth command strip */
+.carnival-actions {
+  justify-content: center;
+  margin-block: .5rem .35rem;
+  padding-top: 8px;
+  border-top: 1px solid transparent;
+  border-image: var(--qbc-rule, linear-gradient(90deg, rgba(223, 232, 250, .7), rgba(223, 232, 250, .18) 70%, transparent)) 1;
+}
+.carnival-gamepad-hints { margin: .25rem 0 0; }
+.carnival-feedback {
+  padding: 5px 10px;
+  margin: .45rem auto 0;
+  max-width: 44rem;
+  list-style: none;
+  border: 1px solid rgba(143, 163, 208, .32);
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(11, 24, 68, .85), rgba(7, 16, 44, .75));
+  color: var(--teal);
+  font-size: .86rem;
+  text-shadow: 1px 1px 0 #03071b;
+}
+.carnival-feedback:empty,
+.carnival-result:empty { display: none; }
+
+/* FF7 OG double-silver royal blue puzzle result panel */
+.carnival-result {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border: 2px solid var(--silver, #dfe8fa);
+  border-radius: 3px;
+  background: var(--qbc-window, linear-gradient(155deg, #1d42a6 0%, #102670 48%, #071242 100%));
+  box-shadow: var(--qbc-bevel-flat), 0 8px 24px rgba(2, 5, 18, .75);
+}
+.carnival-result table { margin: 8px auto 0; font-variant-numeric: tabular-nums; }
+
 @media (max-width: 540px) {
   .carnival-puzzles > li { display: grid; }
   .carnival-puzzles button { justify-self: start; }
-  .carnival-stage { padding: 10px; --hand-width: 76px; --hand-height: 109px; }
-  .carnival-stage .carnival-table { height: clamp(180px, 64vw, 275px); }
+  .carnival-stage { padding: 10px; --hand-width: 76px; --hand-height: 109px; --score-width: 28px; }
+  .carnival-stage .carnival-table { height: clamp(190px, 64vw, 280px); }
   .carnival-actions button { min-height: 44px; }
+  .carnival-inspector { padding: 7px 10px; }
 }

@@ -28,9 +28,9 @@ Use the steps in [the Windows portable guide](../desktop/PORTABLE_README.txt) fo
 3. `build_run_id`: the Actions run that produced the artifact.
 4. `artifact_name`: exact name shown on that run, including run attempt.
 5. Set `gui_accepted` after personally testing the Windows GUI.
-6. Type `PUBLISH_PRE_RELEASE` in `publish_confirmation`.
+6. Type `PUBLISH_RELEASE` in `publish_confirmation`.
 
-The workflow refuses publication unless the repository is public, the dispatch comes from `main`, `main` still points to the selected source commit, the selected build run succeeded on `main`, and the run/artifact/version/commit/hash metadata all match. It re-audits the Windows ZIP, embedded source ZIP and all reachable Git history. It creates or verifies the tag at that exact commit, uploads the original tested ZIP, SHA-256 sidecar and build manifest, then publishes a non-Draft Pre-release. It never rebuilds the Windows ZIP during publication.
+The workflow refuses publication unless the repository is public, the dispatch comes from `main`, `main` still points to the selected source commit, the selected build run succeeded on `main`, and the run/artifact/version/commit/hash metadata all match. It re-audits the Windows ZIP, embedded source ZIP and all reachable Git history. It creates or verifies the tag at that exact commit, uploads the original tested ZIP, SHA-256 sidecar and build manifest, then publishes a non-draft release (pre-release only when the version has a suffix). It never rebuilds the Windows ZIP during publication.
 
 Build jobs have only `contents: read`. The separate publish job has `actions: read` to fetch the chosen Actions artifact and `contents: write` only for creating the exact tag and release. Both workflows use the built-in `GITHUB_TOKEN`; no personal token is stored in source or workflow settings. Third-party Actions are pinned to full commit SHAs.
 
@@ -38,4 +38,4 @@ If validation fails, nothing is published. If an asset upload fails after a draf
 
 ## Current release notes
 
-The bilingual notes for this version are in [`docs/releases/v0.8.0-rc.2.md`](releases/v0.8.0-rc.2.md). They state that this is an unofficial FF7 fan project, players provide their own FF7 Original PC resources, all 145 Classic Art routes can be generated locally, and the Windows build has not had an independent clean-VM compatibility test. They also preserve the current rule and art limitations.
+The bilingual notes for this version are in [`docs/releases/v1.0.0.md`](releases/v1.0.0.md). They state that this is an unofficial FF7 fan project, players provide their own FF7 Original PC resources, all 145 Classic Art routes can be generated locally, and the Windows build has not had an independent clean-VM compatibility test. They also preserve the current rule and art limitations.

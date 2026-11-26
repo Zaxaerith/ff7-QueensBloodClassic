@@ -5,11 +5,11 @@ import type {BotDecision} from './bot.js';
 import {BotWorkerFailure,elapsedSince,resolutionFailure,type BotDiagnostic,type BotFailureReason} from './bot-diagnostics.js';
 import {actionFeedback,eventLabel} from './match-flow.js';
 import {byId} from './cards.js';
-import {effectPlan,effectTargets,type MatchEffect} from './match-effects.js';
+import {effectPlan,effectTargets,type MatchEffect,type TransitionStage} from './match-effects.js';
 
 export type PresentationPhase='Suspended'|'Mulligan'|'PlayerSelect'|'Preview'|'PlayerCommit'|'PlayerResolve'|'OpponentTurn'|'OpponentCommit'|'OpponentResolve'|'MatchEnd'|'Result';
 // Project UX values, not measured Rebirth animation timings.
-export const PRESENTATION_MS=Object.freeze({placement:180,opponentCard:220,effect:220,effectsMax:880,settle:300,pass:260,handoff:300,end:200,lane:280,total:320,mulligan:400});
+export const PRESENTATION_MS=Object.freeze({placement:180,opponentCard:220,effect:220,effectsMax:880,settle:300,pass:260,handoff:300,end:200,lane:280,total:320,start:160,turn:180,deal:290,draw:150});
 export function publicMatch(game:Game){
   return {board:structuredClone(game.board),hand:[...game.hands[0]],enemyHandCount:game.hands[1].length,
     deckCounts:[game.decks[0].length,game.decks[1].length],phase:game.phase,turn:game.turn,passes:game.passes,
@@ -38,6 +38,9 @@ interface Hooks {
   paused?:()=>void;
   matchEnded?:(sequence:number,winner:PublicMatch['result']['winner'])=>void;
   totalsRevealed?:(sequence:number)=>void;
+  passPlayer?:(game:Game)=>void;
+  playOpponent?:(game:Game,handIndex:number,row:number,col:number)=>void;
+  passOpponent?:(game:Game)=>void;
 }
 type SearchReply={decision:BotDecision|null;warning:string;diagnostic?:BotDiagnostic};
 type Search={game:Game;command:number;automaticPass:boolean;reply:Promise<SearchReply>};
@@ -121,10 +124,10 @@ export class MatchPresentation {
   private async playerSequence(epoch:number,search:Search|undefined,opening:boolean){
     try{
       if(!await this.resolveBatch(epoch,opening))return;
-      this.dispatch(epoch,search);
+      this.dispatch(epoch,search,opening);
     }catch{this.recover(epoch);}
   }
-  private dispatch(epoch:number,search?:Search){
+  private dispatch(epoch:number,search?:Search,opening=false){
     if(!this.alive(epoch))return;
     const game=this.hooks.game()!;this.frame=publicMatch(game);this.batch=null;this.skipBatch=false;
     if(game.phase==='mulligan'){this.state('Mulligan',t("chooseCardsToExchangeThenConfirm"));return;}
@@ -135,14 +138,15 @@ export class MatchPresentation {
       if(!legalMoves(game,0).length){
         // Enter the existing commit gate synchronously, without exposing an
         // actionable PlayerSelect frame or inventing an engine end condition.
-        this.phase='PlayerSelect';this.commitPlayer(()=>pass(game,0),false,true);
+        this.phase='PlayerSelect';this.commitPlayer(()=>this.hooks.passPlayer?this.hooks.passPlayer(game):pass(game,0),false,true);
       }else this.state('PlayerSelect',t("yourTurnSelectCardSelectTileConfirm"));
     }
-    else void this.opponent(epoch,search??this.search());
+    else void this.opponent(epoch,search??this.search(),opening);
   }
-  private async opponent(epoch:number,search:Search){
+  private async opponent(epoch:number,search:Search,opening:boolean){
     try{
       this.skipBatch=false;this.state('OpponentTurn',t("computersTurnWaitingForAMove"));
+      if(!opening&&this.duration(PRESENTATION_MS.handoff))this.transition('turn',1);
       // Both barriers start together; a slow worker does not pay a second delay.
       const [ready,answer]=await Promise.all([this.wait(this.fast||this.reduced()?80:PRESENTATION_MS.handoff,epoch),search.reply]);
       const game=this.hooks.game();
@@ -165,24 +169,36 @@ export class MatchPresentation {
     const record=(source:BotDiagnostic['source'],reason:BotDiagnostic['reason'],degraded:boolean)=>{
       try{this.hooks.diagnostic?.({source,reason,elapsedMs:(diagnostic?.elapsedMs??0)+elapsedSince(started),nodes:diagnostic?.nodes??decision?.stats.nodes??null,resolutionFailures:failures,degraded});}catch{/* Diagnostics must not interrupt play. */}
     };
+    const doOpponentPlay=(hi:number,r:number,c:number)=>{if(this.hooks.playOpponent)this.hooks.playOpponent(game,hi,r,c);else play(game,1,hi,r,c);};
+    const doOpponentPass=()=>{if(this.hooks.passOpponent)this.hooks.passOpponent(game);else pass(game,1);};
     // An evaluated PASS (even with a nonfatal warning) is not search exhaustion.
     if(automaticPass||action?.type==='pass'&&action.player===1&&!decision?.stats.exhausted){
-      try{pass(game,1);}catch(error){if(resolutionFailure(error))failures++;record(automaticPass?'automatic-pass':'worker','rule-resolution',true);throw error;}
+      try{doOpponentPass();}catch(error){if(resolutionFailure(error))failures++;record(automaticPass?'automatic-pass':'worker','rule-resolution',true);throw error;}
       record(automaticPass?'automatic-pass':'worker',automaticPass?'no-legal-moves':'strategic-pass',false);return warning;
     }
     if(decision?.stats.exhausted){cause=failures?'rule-resolution':'search-exhausted';warning=t('botSearchWarning');}
     if(action?.type==='play'&&action.player===1){
-      try{play(game,1,action.handIndex,action.row,action.col);record('worker','decision',false);return warning;}
+      try{doOpponentPlay(action.handIndex,action.row,action.col);record('worker','decision',false);return warning;}
       catch(error){cause=resolutionFailure(error)?'rule-resolution':'invalid-action';if(resolutionFailure(error))failures++;warning=t('computersPlacementFailedToResolve');}
     }else if(!decision&&!diagnostic)cause='missing-decision';
     const reason=warning?(!hasActiveLocale()||warning===t('computersPlacementFailedToResolve')?warning:t('botSearchWarning')):(action?t('computerReturnedAnInvalidAction'):t('computerReturnedNoAction'));
     // Atomic fallback is unchanged: failed trials never mutate the live match.
     for(const move of legalMoves(game,1)){
-      try{play(game,1,move.handIndex,move.row,move.col);record('fallback',cause,true);return t('botFallbackMove',reason);}
+      try{doOpponentPlay(move.handIndex,move.row,move.col);record('fallback',cause,true);return t('botFallbackMove',reason);}
       catch(error){if(resolutionFailure(error))failures++;}
     }
-    try{pass(game,1);}catch(error){if(resolutionFailure(error))failures++;record('fallback','rule-resolution',true);throw error;}
+    try{doOpponentPass();}catch(error){if(resolutionFailure(error))failures++;record('fallback','rule-resolution',true);throw error;}
     record('fallback',failures?'rule-resolution':cause,true);return t('botNoResolvableMove',reason);
+  }
+  private transition(stage:TransitionStage,actor:0|1,opening=false,drawIndex?:number){
+    this.effect={key:++this.effectNumber,batch:this.batchNumber,stage,actor,action:'transition',motion:true,
+      opening,events:[],changes:[],targets:[],placement:undefined,...(drawIndex===undefined?{}:{drawIndex})};
+  }
+  private showTransition(stage:TransitionStage,actor:0|1,epoch:number,opening=false,drawIndex?:number){
+    if(!this.alive(epoch))return Promise.resolve(false);
+    if(!this.duration(PRESENTATION_MS[stage])||this.skipBatch)return Promise.resolve(true);
+    this.transition(stage,actor,opening,drawIndex);
+    return this.wait(PRESENTATION_MS[stage],epoch);
   }
   private async resolveBatch(epoch:number,opening=false,warning=''):Promise<boolean>{
     const batch=this.batch!;this.skipBatch=false;this.frame=batch.before;
@@ -192,25 +208,35 @@ export class MatchPresentation {
       try{this.hooks.matchEnded?.(ended.seq,batch.after.result.winner);}catch{/* Optional observers cannot interrupt a commit. */}
     }
     const plan=effectPlan(batch),batchNumber=++this.batchNumber;
+    if(opening){
+      this.state('PlayerResolve',t("mulliganCompleteUpdatingHands"));
+      if(!await this.showTransition('start',batch.after.turn,epoch,true))return false;
+      if(!await this.showTransition('turn',batch.after.turn,epoch,true))return false;
+      this.frame=batch.after;
+      if(!await this.showTransition('deal',0,epoch,true))return false;
+      this.effect=null;
+      return true;
+    }
     const cue=(stage:MatchEffect['stage'],events:readonly RuleEvent[]=[])=>{
-      this.effect={key:++this.effectNumber,batch:batchNumber,stage,actor:batch.actor,action:plan.placement?'play':batch.events.some(e=>e.type==='TurnPassed')?'pass':'mulligan',motion:!this.fast&&!this.reduced()&&!this.skipBatch,
+      this.effect={key:++this.effectNumber,batch:batchNumber,stage,actor:batch.actor,action:plan.placement?'play':'pass',motion:!this.fast&&!this.reduced()&&!this.skipBatch,
+        rivalHandCount:batch.before.enemyHandCount,
         placement:plan.placement,events,changes:plan.changes,targets:effectTargets(events,batch.before,batch.after)};
     };
     cue('commit');
     const summary=actionFeedback(batch.events)+(batch.automaticPass?t("autoPassSuffix"):'')+(warning?` · ${warning}`:'');
     const passed=batch.events.some(e=>e.type==='TurnPassed');
-    this.state(batch.actor===0?'PlayerResolve':'OpponentResolve',opening?t("mulliganCompleteUpdatingHands"):passed?summary:t("resolvingPlayedCard", batch.actor===0?t("you"):t("computer")));
-    const first=opening?PRESENTATION_MS.mulligan:passed?PRESENTATION_MS.pass:batch.actor===1?PRESENTATION_MS.opponentCard:PRESENTATION_MS.placement;
+    this.state(batch.actor===0?'PlayerResolve':'OpponentResolve',passed?summary:t("resolvingPlayedCard", batch.actor===0?t("you"):t("computer")));
+    const first=passed?PRESENTATION_MS.pass:batch.actor===1?PRESENTATION_MS.opponentCard:PRESENTATION_MS.placement;
     if(!await this.wait(this.duration(first),epoch))return false;
     this.frame=batch.after;
     // Board updates once. Ordered evidence overlays do not reconstruct a Game.
-    if(!opening&&!passed)for(const group of plan.groups){
+    if(!passed)for(const group of plan.groups){
       cue('events',group);
       this.message=group.map(presentationEventLabel).join(' · ');this.notify();
       if(!await this.wait(this.duration(PRESENTATION_MS.effect),epoch))return false;
     }
     cue('settle');this.message=summary;this.notify();
-    if(!passed&&!opening&&!await this.wait(this.duration(PRESENTATION_MS.settle),epoch))return false;
+    if(!passed&&!await this.wait(this.duration(PRESENTATION_MS.settle),epoch))return false;
     if(batch.after.phase==='finished'){
       cue('scoring');this.effect!.scoring={result:batch.after.result,revealed:0,totals:false};
       this.state('MatchEnd',t("twoConsecutivePassesShowingTheFinalScore"));
@@ -228,6 +254,15 @@ export class MatchPresentation {
       }
       if(!await this.wait(this.duration(PRESENTATION_MS.total),epoch))return false;
     }else{
+      if(batch.actor===1&&batch.after.turn===0&&!await this.showTransition('turn',0,epoch))return false;
+      const playerAdditions=batch.events.filter(event=>event.type==='CardAddedToHand'&&event.player===0);
+      const playerDraw=playerAdditions.findIndex(event=>event.reason==='draw');
+      if(playerDraw>=0){
+        const index=batch.after.hand.length-playerAdditions.length+playerDraw;
+        if(!await this.showTransition('draw',0,epoch,false,index))return false;
+      }else if(batch.events.some(event=>event.type==='CardAddedToHand'&&event.player===1&&event.reason==='draw')){
+        if(!await this.showTransition('draw',1,epoch))return false;
+      }
       cue('summary');this.notify();
     }
     return this.alive(epoch);

@@ -1,0 +1,443 @@
+/* FrameUI v3 · Shinra-8 Cruise Tournament Lobby, Bracket Tree & Live Arena Stage.
+   Pure 1997 FF7 OG royal-blue silver-beveled windows + Midgar Mako-Slate / Climax tabletop. */
+
+/* ------------------------------------------------------------------ */
+/* 1. Tournament Bracket Lobby                                         */
+/* ------------------------------------------------------------------ */
+.tourney-lobby {
+  max-width: 72rem;
+  margin: auto;
+}
+.tourney-lobby > .tourney-lobby-head {
+  display: grid;
+  gap: .35rem;
+}
+.tourney-exhibition-badge {
+  border-color: #ff8aa0;
+  background: linear-gradient(180deg, rgba(138, 22, 66, .92) 0%, rgba(62, 10, 40, .96) 100%);
+  box-shadow: inset 1px 1px 0 rgba(255, 220, 232, .35), 0 0 10px rgba(255, 100, 126, .35);
+  color: #ffe8ee;
+}
+
+.tourney-resume {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--teal, #4ef2d2);
+  border-radius: 2px;
+  background: linear-gradient(120deg, rgba(10, 84, 92, .64), rgba(8, 24, 74, .7) 70%);
+  box-shadow: inset 0 0 0 1px #032a2c, 0 0 14px rgba(78, 242, 210, .2);
+}
+.tourney-resume p { margin: .2rem 0 0; color: #c4f3e8; }
+
+.tourney-deck-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border: 1px solid #2c3d74;
+  border-radius: 3px;
+  background: var(--qbc-well, linear-gradient(180deg, #060f34 0%, #040a24 100%));
+  box-shadow: var(--qbc-well-shadow);
+}
+
+.tourney-section-title {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  margin: 18px 0 10px;
+  font: 700 .84rem/1.25 var(--qbc-display, var(--qbc-sans));
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: #c9d6f4;
+  text-shadow: var(--qbc-text-shadow, 1px 1px 0 #03071b);
+}
+.tourney-section-title::after {
+  content: "";
+  flex: 1 1 2rem;
+  height: 1px;
+  background: var(--qbc-rule);
+  box-shadow: 0 1px 0 #03071b;
+}
+
+/* 5-round Single-Elimination Visual Bracket Tree + Golden Connectors */
+.tourney-bracket-wrap {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+  border: 1px solid #2c3d74;
+  border-radius: 3px;
+  background:
+    radial-gradient(ellipse 75% 40% at 50% 0%, rgba(70, 124, 240, .18), transparent 72%),
+    var(--qbc-well, linear-gradient(180deg, #060f34 0%, #040a24 100%));
+  box-shadow: var(--qbc-well-shadow);
+}
+.tourney-bracket {
+  list-style: none;
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  overflow-x: auto;
+}
+.tourney-node {
+  flex: 1 1 140px;
+  min-width: 132px;
+  display: grid;
+  align-content: space-between;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid var(--qbc-steel, #526696);
+  border-radius: 3px;
+  background: linear-gradient(155deg, rgba(24, 56, 152, .92) 0%, rgba(12, 30, 90, .92) 56%, rgba(7, 16, 52, .96) 100%);
+  box-shadow: var(--qbc-bevel-thin), 0 4px 10px rgba(2, 5, 20, .5);
+  text-shadow: 1px 1px 0 #03071b;
+}
+.tourney-node[data-status="active"] {
+  border: 2px solid var(--gold, #f8dc82);
+  box-shadow: 0 0 14px rgba(248, 220, 130, .34), var(--qbc-bevel-thin);
+}
+.tourney-node[data-status="won"] {
+  border-color: var(--teal, #4ef2d2);
+  border-inline-start: 3px solid var(--gold, #f8dc82);
+  background: linear-gradient(155deg, rgba(16, 76, 98, .92) 0%, rgba(10, 38, 80, .94) 58%, rgba(6, 18, 50, .96) 100%);
+}
+.tourney-node[data-status="lost"] {
+  border-color: rgba(255, 100, 126, .72);
+  background: linear-gradient(155deg, rgba(96, 20, 56, .88) 0%, rgba(44, 12, 40, .92) 60%, rgba(20, 6, 26, .95) 100%);
+}
+.tourney-node[data-stage="final"] {
+  border-color: rgba(248, 220, 130, .75);
+}
+
+.tourney-connector {
+  flex: 0 0 22px;
+  align-self: center;
+  height: 2px;
+  background: linear-gradient(90deg, rgba(143, 163, 208, .55), rgba(248, 220, 130, .42));
+  position: relative;
+}
+.tourney-connector::after {
+  content: "";
+  position: absolute;
+  right: -1px;
+  top: -3px;
+  width: 6px;
+  height: 8px;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  background: rgba(248, 220, 130, .7);
+}
+.tourney-connector[data-lit="true"] {
+  height: 3px;
+  background: linear-gradient(90deg, var(--teal, #4ef2d2), var(--gold, #f8dc82));
+  box-shadow: 0 0 8px rgba(248, 220, 130, .55);
+}
+.tourney-connector[data-lit="true"]::after {
+  background: var(--gold, #f8dc82);
+}
+
+.tourney-node-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  font-size: .72rem;
+}
+.tourney-stage-pill {
+  color: var(--gold, #f8dc82);
+  font-weight: 700;
+  letter-spacing: .06em;
+}
+.tourney-diff-pill {
+  padding: 1px 5px;
+  border: 1px solid rgba(143, 163, 208, .45);
+  border-radius: 2px;
+  background: rgba(4, 10, 32, .65);
+  color: var(--muted);
+}
+.tourney-node-name {
+  color: #f6f8ff;
+  font: 700 .98rem/1.25 var(--qbc-display, var(--qbc-sans));
+  overflow-wrap: anywhere;
+}
+.tourney-node-meta {
+  color: var(--teal, #4ef2d2);
+  font-size: .78rem;
+  font-variant-numeric: tabular-nums;
+  min-height: 1.15em;
+}
+.tourney-node[data-status="locked"] .tourney-node-meta { color: var(--muted); }
+
+/* Bonus Exhibition Seat: Red XIII · Overfang (Crimson-Gold Royal Highlight) */
+.tourney-exhibition-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.tourney-node--exhibition {
+  border: 2px solid rgba(255, 118, 138, .65);
+  background:
+    radial-gradient(ellipse 65% 60% at 90% 10%, rgba(248, 220, 130, .18), transparent 72%),
+    linear-gradient(115deg, rgba(110, 22, 58, .92) 0%, rgba(56, 14, 52, .94) 55%, rgba(22, 8, 34, .96) 100%);
+  box-shadow: inset 0 0 0 1px rgba(248, 220, 130, .3), 0 4px 16px rgba(8, 2, 16, .68);
+}
+.tourney-node--exhibition[data-status="locked"] {
+  opacity: .76;
+  border-style: dashed;
+}
+.tourney-node--exhibition[data-status="won"],
+.tourney-node--exhibition[data-status="unlocked"] {
+  border-color: var(--gold, #f8dc82);
+  box-shadow: 0 0 18px rgba(248, 220, 130, .32), inset 0 0 0 1px rgba(255, 118, 138, .48);
+}
+
+/* ------------------------------------------------------------------ */
+/* 2. Active Cruise Tournament Match Arena Stage                       */
+/* ------------------------------------------------------------------ */
+.tourney-stage {
+  --score-width: clamp(28px, 4.4vw, 54px);
+  --score-gap: clamp(4px, .7vw, 8px);
+  --cell-gap: clamp(3px, .45vw, 6px);
+  --table-inset: clamp(8px, 1vw, 14px);
+  --hand-width: 92px;
+  --hand-height: 132px;
+  --hand-lift: 9px;
+  position: relative;
+  isolation: isolate;
+  max-width: 74rem;
+  margin: auto;
+  padding: clamp(10px, 1.3vw, 16px);
+  display: grid;
+  gap: 8px;
+  border: 2px solid var(--silver, #dfe8fa);
+  border-radius: 4px;
+  /* Rounds 1-4: Shinra-8 Royal Ocean Indigo & Gold Halo */
+  background:
+    radial-gradient(ellipse 72% 46% at 50% 18%, rgba(44, 96, 206, .34) 0%, transparent 70%),
+    radial-gradient(ellipse 64% 36% at 50% 88%, rgba(248, 220, 130, .1) 0%, transparent 72%),
+    linear-gradient(165deg, #0b1b48 0%, #07102c 54%, #04081a 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(248, 220, 130, .35),
+    inset 0 0 28px rgba(2, 5, 18, .72),
+    0 12px 30px rgba(1, 3, 12, .82);
+}
+
+/* Final (Regina) & Bonus Exhibition (Red XIII Overfang): Crimson-Gold Climax Aura */
+.tourney-stage[data-tourney-tier="climax"] {
+  border-color: #f0b86c;
+  background:
+    radial-gradient(ellipse 70% 48% at 50% 20%, rgba(168, 30, 68, .44) 0%, transparent 72%),
+    radial-gradient(ellipse 60% 34% at 50% 86%, rgba(248, 220, 130, .16) 0%, transparent 70%),
+    linear-gradient(160deg, #22091c 0%, #0f0514 56%, #180614 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(248, 220, 130, .46),
+    inset 0 0 32px rgba(8, 2, 12, .82),
+    0 14px 36px rgba(4, 1, 8, .9);
+}
+.tourney-stage[data-tourney-tier="climax"] .frame-table::before {
+  border-color: #e4a95a;
+  background:
+    linear-gradient(135deg, rgba(248, 220, 130, .18) 0%, transparent 28%, transparent 72%, rgba(255, 92, 124, .18) 100%),
+    linear-gradient(145deg, #3a1226 0%, #1c0818 34%, #0b0410 72%, #2c0e20 100%);
+}
+
+.tourney-stage .match-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(8ch, auto) minmax(0, 1fr);
+  align-items: center;
+  gap: clamp(6px, 1.2vw, 14px);
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
+.tourney-hud {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 14px;
+  padding: 6px 12px;
+  border: 1px solid rgba(248, 220, 130, .48);
+  border-radius: 3px;
+  background: var(--qbc-window-deep, linear-gradient(160deg, #163591 0%, #0c1f60 50%, #06103a 100%));
+  box-shadow: var(--qbc-bevel-thin);
+  color: #e4ecff;
+  font-size: .86rem;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 1px 1px 0 #03071b;
+}
+.tourney-hud-stage { color: var(--gold, #f8dc82); }
+.tourney-pips {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.tourney-pip {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1px solid rgba(223, 232, 250, .55);
+  background: #091334;
+}
+.tourney-pip[data-status="active"] { border-color: var(--gold); background: var(--gold); box-shadow: 0 0 7px rgba(248, 220, 130, .7); }
+.tourney-pip[data-status="won"] { border-color: var(--teal); background: var(--teal); box-shadow: 0 0 6px rgba(78, 242, 210, .6); }
+.tourney-pip[data-status="lost"] { border-color: var(--rose); background: var(--rose); }
+.tourney-pip[data-exhibition="true"] { border-radius: 2px; transform: rotate(45deg); border-color: #ff8aa0; }
+
+.tourney-stage .tourney-table {
+  position: relative;
+  height: clamp(230px, 43vh, 370px);
+  margin-block: 4px;
+  --score-width: inherit;
+  --score-gap: inherit;
+  --cell-gap: inherit;
+  --table-inset: inherit;
+}
+.tourney-stage[data-presentation-phase="Mulligan"] .frame-mulligan-prompt { display: block; }
+.tourney-lane {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  color: rgba(190, 210, 250, .72);
+  font: 700 10px/1 var(--qbc-sans);
+  text-shadow: 1px 1px 0 #03071b;
+}
+
+.tourney-feedback {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px 12px;
+  padding: 5px 12px;
+  min-height: 30px;
+  border: 1px solid rgba(143, 163, 208, .34);
+  border-radius: 2px;
+  background: linear-gradient(90deg, rgba(11, 24, 68, .85), rgba(7, 16, 44, .75));
+  font-size: .86rem;
+  text-shadow: 1px 1px 0 #03071b;
+}
+.tourney-feedback p { margin: 0; }
+
+.tourney-hand-area {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 23rem);
+  gap: 10px;
+  align-items: start;
+}
+.tourney-hand-area .hand-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  color: var(--muted);
+}
+.tourney-hand {
+  min-height: calc(var(--hand-height) + 2 * var(--hand-lift) + 12px);
+  padding: calc(var(--hand-lift) + 8px) 10px 8px;
+  border: 1px solid rgba(143, 163, 208, .36);
+  border-radius: 3px;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 0%, rgba(42, 86, 198, .22), transparent 72%),
+    linear-gradient(180deg, #07102c 0%, #0a173e 54%, #060d26 100%);
+  box-shadow: inset 0 4px 12px rgba(1, 3, 12, .82);
+}
+.tourney-hand .check {
+  inset: 44% 0 auto;
+  padding: 3px 4px;
+  border-block: 1px solid #ffd1dc;
+  color: #ffffff;
+  background: linear-gradient(90deg, rgba(168, 26, 66, .95), rgba(110, 16, 48, .96));
+  font-weight: 700;
+  text-align: center;
+  text-shadow: 1px 1px 0 #03071b;
+}
+
+.tourney-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid transparent;
+  border-image: var(--qbc-rule, linear-gradient(90deg, rgba(223, 232, 250, .7), rgba(223, 232, 250, .18) 70%, transparent)) 1;
+}
+#tourneyPass {
+  --pass-progress: 0;
+  touch-action: none;
+  user-select: none;
+  border-color: rgba(248, 220, 130, .72);
+  color: #fff3c4;
+  background-image:
+    linear-gradient(90deg, rgba(78, 242, 210, .82) 0%, rgba(248, 220, 130, .92) calc(var(--pass-progress) * 100%), transparent calc(var(--pass-progress) * 100%)),
+    var(--qbc-key, linear-gradient(180deg, #2348b0 0%, #14307f 52%, #0b1c58 100%));
+}
+.tourney-fast-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: .82rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+.tourney-gamepad-hints { margin: 0; text-align: center; }
+
+.tourney-result {
+  margin-top: 6px;
+  padding: 12px 14px;
+  border: 2px solid var(--silver, #dfe8fa);
+  border-radius: 3px;
+  background: var(--qbc-window, linear-gradient(155deg, #1d42a6 0%, #102670 48%, #071242 100%));
+  box-shadow: var(--qbc-bevel-flat), 0 8px 24px rgba(2, 5, 18, .75);
+  text-align: center;
+}
+.tourney-result:empty { display: none; }
+.tourney-result h3 { color: var(--gold); margin: 0 0 6px; font-family: var(--qbc-display, var(--qbc-sans)); }
+.tourney-banner {
+  display: inline-block;
+  margin: 4px 0 8px;
+  padding: 5px 14px;
+  border: 1px solid var(--gold);
+  border-radius: 2px;
+  font-weight: 700;
+  text-shadow: 1px 1px 0 #03071b;
+}
+.tourney-banner--champion {
+  background: linear-gradient(180deg, #c9982c 0%, #865a10 100%);
+  color: #fffbe4;
+  box-shadow: 0 0 14px rgba(248, 220, 130, .45);
+}
+.tourney-banner--exhibition {
+  border-color: #ff8aa0;
+  background: linear-gradient(180deg, #9c1d4c 0%, #520d2c 100%);
+  color: #ffe8ef;
+  box-shadow: 0 0 14px rgba(255, 100, 126, .45);
+}
+.tourney-banner--eliminated {
+  border-color: var(--rose);
+  background: linear-gradient(180deg, #5c1632 0%, #2f0a1c 100%);
+  color: #ffdce3;
+}
+.tourney-result table { margin: 8px auto 0; font-variant-numeric: tabular-nums; }
+
+@media (max-width: 860px) {
+  .tourney-bracket { flex-direction: column; gap: 6px; }
+  .tourney-connector { width: 2px; height: 14px; flex: 0 0 14px; }
+  .tourney-connector::after { right: -3px; top: auto; bottom: -1px; clip-path: polygon(0 0, 100% 0, 50% 100%); width: 8px; height: 6px; }
+  .tourney-hand-area { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+  .tourney-stage { padding: 10px; --hand-width: 76px; --hand-height: 109px; --score-width: 28px; }
+  .tourney-stage .tourney-table { height: clamp(195px, 62vw, 285px); }
+  .tourney-actions button { min-height: 44px; }
+}

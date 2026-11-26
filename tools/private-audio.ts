@@ -3,7 +3,12 @@ import {dirname,isAbsolute,relative,resolve,sep} from 'node:path';
 import type {Plugin} from 'vite';
 
 const namespace='/__qb-private-audio/v1/';
-const routes={matchLoop:`${namespace}match-loop.wav`,victory:`${namespace}victory.wav`} as const;
+const routes={
+  matchLoop:`${namespace}match-loop.wav`,
+  challengeLoop:`${namespace}challenge-loop.wav`,
+  bossLoop:`${namespace}boss-loop.wav`,
+  victory:`${namespace}victory.wav`,
+} as const;
 const maxWaveBytes=16*1024*1024;
 type TrackId=keyof typeof routes;
 type Loop={sampleRateHz:number;startFrame:number;endFrameExclusive:number};
@@ -58,7 +63,7 @@ function readLoop(value:unknown,sampleRate:number,frames:number):Loop{
 }
 
 function readAudioPack(root:string,selection:string,warn:(message:string)=>void):Track[]{
-  const lab=resolve(realpathSync(root),'private-audio');
+  const lab=resolve(realpathSync(root),'.research-cache/audio-lab');
   let config:string,entries:Record<string,unknown>;
   try{
     if(relative(lab,realpathSync(lab)))throw new Error('Audio lab is redirected');
@@ -82,7 +87,7 @@ function readAudioPack(root:string,selection:string,warn:(message:string)=>void)
       }
       const bytes=readFileSync(localFile(lab,resolve(dirname(config),entry.wav),maxWaveBytes));
       const {sampleRate,frames}=waveInfo(bytes);
-      tracks.push(id==='matchLoop'?{id,bytes,loop:readLoop(entry.loop,sampleRate,frames)}:{id,bytes});
+      tracks.push(id==='victory'?{id,bytes}:{id,bytes,loop:readLoop(entry.loop,sampleRate,frames)});
     }catch{
       warn(`[QB audio] ${id} is unavailable. Check its WAV path, PCM format and loop metadata.`);
     }

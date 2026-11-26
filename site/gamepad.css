@@ -8,12 +8,12 @@
 #view-game .gamepad-hints { margin-inline-start: auto; }
 #view-home .gamepad-hints, #infoDialog > .gamepad-hints { padding: 4px 10px; }
 
-:root[data-gamepad-input] :is(#view-game, #view-home, #infoDialog) :is(button, summary, a[href]):focus {
+:root[data-gamepad-input] :is(#view-game, #view-home, #view-carnival, #view-gold-saucer, #infoDialog) :is(button, summary, a[href]):focus {
   outline: 2px solid #fff5d7;
   outline-offset: 2px;
 }
 
-:root[data-gamepad-input] #view-game .tile:focus { z-index: 4; }
+:root[data-gamepad-input] :is(#view-game, #view-carnival, #view-gold-saucer) .tile:focus { z-index: 4; }
 
 #view-game.view .battle-actions:has(> .gamepad-play-hints:not([hidden])):not(:has(> .action-more[open])) > :not(.gamepad-play-hints) {
   display: none;

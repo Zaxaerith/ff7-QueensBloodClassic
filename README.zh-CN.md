@@ -2,15 +2,16 @@
 
 [English](README.md)
 
-这是受 Queen’s Blood 启发的非官方开源单机卡牌游戏。公开 `main` 分支提供源码；最新带标签的预览版本仍是 [v0.9.0-rc.1](https://github.com/Zaxaerith/ff7-QueensBloodClassic/releases/tag/v0.9.0-rc.1)。当前没有通过验收的 Windows 可执行文件。
+这是受 Queen’s Blood 启发的非官方开源单机卡牌游戏。当前版本 **1.0.0** 提供完整 Classic 候选体验。
 
 ## 功能
 
 - 3×5 棋盘、145 张编号卡牌定义、牌组编辑、换牌、对局存档、回放和对局分析。
-- 三档 Bot、命名 NPC 挑战者，以及键盘和手柄操作。
+- 三档 Bot、20 名世界巡礼对手、暗影血女王，以及键盘和手柄操作。
+- 第八神罗丸锦标赛、金碟特殊挑战与生存赛。
 - 11 种界面语言与 Classic Frame 风格界面。
 - 可选的本地 BGM 播放、音量与静音设置；仓库不含音乐文件。
-- Card Carnival 目前有 3 关可玩谜题，完整的 22 关尚未实现。
+- Card Carnival 包含 22 关可玩的 Classic 候选谜题。
 - 145 张 Classic Art 卡牌的候选本地生成路线。
 
 部分复杂卡牌互动仍属于候选规则。#066 Two Face 的反馈行为和 #134 J-Squad 细节仍待对照原作核验。

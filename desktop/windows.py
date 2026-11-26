@@ -3,8 +3,11 @@ SPDX-License-Identifier: GPL-3.0-only
 """
 import json
 
-BRIDGE_METHODS = frozenset(('choose_source', 'inspect_source', 'plan_source', 'start_generation',
-                            'cancel_generation', 'choose_pack', 'check_previous_pack', 'status', 'enter_game'))
+BRIDGE_METHODS = frozenset((
+    'choose_source', 'auto_detect_source', 'inspect_source', 'plan_source',
+    'start_generation', 'cancel_generation', 'choose_pack', 'check_previous_pack',
+    'choose_audio_pack', 'clear_audio_pack', 'detect_local_packs', 'mount_detected_pack', 'set_auto_enter', 'status', 'enter_game',
+))
 
 
 def allowed_message(raw):
@@ -24,6 +27,9 @@ class Bridge:
     def choose_source(self):
         return self._controller.choose_source()
 
+    def auto_detect_source(self):
+        return self._controller.auto_detect_source()
+
     def inspect_source(self):
         return self._controller.inspect_source()
 
@@ -41,6 +47,21 @@ class Bridge:
 
     def check_previous_pack(self):
         return self._controller.check_previous_pack()
+
+    def choose_audio_pack(self):
+        return self._controller.choose_audio_pack()
+
+    def clear_audio_pack(self):
+        return self._controller.clear_audio_pack()
+
+    def detect_local_packs(self):
+        return self._controller.detect_local_packs()
+
+    def mount_detected_pack(self, index):
+        return self._controller.mount_detected_pack(index)
+
+    def set_auto_enter(self, enabled):
+        return self._controller.set_auto_enter(enabled)
 
     def status(self):
         return self._controller.status()

@@ -30,7 +30,8 @@ test('a private pack explicitly joins Card ID to verified file hashes, rejects t
     try{
       const {default:factory}=await import('../vite.config.js');const config=await (factory as Function)({command:'build',mode:'private'});
       expect(config.build.outDir).toBe('../dist-private');const emitted:string[]=[];
-      config.plugins[0].generateBundle.call({emitFile:(asset:{fileName:string})=>emitted.push(asset.fileName)});
+      const catalogPlugin=config.plugins.find((p:{name?:string})=>p?.name==='catalog');
+      catalogPlugin.generateBundle.call({emitFile:(asset:{fileName:string})=>emitted.push(asset.fileName)});
       expect(emitted).toEqual(['catalog.json','classic/portraits/synthetic.png','classic/visual-manifest.json']);
     }finally{if(previous===undefined)delete process.env.QB_PRIVATE_ASSETS;else process.env.QB_PRIVATE_ASSETS=previous;}
     writeFileSync(resolve(folder,'portraits/synthetic.png'),'changed');expect(()=>readPrivatePack(root,folder)).toThrow(/hash mismatch/);
@@ -42,7 +43,8 @@ test('public Vite mode never loads private manifests even when a private path is
   try{
     const {default:factory}=await import('../vite.config.js');
     const config=await (factory as Function)({command:'build',mode:'production'});expect(config.build.outDir).toBe('../dist');
-    const emitted:string[]=[];config.plugins[0].generateBundle.call({emitFile:(asset:{fileName:string})=>emitted.push(asset.fileName)});
+    const emitted:string[]=[];const catalogPlugin=config.plugins.find((p:{name?:string})=>p?.name==='catalog');
+    catalogPlugin.generateBundle.call({emitFile:(asset:{fileName:string})=>emitted.push(asset.fileName)});
     expect(emitted).toEqual(['catalog.json']);
   }finally{if(previous===undefined)delete process.env.QB_PRIVATE_ASSETS;else process.env.QB_PRIVATE_ASSETS=previous;}
   expect(readFileSync(resolve(root,'src/engine.ts'),'utf8')).not.toContain('visuals');

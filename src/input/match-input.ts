@@ -1,7 +1,8 @@
 import {getLocale,t,type MessageKey} from '../i18n/index.js';
 import {$,element} from '../ui-dom.js';
 import type {Direction} from '../ui-gamepad.js';
-import {InputManager,allowsPass,inputContext,type InputContext,type MatchControl,type SemanticAction} from './input-manager.js';
+import {CARNIVAL_ACTION_EVENT,GOLD_SAUCER_ACTION_EVENT,InputManager,allowsPass,inputContext,type InputContext,type MatchControl,type SemanticAction} from './input-manager.js';
+import {TOURNAMENT_ACTION_EVENT} from '../ui-tournament.js';
 import {gridStep,smartSnap} from './match-cursor.js';
 import '../../site/gamepad.css';
 
@@ -117,6 +118,12 @@ export function mountMatchInput(view:MatchView):InputManager {
   const handCard=(index:number)=>hand.querySelector<HTMLElement>(`[data-focus="hand-${index}"]`);
   const tile=(index:number)=>board.querySelector<HTMLElement>(`[data-focus="cell-${index}"]`);
   const isControl=(node:HTMLElement|null)=>node?.matches(controls)===true;
+  const carnivalRoot=()=>$('view-carnival');
+  const carnivalStage=()=>route()==='carnival'?carnivalRoot().querySelector<HTMLElement>('.carnival-stage:not([hidden])'):null;
+  const goldSaucerRoot=()=>$('view-gold-saucer');
+  const goldSaucerStage=()=>route()==='gold-saucer'?goldSaucerRoot().querySelector<HTMLElement>('.gs-stage:not([hidden])'):null;
+  const tournamentRoot=()=>document.getElementById('view-tournament');
+  const tournamentStage=()=>route()==='tournament'?tournamentRoot()?.querySelector<HTMLElement>('.tourney-stage:not([hidden])')??null:null;
   const context=():InputContext=>{
     if(route()==='game'&&menu.open&&!dialog.open)return 'MATCH_PAUSE';
     const cursor=view.cursor(),focus=active();
@@ -124,7 +131,12 @@ export function mountMatchInput(view:MatchView):InputManager {
       :input.modality==='keyboard'&&hand.contains(focus)?'hand'
       :cursor.selected!==null&&cursor.board!==null?'target'
       :cursor.board!==null||board.contains(focus)?'inspect':'hand';
-    return inputContext(route(),dialog.open,phase(),zone);
+    const activeCarnival=carnivalStage();
+    const activeGoldSaucer=goldSaucerStage();
+    const activePhase=route()==='carnival'?(activeCarnival?.dataset.carnivalPhase??(activeCarnival?'playing':''))
+      :route()==='gold-saucer'?(activeGoldSaucer?.dataset.gsPhase??(activeGoldSaucer?'playing':''))
+      :phase();
+    return inputContext(route(),dialog.open,activePhase,zone);
   };
   const focus=(node:HTMLElement|null)=>{if(input.modality!=='pointer'&&usable(node))node.focus();};
   function browse(index:number){
@@ -326,6 +338,21 @@ export function mountMatchInput(view:MatchView):InputManager {
 
   function handle(action:SemanticAction,current:InputContext){
     const {type}=action;
+    if(current==='CARNIVAL_STAGE'){
+      if(type==='help'){activate($('instructionsBtn'));return;}
+      carnivalRoot().dispatchEvent(new CustomEvent<SemanticAction>(CARNIVAL_ACTION_EVENT,{detail:action}));
+      return;
+    }
+    if(current==='GOLD_SAUCER_STAGE'){
+      if(type==='help'){activate($('instructionsBtn'));return;}
+      goldSaucerRoot().dispatchEvent(new CustomEvent<SemanticAction>(GOLD_SAUCER_ACTION_EVENT,{detail:action}));
+      return;
+    }
+    if(current==='NAV_MENU'&&route()==='tournament'&&tournamentStage()){
+      if(type==='help'){activate($('instructionsBtn'));return;}
+      tournamentRoot()?.dispatchEvent(new CustomEvent<SemanticAction>(TOURNAMENT_ACTION_EVENT,{detail:action}));
+      return;
+    }
     if(current==='DIALOG_MODAL'||current==='NAV_MENU'||current==='PREPARE'||current==='REPLAY'){handleOutside(action,current);return;}
     if(current==='MATCH_PAUSE'){
       if(type==='cancel'||type==='menu')closeMenu();
@@ -412,6 +439,12 @@ export function mountMatchInput(view:MatchView):InputManager {
     }
   }
 
+  function setHidden(node:HTMLElement|null,value:boolean){
+    if(node&&node.hidden!==value)node.hidden=value;
+  }
+  function setText(node:HTMLElement|null,value:string){
+    if(node&&node.textContent!==value)node.textContent=value;
+  }
   function hints(){
     const current=context(),gamepad=input.modality==='gamepad';
     const opening=current==='MULLIGAN';
@@ -419,23 +452,51 @@ export function mountMatchInput(view:MatchView):InputManager {
     document.documentElement.toggleAttribute('data-gamepad-input',gamepad);
     if(gamepad&&route()==='game')table.dataset.gamepadState=current;
     else delete table.dataset.gamepadState;
-    settingsLabel.textContent=t('inputConfirmButton');
-    summary.textContent=menu.open?t('paused'):pauseLabel[getLocale()];
+    setText(settingsLabel,t('inputConfirmButton'));
+    setText(summary,menu.open?t('paused'):pauseLabel[getLocale()]);
     const show=route()==='game'&&(opening||browseContexts.has(current))&&!menu.open&&gamepad;
-    playHints.hidden=!show;
-    hint.hidden=show||route()!=='game'||(!gamepad&&!input.unsupported)||current==='DIALOG_MODAL';
-    dialogHint.hidden=!gamepad||!dialog.open;
-    prepareHints.hidden=current!=='PREPARE'||!gamepad;
-    challengeHints.hidden=current!=='NAV_MENU'||route()!=='home'||!gamepad||!active()?.matches('[data-opponent]');
-    if(input.unsupported){hintLabel.textContent=t('gamepadUnsupported');return;}
+    setHidden(playHints,!show);
+    setHidden(hint,show||route()!=='game'||(!gamepad&&!input.unsupported)||current==='DIALOG_MODAL');
+    setHidden(dialogHint,!gamepad||!dialog.open);
+    setHidden(prepareHints,current!=='PREPARE'||!gamepad);
+    setHidden(challengeHints,current!=='NAV_MENU'||route()!=='home'||!gamepad||!active()?.matches('[data-opponent]'));
+    const carnivalHints=carnivalRoot().querySelector<HTMLElement>('#carnivalHints');
+    setHidden(carnivalHints,current!=='CARNIVAL_STAGE'||!gamepad);
+    const gsHints=goldSaucerRoot().querySelector<HTMLElement>('#gsHints');
+    setHidden(gsHints,current!=='GOLD_SAUCER_STAGE'||!gamepad);
+    if(input.unsupported){setText(hintLabel,t('gamepadUnsupported'));return;}
     if(!gamepad){
-      hintLabel.textContent='';
+      setText(hintLabel,'');
+      setText(carnivalHints,'');
+      setText(gsHints,'');
       meter.setAttribute('aria-label',t('gamepadHoldPass'));
       return;
     }
     const [south,east,details,pass,menuKey,shoulders]=glyphs[input.family];
     const [confirm,cancel]=input.confirmMode==='south'?[south,east]:[east,south];
     const label=(key:string,message:MessageKey)=>`${key} ${t(message)}`;
+    if(carnivalHints&&!carnivalHints.hidden){
+      const stage=carnivalStage();
+      const selected=Boolean(stage?.dataset.carnivalSelected),pending=Boolean(stage?.dataset.carnivalPending);
+      const carnivalLabels=[
+        label(confirm,selected?(pending?'confirmPlay':'gamepadConfirm'):'gamepadSelect'),
+        label(details,'cardDetails2'),
+        label(cancel,'back'),
+      ];
+      if(selected&&carnivalRoot().querySelectorAll('#carnivalHand button').length>1)carnivalLabels.push(label(shoulders,'hand'));
+      setText(carnivalHints,carnivalLabels.join('　'));
+    }
+    if(gsHints&&!gsHints.hidden){
+      const stage=goldSaucerStage();
+      const selected=Boolean(stage?.dataset.gsSelected),pending=Boolean(stage?.dataset.gsPending);
+      const gsLabels=[
+        label(confirm,selected?(pending?'confirmPlay':'gamepadConfirm'):'gamepadSelect'),
+        label(details,'cardDetails2'),
+        label(cancel,'back'),
+      ];
+      if(selected&&goldSaucerRoot().querySelectorAll('#gsHand button').length>1)gsLabels.push(label(shoulders,'hand'));
+      setText(gsHints,gsLabels.join('　'));
+    }
     if(!challengeHints.hidden)challengeHints.textContent=label(confirm,'startingDeck');
     if(!prepareHints.hidden){
       const shortcuts=[label(shoulders,'switchSavedDeck'),label(pass,'chooseOrEditDeck')];
@@ -498,7 +559,16 @@ export function mountMatchInput(view:MatchView):InputManager {
     }
     input.contextChanged();
   });
-  const changes=new MutationObserver(()=>{
+  const isRelevantMutation=(record:MutationRecord)=>{
+    if(record.type==='childList'){
+      return record.target===carnivalRoot()||record.target===goldSaucerRoot();
+    }
+    const target=record.target as HTMLElement|null;
+    if(target?.id==='carnivalHints'||target?.id==='gsHints')return false;
+    return true;
+  };
+  const changes=new MutationObserver(records=>{
+    if(records.length&&!records.some(isRelevantMutation))return;
     const current=phase(),entered=current==='PlayerSelect'&&previousPhase!=='PlayerSelect'&&previousPhase!=='Preview';
     previousPhase=current;
     if(current==='Mulligan')firstTurn=true;
@@ -525,6 +595,8 @@ export function mountMatchInput(view:MatchView):InputManager {
   changes.observe(app,{attributeFilter:['data-view']});
   changes.observe(table,{attributeFilter:['data-presentation-phase']});
   changes.observe(dialog,{attributeFilter:['open']});
+  changes.observe(carnivalRoot(),{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','data-carnival-phase','data-carnival-selected','data-carnival-pending']});
+  changes.observe(goldSaucerRoot(),{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','data-gs-phase','data-gs-selected','data-gs-pending']});
   menu.addEventListener('toggle',()=>{board.inert=hand.inert=menu.open;input.contextChanged();});
   changes.observe(document.documentElement,{attributeFilter:['lang']});
   let resizeFrame:number|null=null;

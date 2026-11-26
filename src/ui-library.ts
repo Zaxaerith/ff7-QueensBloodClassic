@@ -15,6 +15,26 @@ export interface LibraryHooks {
   entries:()=>LibraryEntry[];visual:(id:number)=>CardVisual;decks:()=>DeckStore;
   save:(data:DeckStore)=>boolean;choose:(deck:SavedDeck)=>void;
 }
+export function duplicateDraftName(
+  currentName: string,
+  originalName: string,
+  existingNames: readonly string[],
+  formatCopy: (base: string) => string,
+  maxLength = 40,
+): string {
+  const trimmed = currentName.trim(), original = originalName.trim();
+  const taken = new Set(existingNames.map(name => name.trim()).filter(Boolean));
+  if (trimmed && trimmed !== original && !taken.has(trimmed)) return trimmed.slice(0, maxLength);
+  const base = trimmed || original;
+  const first = formatCopy(base).trim().slice(0, maxLength);
+  if (!taken.has(first)) return first;
+  for (let suffix = 2; suffix < 1000; suffix++) {
+    const tail = ` ${suffix}`;
+    const candidate = `${first.slice(0, Math.max(1, maxLength - tail.length))}${tail}`;
+    if (!taken.has(candidate)) return candidate;
+  }
+  return first;
+}
 const rarity=(value:string|null)=>value==='legendary'?t("legendary"):value==='token'?t("token"):value==='standard'?t("normal"):t("rarityPendingReview");
 const dimensionNames=()=>[t("numberAndRarity"),t("rankAndBasePower"),t("territoryPattern"),t("abilityPattern"),t("abilityEffects"),t("triggerOrder"),t("projectImplementation")];
 const statusNames=()=>({verified:t("checkedSeeScope"),candidate:t("candidate"),conflict:t("conflictingSources"),missing:t("evidenceMissing")});
@@ -164,14 +184,17 @@ export function mountLibrary(hooks:LibraryHooks){
     const error = validateDeck(draft.cards);
     $('deckSummary').dataset.valid=String(!error);
     const save = $<HTMLButtonElement>('saveDeck');
+    const duplicate = $<HTMLButtonElement>('duplicateDeck');
     const use = $<HTMLButtonElement>('useDeck');
     const nameError = name.value.trim() ? null : t("enterADeckName");
     save.disabled = !!error || !!nameError;
+    duplicate.disabled = draft.cards.length === 0;
     use.disabled = !!error;
     const incomplete = error && draft.cards.length < 15;
     $('deckValidation').textContent = incomplete ? t("cardsNeeded", 15 - draft.cards.length)
       : error ? t("invalidDeckReason", error) : t("validDeckUpToTwoCopiesPerStandard");
     save.title = nameError ?? error ?? t("saveInThisBrowser");
+    duplicate.title = t("duplicateDeckHelp");
     use.title = error ?? t("useThisDeckInTheMainMenu");
     $<HTMLButtonElement>('revertDeck').disabled = !dirty;
     $<HTMLButtonElement>('deleteDeck').disabled = !hooks.decks().decks.some(d => d.id === draft.id);
@@ -393,6 +416,19 @@ export function mountLibrary(hooks:LibraryHooks){
       load(baseline);
     }));
     openDialog(t("revertDraft"), content);
+  };
+  $('duplicateDeck').onclick=()=>{
+    if(!draft.cards.length)return;
+    const saved=hooks.decks().decks;
+    const nameInput=$<HTMLInputElement>('deckName');
+    const original=saved.find(d=>d.id===draft.id)?.name??deckLabel(baseline);
+    const nextName=duplicateDraftName(nameInput.value,original,saved.map(d=>d.name),base=>t('deckCopyName',base||t('newDeck')));
+    draft={id:'',name:nextName,cards:[...draft.cards]};
+    dirty=true;
+    nameInput.value=nextName;
+    refreshMenu();
+    refreshEditorStatus();
+    notice(t('deckDuplicatedNotice',nextName));
   };
   $('saveDeck').onclick=()=>{
     const error=validateDeck(draft.cards);if(error){notice(error);return;}

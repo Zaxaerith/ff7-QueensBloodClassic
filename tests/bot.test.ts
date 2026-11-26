@@ -112,7 +112,7 @@ for(const first of [0,1] as const)test(`complete API match first P${first}, dete
   expect(scoreBreakdown(game).awards.reduce((sum,r)=>sum+r[0],0)).toBe(outcome(game).scores[0]);
 });
 test('actual JSON CLI compares all three difficulties on an unchanged imported fixture',()=>{
-  const input=readFileSync(new URL('../examples/cli/bot-vs-bot.json',import.meta.url),'utf8');
+  const input=readFileSync(new URL('../examples/cli/m5-bot.json',import.meta.url),'utf8');
   const cli=spawnSync(process.execPath,['tools/qb-cli.mjs'],{cwd:new URL('../',import.meta.url),input,encoding:'utf8'});
   expect(cli.status).toBe(0);const response=JSON.parse(cli.stdout);expect(response.ok).toBe(true);
   expect(response.results.slice(1,4).map((r:any)=>r.result.difficulty)).toEqual(difficulties);

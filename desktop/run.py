@@ -33,8 +33,22 @@ def fail(message):
         print(message, file=sys.stderr)
 
 
+def _version_tuple(value):
+    parts = []
+    for token in str(value).split('.'):
+        digits = ''
+        for ch in token:
+            if ch.isdigit():
+                digits += ch
+            else:
+                break
+        if digits:
+            parts.append(int(digits))
+    return tuple(parts)
+
+
 def main(argv=None):
-    parser = argparse.ArgumentParser(description='Queen\'s Blood Classic Windows desktop prototype')
+    parser = argparse.ArgumentParser(description='Queen\'s Blood Classic Windows desktop host')
     parser.add_argument('--dist', type=Path, default=ROOT / 'desktop/game', help='Explicit desktop Game artifact (node desktop/build-game.mjs)')
     parser.add_argument('--data-dir', type=Path, help='Explicit storage override; default: Saved Games/QueensBloodClassicDesktop/data-location.json')
     parser.add_argument('--check', action='store_true', help='Check dependencies and public artifact without opening a window')
@@ -45,8 +59,8 @@ def main(argv=None):
             raise ValueError('Windows and Python 3.11+ are required')
         if importlib.metadata.version('pywebview') != '6.2.1':
             raise ValueError('Install desktop/requirements.txt; this native boundary is pinned to pywebview 6.2.1')
-        if importlib.metadata.version('Pillow') != '13.0.0':
-            raise ValueError('Pillow 13.0.0 is required by the existing art generator')
+        if _version_tuple(importlib.metadata.version('Pillow')) < (10, 0):
+            raise ValueError('Pillow 10.0+ is required by the existing art generator')
         import webview
         guilib = __import__('importlib').import_module('webview.guilib')
         # Explicit initialization lets us reject MSHTML BEFORE any window exists.
@@ -60,8 +74,9 @@ def main(argv=None):
             raise ValueError('Microsoft Edge WebView2 Runtime is required. No IE/MSHTML fallback is permitted.')
         host = ResourceHost(args.dist, ROOT / 'desktop/ui')
         if args.check:
-            print(json.dumps(dict(ok=True, backend=gui.renderer, python=sys.version.split()[0],
-                                  pywebview='6.2.1', origin=host.origin, gameFiles=len(host.files)-3)))
+            if sys.stdout:
+                print(json.dumps(dict(ok=True, backend=gui.renderer, python=sys.version.split()[0],
+                                      pywebview='6.2.1', origin=host.origin, gameFiles=len(host.files)-3)))
             host.close()
             host = None
             return 0
@@ -75,8 +90,8 @@ def main(argv=None):
         from webview.menu import Menu, MenuAction
         window = webview.create_window("Queen's Blood Classic · Windows x64", host.launch_url,
                                        js_api=Bridge(controller), width=1280, height=820, min_size=(900, 650),
-                                       background_color='#050a21', text_select=True,
-                                       menu=[Menu('Desktop', [MenuAction('Resource Setup', controller._setup_menu)])])
+                                       background_color='#04081c', text_select=True,
+                                       menu=[Menu('Desktop', [MenuAction('Launcher & Resource Setup', controller._setup_menu)])])
         controller.window = window
         def secure_before_show():
             try:
@@ -93,7 +108,8 @@ def main(argv=None):
         return 0
     except Exception as error:
         if args.check:
-            print(json.dumps(dict(ok=False, error=str(error))))
+            if sys.stdout:
+                print(json.dumps(dict(ok=False, error=str(error))))
         else:
             fail(str(error))
         return 1

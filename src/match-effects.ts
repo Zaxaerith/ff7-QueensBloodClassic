@@ -5,13 +5,17 @@ import type {RuleEvent} from './engine.js';
 import type {PublicBatch,PublicMatch} from './match-presentation.js';
 import {byId} from './cards.js';
 
-export type EffectStage='commit'|'events'|'settle'|'summary'|'scoring';
+export type TransitionStage='start'|'turn'|'deal'|'draw';
+export type EffectStage='commit'|'events'|'settle'|'summary'|'scoring'|TransitionStage;
 export interface CellChange {row:number;col:number;kind:'power'|'pawns';text:string;delta:number;}
 export interface EventTarget {row:number;col:number;kind:string;text:string;current:boolean;source:string|null;}
 export interface MatchEffect {
-  key:number;batch:number;stage:EffectStage;actor:0|1;action:'play'|'pass'|'mulligan';motion:boolean;
+  key:number;batch:number;stage:EffectStage;actor:0|1;action:'play'|'pass'|'transition';motion:boolean;
   events:readonly RuleEvent[];changes:readonly CellChange[];targets:readonly EventTarget[];
   placement:RuleEvent|undefined;
+  opening?:boolean;
+  drawIndex?:number;
+  rivalHandCount?:number;
   scoring?:{result:PublicMatch['result'];revealed:number;totals:boolean};
 }
 const location=(e:RuleEvent)=>e.row!==undefined&&e.col!==undefined&&e.row>=0&&e.row<3&&e.col>=0&&e.col<5;
@@ -71,4 +75,47 @@ export function effectPlan(batch:PublicBatch){
   const size=Math.max(1,Math.ceil(events.length/4)),groups:RuleEvent[][]=[];
   for(let i=0;i<events.length;i+=size)groups.push(events.slice(i,i+size));
   return {groups,placement:batch.events.find(e=>e.type==='CardPlayed'),changes:netChanges(batch.before,batch.after)};
+}
+
+export type LegendaryVfxKind='mako'|'abyss'|'chain';
+export interface LegendaryVfxBurst {
+  readonly kind:LegendaryVfxKind;
+  readonly row?:number;
+  readonly col?:number;
+}
+
+/** Classify iconic legendary cards (#086-#106 party/summons, #143 Sephiroth, #144 Emerald Witch, #145 Queen). */
+export function legendaryCardVfx(cardId:number|undefined):'mako'|'abyss'|null {
+  if(cardId===undefined)return null;
+  if(cardId===143||cardId===145)return 'abyss';
+  if((cardId>=86&&cardId<=106)||cardId===144)return 'mako';
+  return null;
+}
+
+/** Detect whether a resolved event batch warrants a crisp 260ms PS1 legendary crystal pulse. */
+export function batchLegendaryVfx(events:readonly RuleEvent[],placement?:RuleEvent):LegendaryVfxBurst|null {
+  const cardKind=placement?.type==='CardPlayed'?legendaryCardVfx(placement.cardId):null;
+  if(cardKind){
+    return {
+      kind:cardKind,
+      ...(placement?.row!==undefined?{row:placement.row}:{}),
+      ...(placement?.col!==undefined?{col:placement.col}:{}),
+    };
+  }
+  let destroyedCount=0;
+  let lastDestroyed:RuleEvent|undefined;
+  for(const event of events){
+    if(event.type==='CardDestroyed'){
+      destroyedCount++;
+      if(event.row!==undefined&&event.col!==undefined)lastDestroyed=event;
+    }
+  }
+  if(destroyedCount>=2){
+    return {
+      kind:'chain',
+      ...(lastDestroyed?.row!==undefined?{row:lastDestroyed.row}:{}),
+      ...(lastDestroyed?.col!==undefined?{col:lastDestroyed.col}:{}),
+    };
+  }
+  return null;
 }

@@ -205,7 +205,7 @@ test('a short normal-deck opening plays J-Squad and restores its generated cards
 });
 
 test('145-card inventory separates source support, conflict and candidate timing without promoting game verification',()=>{
-  const rows=readFileSync(new URL('./fixtures/card-rule-status.csv',import.meta.url),'utf8').trim().split(/\r?\n/).slice(1).map(row=>row.split(','));
+  const rows=readFileSync(new URL('../data/rule-status-m6-a1.csv',import.meta.url),'utf8').trim().split(/\r?\n/).slice(1).map(row=>row.split(','));
   expect(rows.map(row=>Number(row[0]))).toEqual(Array.from({length:145},(_,i)=>i+1));
   expect(playableCards).toHaveLength(145);expect(tokenCards).toHaveLength(21);
   expect(rows.every(row=>row[2]==='true')).toBe(true);

@@ -7,12 +7,12 @@ export type PlacedCard = {
   enhancedOnce: boolean; enfeebledOnce: boolean;
   statusPower?: number; dynamicDelta?: number; thresholds?: number[];
 };
-export type Tile = {owner: Player | null; pawns: number; card: PlacedCard | null};
+export type Tile = {owner: Player | null; pawns: number; card: PlacedCard | null; tileBonus?: number};
 export type Move = {handIndex: number; row: number; col: number};
 export type Command = {type: 'mulligan'; player: Player; indices: number[]}
   | ({type: 'play'; player: Player} & Move) | {type: 'pass'; player: Player};
-export type PositionTile = {row: number; col: number; owner: Player | null; pawns?: number; cardId?: number; permanentDelta?: number; enhancedOnce?: boolean; enfeebledOnce?: boolean; thresholds?: number[]};
-export type Position = {seed?: number; phase?: Phase; turn?: Player; passes?: number; board?: PositionTile[]; hands: [number[],number[]]; decks?: [number[],number[]]; discard?: [number[],number[]]};
+export type PositionTile = {row: number; col: number; owner: Player | null; pawns?: number; cardId?: number; permanentDelta?: number; enhancedOnce?: boolean; enfeebledOnce?: boolean; thresholds?: number[]; tileBonus?: number};
+export type Position = {seed?: number; phase?: Phase; turn?: Player; passes?: number; board?: PositionTile[]; hands: [number[],number[]]; decks?: [number[],number[]]; discard?: [number[],number[]]; noTurnDraw?: boolean};
 export const LEGACY_RULES_VERSION = 'qb-classic-m3-v1';
 export const TURN_DRAW_RULES_VERSION = 'qb-classic-turn-draw-v1';
 export type RulesVersion = typeof LEGACY_RULES_VERSION | typeof TURN_DRAW_RULES_VERSION;
@@ -42,6 +42,7 @@ export type Game = RulesTag & {
   board: Tile[][]; hands: [number[],number[]]; decks: [number[],number[]]; discard: [number[],number[]];
   mulliganDone: [boolean,boolean]; phase: Phase; turn: Player; passes: number;
   history: string[]; events: RuleEvent[]; nextInstanceId: number; replay: Replay;
+  noTurnDraw?: boolean;
 };
 export type Outcome = {rows: [number,number][]; bonuses: [number,number][]; scores: [number,number]; winner: Player | null};
 type Located = {row: number; col: number; card: PlacedCard};
@@ -61,6 +62,7 @@ export function cardStatus(card: PlacedCard): 'enhanced' | 'enfeebled' | 'neutra
 function cardsOnBoard(game: Game): Located[] {
   return game.board.flatMap((row,r)=>row.flatMap((tile,c)=>tile.card ? [{row:r,col:c,card:tile.card}] : []));
 }
+function tileTerrain(tile: Tile): {tileBonus?: number} {return tile.tileBonus ? {tileBonus: tile.tileBonus} : {};}
 function snapshot(source: Located): Located {return {...source,card:{...source.card}};}
 function record(game: Game,event: Omit<RuleEvent,'seq'>): void {
   const type=event.type;
@@ -187,14 +189,14 @@ class Resolution {
   }
   private place(id: number,owner: Player,row: number,col: number): Located {
     const card: PlacedCard={id,owner,instanceId:this.game.nextInstanceId++,permanentDelta:0,power:definition(id).power,enhancedOnce:false,enfeebledOnce:false};
-    this.game.board[row][col]={owner,pawns:0,card};
+    this.game.board[row][col]={owner,pawns:0,card,...tileTerrain(this.game.board[row][col])};
     return {row,col,card};
   }
   private destroy(sources: Located[],reason: string): void {
     // Remove a complete lethal wave before any observer is selected or aura rebuilt.
     const removed=sources.filter(s=>this.living(s)).map(snapshot);
     for(const s of removed){
-      this.game.board[s.row][s.col]={owner:null,pawns:0,card:null};
+      this.game.board[s.row][s.col]={owner:null,pawns:0,card:null,...tileTerrain(this.game.board[s.row][s.col])};
       this.game.discard[s.card.owner].push(s.card.id);
     }
     for(const s of removed){
@@ -207,7 +209,8 @@ class Resolution {
   private recompute(): void {
     const sources=cardsOnBoard(this.game);
     const previous=sources.map(s=>s.card.power);
-    const base=sources.map(s=>definition(s.card.id).power+s.card.permanentDelta);
+    // Tile terrain bonuses (e.g., Gold Saucer High Ground) enter the fixed baseline alongside permanentDelta.
+    const base=sources.map(s=>definition(s.card.id).power+s.card.permanentDelta+(this.game.board[s.row][s.col].tileBonus??0));
     for(const [i,s] of sources.entries()){s.card.power=base[i];s.card.statusPower=base[i];s.card.dynamicDelta=0;}
     // Unconditional spatial modifiers form the baseline. Conditional auras are
     // solved synchronously; never let row traversal order choose an outcome.
@@ -319,7 +322,7 @@ class Resolution {
     const replacedPower=old ? Math.max(0,old.card.power) : 0;
     if(old){
       // The replaced card is destroyed, but its old modifiers never transfer.
-      this.game.board[row][col]={owner:null,pawns:0,card:null};
+      this.game.board[row][col]={owner:null,pawns:0,card:null,...tileTerrain(this.game.board[row][col])};
       this.game.discard[owner].push(old.card.id);
       cardEvent(this.game,'CardReplaced',old,{power:replacedPower});
     }
@@ -352,7 +355,7 @@ class Resolution {
 // The opening turn comes from mulligan and has no turn handoff.
 function advanceTurn(game: Game): void {
   game.turn=opponent(game.turn);
-  if(game.rulesVersion===TURN_DRAW_RULES_VERSION && game.decks[game.turn].length) {
+  if(!game.noTurnDraw && game.rulesVersion===TURN_DRAW_RULES_VERSION && game.decks[game.turn].length) {
     new Resolution(game).draw(game.turn);
   }
 }
@@ -441,6 +444,7 @@ export function createPosition(input: Position,rules: RulesVersion = TURN_DRAW_R
   const turn=input.turn??0,phase=input.phase??'playing',seed=input.seed??1,passes=input.passes??(phase==='finished'?2:0);
   assertPlayer(turn);
   if(!Number.isSafeInteger(seed)||seed<0||seed>0xFFFFFFFF) throw new Error('Invalid position seed');
+  if(input.noTurnDraw!==undefined&&typeof input.noTurnDraw!=='boolean') throw new Error('Invalid noTurnDraw flag');
   if(!['mulligan','playing','finished'].includes(phase)||!Number.isInteger(passes)||passes<0||passes>2||(phase==='finished')!==(passes===2)) throw new Error('Invalid phase/pass count');
   const tag=rulesTag(rules);
   const board: Tile[][]=input.board===undefined?openingBoard():
@@ -456,6 +460,9 @@ export function createPosition(input: Position,rules: RulesVersion = TURN_DRAW_R
       if(tile.owner!==null) assertPlayer(tile.owner);
       const pawns=tile.pawns??0;
       if(!Number.isInteger(pawns)||pawns<0||pawns>3) throw new Error('Invalid pawn rank');
+      const tileBonus=tile.tileBonus;
+      if(tileBonus!==undefined&&(!Number.isSafeInteger(tileBonus)||Math.abs(tileBonus)>99)) throw new Error('Invalid tileBonus');
+      const terrain=tileBonus?{tileBonus}:{};
       if(tile.cardId!==undefined){
         definition(tile.cardId);
         if(tile.owner===null||pawns!==0||!Number.isSafeInteger(tile.permanentDelta??0)) throw new Error('Invalid card position');
@@ -463,10 +470,10 @@ export function createPosition(input: Position,rules: RulesVersion = TURN_DRAW_R
         if(tile.thresholds!==undefined&&(!Array.isArray(tile.thresholds)||tile.thresholds.some(i=>!Number.isInteger(i)||definition(tile.cardId!).abilities[i]?.timing!=='threshold'))) throw new Error('Invalid threshold flags');
         board[tile.row][tile.col]={owner:tile.owner,pawns:0,card:{id:tile.cardId,owner:tile.owner,instanceId:nextInstanceId++,
           permanentDelta:tile.permanentDelta??0,power:definition(tile.cardId).power,enhancedOnce:tile.enhancedOnce??false,enfeebledOnce:tile.enfeebledOnce??false,
-          ...(tile.thresholds?{thresholds:[...tile.thresholds]}:{})}};
+          ...(tile.thresholds?{thresholds:[...tile.thresholds]}:{})},...terrain};
       } else {
         if((tile.owner===null)!==(pawns===0)) throw new Error('Empty position ownership must match pawn rank');
-        board[tile.row][tile.col]={owner:tile.owner,pawns,card:null};
+        board[tile.row][tile.col]={owner:tile.owner,pawns,card:null,...terrain};
       }
     }
   }
@@ -474,6 +481,7 @@ export function createPosition(input: Position,rules: RulesVersion = TURN_DRAW_R
   const position=structuredClone({...input,seed,turn,phase,passes,hands,decks,discard});
   const game=initializeGame({board,hands,decks,discard,phase,passes},
     {...tag,version:2,seed,decks:[[],[]],firstPlayer:turn,position,commands:[]});
+  if(input.noTurnDraw) game.noTurnDraw=true;
   game.nextInstanceId=nextInstanceId;
   new Resolution(game).stabilize();
   return game;

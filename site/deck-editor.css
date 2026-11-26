@@ -15,7 +15,9 @@
 .d4-home-setup .advanced { margin-top: 10px; }
 .d4-home-deck {
   grid-area: deck;
-  background: radial-gradient(ellipse at 50% 8%, #20458d 0%, transparent 68%), linear-gradient(140deg, #172b65, #0a143c);
+  background:
+    radial-gradient(ellipse 65% 38% at 50% 0%, rgba(90, 140, 255, .24), transparent 72%),
+    var(--qbc-window, linear-gradient(155deg, #1d42a6 0%, #102670 48%, #071242 100%));
 }
 .d4-panel-heading {
   display: flex;
@@ -54,13 +56,15 @@
   display: grid;
   place-items: center;
   aspect-ratio: 240 / 346;
-  border: 1px dashed #778ab9;
+  border: 1px dashed var(--qbc-steel, #526696);
   border-radius: 3px;
-  background: #0713328a;
+  background: var(--qbc-well-flat, #050d2e);
   color: var(--muted);
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  text-shadow: var(--qbc-text-shadow, 1px 1px 0 #03071b);
 }
-.d4-slot-code { display: block; color: var(--muted); font-size: 11px; line-height: 1.5; font-variant-numeric: tabular-nums; }
+.d4-slot-code { display: block; color: var(--muted); font-size: 11px; line-height: 1.5; font-variant-numeric: tabular-nums; text-shadow: var(--qbc-text-shadow, 1px 1px 0 #03071b); }
 .d4-slot > .d4-slot-code { text-align: center; margin-top: 3px; }
 .d4-deck-tools { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 18px; padding: 10px 14px; margin-bottom: 12px; }
 .d4-deck-tools .editor-tools { flex: 1 1 260px; max-width: 360px; }
@@ -80,7 +84,7 @@
 .d4-library-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; gap: 10px 8px; }
 .d4-library-grid .empty { grid-column: 1 / -1; }
 .d4-library-caption { display: flex; justify-content: space-between; align-items: baseline; gap: 4px; flex-wrap: wrap; margin-top: 3px; }
-.d4-library-status { font-size: 11px; color: var(--gold); line-height: 1.5; }
+.d4-library-status { font-size: 11px; color: var(--gold); line-height: 1.5; font-variant-numeric: tabular-nums; text-shadow: var(--qbc-text-shadow, 1px 1px 0 #03071b); }
 .d4-library-item[data-blocked="true"] .d4-library-status { color: var(--muted); }
 .d4-library-item[data-in-deck="true"] .d4-library-status { color: var(--teal); }
 #deckFilters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0 0 12px; gap: 6px; }
@@ -103,14 +107,14 @@
 .d4-inspector .qb-key { grid-column: 1; margin: 0; }
 .d4-inspector .qb-trigger { display: none; }
 .d4-inspector .qb-description { grid-column: 1 / -1; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 4; overflow: hidden; margin: 0; }
-.d4-inspector .d4-copy-count, .d4-inspector .d4-limit { margin: 8px 0; font-size: .9rem; }
+.d4-inspector .d4-copy-count, .d4-inspector .d4-limit { margin: 8px 0; font-size: .9rem; font-variant-numeric: tabular-nums; text-shadow: var(--qbc-text-shadow, 1px 1px 0 #03071b); }
 .d4-copy-count { color: var(--teal); }
 .d4-inspector-actions { gap: 6px; }
 .d4-inspector-actions button { min-height: 44px; padding: 6px 9px; font-size: .88rem; }
 .d4-deck-footer { position: sticky; bottom: 0; z-index: 4; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 6px 12px; padding: 8px 10px; margin-top: 12px; }
 .d4-deck-actions { gap: 5px; }
 .d4-deck-actions button { min-height: 40px; }
-.d4-inspector-actions button:disabled, .d4-deck-actions button:disabled { color: #91a2c6; border-color: #536c98; background: #101e46; }
+.d4-inspector-actions button:disabled, .d4-deck-actions button:disabled { color: #8fa3d0; border-color: var(--qbc-steel, #526696); background: #081544; }
 #view-decks .d4-card-button { scroll-margin-block-end: 115px; }
 @media (min-width: 1121px) {
   #deckSlotsPanel, #deckInfo { position: sticky; top: 12px; }
@@ -121,9 +125,9 @@
 @media (max-width: 1120px) {
   #view-decks { max-width: 650px; margin-inline: auto; }
   .d4-deck-layout { display: block; }
-  .d4-deck-tabs { position: sticky; top: 0; z-index: 3; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-bottom: 8px; padding: 4px 0; background: #0a143e; }
+  .d4-deck-tabs { position: sticky; top: 0; z-index: 3; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; margin-bottom: 8px; padding: 4px; background: var(--qbc-window, linear-gradient(155deg, #1d42a6 0%, #102670 48%, #071242 100%)); }
   .d4-deck-tabs button { min-height: 44px; padding: 6px 4px; }
-  .d4-deck-tabs button[aria-pressed="true"] { color: var(--gold); border-color: var(--gold); background: #27457c; }
+  .d4-deck-tabs button[aria-pressed="true"] { color: var(--gold); border-color: var(--qbc-row-selected-edge, var(--gold)); background: var(--qbc-row-selected, rgba(3, 8, 34, .82)); }
   #view-decks[data-deck-pane="slots"] [data-deck-panel]:not([data-deck-panel="slots"]),
   #view-decks[data-deck-pane="library"] [data-deck-panel]:not([data-deck-panel="library"]),
   #view-decks[data-deck-pane="info"] [data-deck-panel]:not([data-deck-panel="info"]) { display: none; }

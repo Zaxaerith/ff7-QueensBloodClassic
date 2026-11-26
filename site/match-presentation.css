@@ -5,14 +5,103 @@
 .battle-window .presentation-tools{font-size:12px;display:flex;gap:6px;align-items:center;line-height:1.5}
 .battle-window .presentation-tools input{width:auto}
 #presentationSkip[hidden]{display:none}
-/* D3: actual event/endpoint annotations, never predicted yellow range flashes. */
+/* Overlay shares the board's grid area, including its fractional geometry. */
 #view-game .board-layout{position:relative}
-.match-effects{position:absolute;pointer-events:none;z-index:4;overflow:visible}
+.match-effects{position:absolute;grid-area:1 / 2 / 2 / 3;inset:0;pointer-events:none;z-index:4;overflow:visible}
 .match-effects>div{pointer-events:none}
-.match-drop-target,.match-event-target,.match-net-change{position:absolute;left:calc(var(--effect-col) * (var(--cell-width) + var(--cell-gap)));top:calc(var(--effect-row) * (var(--cell-height) + var(--cell-gap)));width:var(--cell-width);height:var(--cell-height);display:flex;align-items:center;justify-content:center;text-align:center}
-.match-drop-target{border:2px solid #e5edff;box-shadow:inset 0 0 0 2px #102850}
-.match-drop-target span,.match-event-target span,.match-net-change span{background:#0b174de8;border:1px solid #b9cee3;color:#f3f5ff;padding:3px 4px;font-size:12px;line-height:1.3;overflow-wrap:anywhere;max-width:100%}
-.match-drop-target span{align-self:start;font-weight:bold}
+.match-drop-target,.match-landing,.match-event-target,.match-net-change{position:absolute;left:calc(var(--effect-col) * (var(--cell-width) + var(--cell-gap)));top:calc(var(--effect-row) * (var(--cell-height) + var(--cell-gap)));width:var(--cell-width);height:var(--cell-height);display:flex;align-items:center;justify-content:center;text-align:center}
+
+.match-drop-target,.match-landing{--placement-edge:#a6eee1}
+.match-drop-target[data-owner="1"],.match-landing[data-owner="1"]{--placement-edge:#ffc4d4}
+.match-drop-target{border:1px solid #d9e5f1aa}
+.match-drop-target[data-owner="0"]{animation:match-target-enter 110ms steps(3,end)}
+.match-drop-target::before,.match-drop-target::after{
+  content:"";position:absolute;width:18%;height:12%;border:0 solid var(--placement-edge);
+}
+.match-drop-target::before{top:2px;left:2px;border-top-width:2px;border-left-width:2px}
+.match-drop-target::after{bottom:2px;right:2px;border-bottom-width:2px;border-right-width:2px}
+.match-landing{
+  border:2px solid var(--placement-edge);
+  box-shadow:inset 0 0 0 1px #10152d;
+  animation:match-land 160ms steps(4,end) both;
+}
+.match-landing[data-replacement]{border-style:double;border-width:4px}
+@keyframes match-target-enter{from{opacity:.25;transform:scale(.94)}to{opacity:1;transform:none}}
+@keyframes match-land{0%,25%{opacity:1}to{opacity:0}}
+
+.match-turn-banner {
+  position: absolute;
+  inset: 36% 0 auto;
+  padding: 6px 8px;
+  border-block: 1px solid #c9d6e8;
+  background: linear-gradient(90deg, #071233dc, #192c77, #071233dc);
+  color: #b9f0bf;
+  text-align: center;
+  overflow-wrap: anywhere;
+  font: bold clamp(.95rem, 2.1cqi, 1.8rem)/1.2 Georgia, serif;
+  animation: match-turn-in 140ms steps(4,end) both;
+}
+.match-effects[data-stage=start] .match-turn-banner { color: var(--gold); }
+.match-effects[data-stage=turn] .match-turn-banner[data-owner="1"] { color: #ffc0c6; }
+.match-effects[data-stage=turn]:not([data-opening]) .match-turn-banner[data-owner="1"] {
+  animation: match-rival-turn 270ms steps(5,end) both;
+}
+@keyframes match-turn-in {
+  from { opacity: 0; transform: translateY(5px); }
+  55%, 100% { opacity: 1; transform: none; }
+}
+@keyframes match-rival-turn {
+  0%, 100% { opacity: 0; }
+  25%, 75% { opacity: 1; }
+}
+#view-game .battle-window:has(.match-effects[data-opening][data-stage=start]) #hand .hand-card,
+#view-game .battle-window:has(.match-effects[data-opening][data-stage=turn]) #hand .hand-card {
+  visibility: hidden;
+}
+#view-game .battle-window:has(.match-effects[data-stage=deal]) #hand .hand-card {
+  animation: match-deal-card 140ms steps(5,end) both;
+}
+#view-game .battle-window:has(.match-effects[data-stage=deal]) #hand .hand-card:nth-child(2) { animation-delay: 34ms; }
+#view-game .battle-window:has(.match-effects[data-stage=deal]) #hand .hand-card:nth-child(3) { animation-delay: 68ms; }
+#view-game .battle-window:has(.match-effects[data-stage=deal]) #hand .hand-card:nth-child(4) { animation-delay: 102ms; }
+#view-game .battle-window:has(.match-effects[data-stage=deal]) #hand .hand-card:nth-child(5) { animation-delay: 136ms; }
+#view-game #hand .match-hand-draw { animation: match-deal-card 140ms steps(5,end) both; }
+@keyframes match-deal-card { from { opacity: 0; transform: translate(12px, -8px); } to { opacity: 1; transform: none; } }
+
+.match-card-back {
+  border: 2px solid #c9d6e8;
+  border-radius: 2px;
+  background: repeating-linear-gradient(135deg, #1d367e 0 4px, #112759 4px 8px);
+  box-shadow: inset 0 0 0 1px #081438;
+}
+.match-rival-hand {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: flex;
+  gap: 2px;
+  animation: match-rival-pick 220ms steps(4,end) both;
+}
+.match-rival-hand i, .match-rival-draw { width: clamp(15px, 2.5cqi, 38px); aspect-ratio: .7; }
+.match-rival-hand i:last-child { border-color: var(--gold); translate: 0 -3px; }
+.match-rival-flight {
+  --rival-origin-x: calc(var(--board-width) - var(--cell-width) - 4px - var(--effect-col) * (var(--cell-width) + var(--cell-gap)));
+  --rival-origin-y: calc(4px - var(--effect-row) * (var(--cell-height) + var(--cell-gap)));
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transform-origin: top right;
+  animation: match-rival-fly 220ms steps(8,end) both;
+}
+.match-rival-draw { position: absolute; top: 4px; right: 4px; animation: match-deal-card 140ms steps(5,end) both; }
+@keyframes match-rival-pick { 0%,28% { opacity: 1; } 55%,100% { opacity: 0; } }
+@keyframes match-rival-fly {
+  0%,28% { opacity: 0; transform: translate(var(--rival-origin-x),var(--rival-origin-y)) scale(.28); }
+  33% { opacity: 1; transform: translate(var(--rival-origin-x),var(--rival-origin-y)) scale(.28); }
+  100% { opacity: 1; transform: none; }
+}
+
+.match-event-target span,.match-net-change span{background:#0b174de8;border:1px solid #b9cee3;color:#f3f5ff;padding:3px 4px;font-size:12px;line-height:1.3;overflow-wrap:anywhere;max-width:100%}
 .match-event-target{align-items:end;padding-bottom:3px}
 .match-event-target[data-kind="CardDestroyed"] span,.match-event-target[data-kind="CardReplaced"] span{border-color:#e4a4b0;color:#ffd1dc}
 .match-event-target[data-kind="CardEnhanced"] span,.match-event-target[data-kind="CardSpawned"] span{border-color:#97e6da;color:#c1fff0}
@@ -24,12 +113,18 @@
 #view-game .battle-feedback:has(.match-action-notice:not([hidden]))>#feedback{display:none}
 #view-game .battle-feedback .match-action-notice{margin:0;color:#e6efff;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .match-effects[data-motion=true] .match-net-change span{animation:match-note-enter 180ms ease-out both}
-.match-card-arrival>.qb-card{animation:match-card-enter 180ms ease-out both}
-@keyframes match-card-enter{from{opacity:.5;transform:translateY(-7px)}to{opacity:1;transform:none}}
+.board-layout:has(>.match-effects[data-stage=events][data-motion=true]) .match-card-arrival>.qb-card{
+  animation:match-card-enter 150ms cubic-bezier(.2,.65,.38,1);
+}
+@keyframes match-card-enter{from{opacity:.58;transform:translateY(-5%) scale(.96)}to{opacity:1;transform:none}}
 @keyframes match-note-enter{from{transform:translateY(5px)}to{transform:none}}
 .match-score-row{position:absolute;left:0;right:0;top:calc(var(--effect-row) * (var(--cell-height) + var(--cell-gap)) + var(--cell-height) * .35);min-height:40px;display:grid;text-align:center;padding:5px;background:linear-gradient(90deg,#0b174ddd,#152b65f5,#0b174ddd);border-block:1px solid #a8badb;color:#edf2ff;font-size:13px}
 .match-score-row.active{border-color:#f5d47b}.match-score-row span{color:#f5d47b}
 .match-score-total{position:absolute;top:0;left:0;right:0;padding:5px;background:#0b174df5;border:1px solid #f5d47b;text-align:center;color:#ffe3a5;font-weight:bold;font-size:15px}
-@media(max-width:760px){.match-drop-target span,.match-event-target span,.match-net-change span{font-size:10px;padding:2px}.match-net-change.pawns span{font-size:9px}.match-score-row{font-size:11px;min-height:34px;padding:2px}.match-score-total{font-size:12px}#view-game .battle-feedback .match-action-notice{font-size:11px}}
-@media(prefers-reduced-motion:reduce){.match-card-arrival>.qb-card,.match-effects[data-motion=true] .match-net-change span{animation:none}}
-:root[data-reduce-motion=true] .match-card-arrival>.qb-card,:root[data-reduce-motion=true] .match-net-change span{animation:none}
+@media(max-width:760px){.match-event-target span,.match-net-change span{font-size:10px;padding:2px}.match-net-change.pawns span{font-size:9px}.match-score-row{font-size:11px;min-height:34px;padding:2px}.match-score-total{font-size:12px}#view-game .battle-feedback .match-action-notice{font-size:11px}}
+@media(prefers-reduced-motion:reduce){
+  .match-drop-target,.match-landing,.match-turn-banner,.match-rival-draw{display:none}
+  #view-game .battle-window #hand .hand-card{visibility:visible!important}
+}
+:root[data-reduce-motion=true] :is(.match-drop-target,.match-landing,.match-turn-banner,.match-rival-draw){display:none}
+:root[data-reduce-motion=true] #view-game .battle-window #hand .hand-card{visibility:visible!important}

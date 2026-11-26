@@ -25,8 +25,8 @@ def main():
         if (root/folder).exists() and folder not in producer:producer.append(folder)
     data=[]
     for path in producer:data.append((str(root/path),'producer/'+str(Path(path).parent).replace('\\','/')))
-    for path in ['desktop/ui/index.html','desktop/ui/setup.js','desktop/ui/setup.css','data/card-index.json','data/release/public-distribution-policy.json']:
-        data.append((str(root/path),str(Path(path).parent).replace('\\','/')))
+    for path in ['package.json','desktop/ui/index.html','desktop/ui/setup.js','desktop/ui/setup.css','data/card-index.json','data/release/public-distribution-policy.json']:
+        data.append((str(root/path),'.' if Path(path).parent==Path('.') else str(Path(path).parent).replace('\\','/')))
     for path in (root/'desktop/game').rglob('*'):
         if path.is_file():data.append((str(path),path.parent.relative_to(root).as_posix()))
     std=set()

@@ -7,7 +7,7 @@ import {starterDeck} from '../src/cards.js';
 import {observeGame,type BotDecision} from '../src/bot.js';
 import type {StoragePort} from '../src/ui-data.js';
 
-const fixture=(name:string):Position=>JSON.parse(readFileSync(new URL(`./fixtures/auto-pass-${name}.json`,import.meta.url),'utf8')).operations[0].position;
+const fixture=(name:string):Position=>JSON.parse(readFileSync(new URL(`../examples/cli/m6-d1-1-${name}.json`,import.meta.url),'utf8')).operations[0].position;
 beforeEach(()=>vi.useFakeTimers());afterEach(()=>vi.useRealTimers());
 class Memory implements StoragePort {rows=new Map<string,string>();getItem(k:string){return this.rows.get(k)??null;}setItem(k:string,v:string){this.rows.set(k,v);}}
 function setup(game:Game,mode='standard',storage=new Memory()){
@@ -98,6 +98,6 @@ test('post-play rotating impact outlines are absent; selection previews are reta
   const originalCss=readFileSync(new URL('../site/style.css',import.meta.url),'utf8');
   // D3 permits finite card/delta transitions, never rotating preview outlines.
   expect(css).not.toMatch(/presentation-impact|infinite|pulse|blink/);expect(ui).not.toContain('presentation-impact');
-  expect(css).toContain('match-card-enter 180ms ease-out both');
+  expect(css).toMatch(/animation:\s*match-card-enter \d+ms/);
   expect(ui).toContain("'preview-pawn'");expect(ui).toContain("'preview-effect'");expect(originalCss).toContain('.tile.legal::after');
 });

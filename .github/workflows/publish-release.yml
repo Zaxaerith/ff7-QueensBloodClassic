@@ -1,4 +1,4 @@
-name: Publish accepted Windows pre-release
+name: Publish accepted Windows release
 
 on:
   workflow_dispatch:
@@ -25,7 +25,7 @@ on:
         required: true
         default: false
       publish_confirmation:
-        description: 'Type PUBLISH_PRE_RELEASE to publish a public pre-release.'
+        description: 'Type PUBLISH_RELEASE to publish the accepted Windows release.'
         type: string
         required: true
 
@@ -71,7 +71,7 @@ jobs:
         run: |
           $ErrorActionPreference = 'Stop'
           if ($env:GUI_ACCEPTED -ne 'true') { throw "Manual Windows GUI acceptance is required" }
-          if ($env:PUBLISH_CONFIRMATION -ne 'PUBLISH_PRE_RELEASE') { throw "Type PUBLISH_PRE_RELEASE to continue" }
+          if ($env:PUBLISH_CONFIRMATION -ne 'PUBLISH_RELEASE') { throw "Type PUBLISH_RELEASE to continue" }
           if ($env:RELEASE_VERSION -notmatch '^\d+\.\d+\.\d+(?:-[A-Za-z0-9.-]+)?$') { throw "Invalid release version" }
           if ($env:SOURCE_COMMIT -notmatch '^[0-9a-f]{40}$') { throw "source_commit must be a full lowercase SHA" }
           if ($env:BUILD_RUN_ID -notmatch '^\d+$') { throw "build_run_id must be numeric" }
@@ -169,7 +169,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "Embedded source or Git history audit failed" }
           Write-Host "Verified the exact accepted artifact for $($env:RELEASE_VERSION) from $($env:SOURCE_COMMIT)."
 
-      - name: Create or resume a draft, upload verified files, then publish pre-release
+      - name: Create or resume a draft, upload verified files, then publish release
         shell: pwsh
         env:
           RELEASE_VERSION: ${{ inputs.version }}
@@ -220,6 +220,7 @@ jobs:
           }
           if ($tagTarget -ne $env:SOURCE_COMMIT) { throw "Existing tag points to a different commit" }
 
+          $isPrerelease = $env:RELEASE_VERSION.Contains('-')
           $notesPath = "docs/releases/$tag.md"
           $notes = Get-Content -Raw -LiteralPath $notesPath
           $release = Get-OptionalApi "$api/releases/tags/$tagPath"
@@ -230,10 +231,10 @@ jobs:
               name = "Queen's Blood Classic $tag"
               body = $notes
               draft = $true
-              prerelease = $true
+              prerelease = $isPrerelease
             } | ConvertTo-Json -Depth 4
             $release = Invoke-RestMethod -Uri "$api/releases" -Method Post -Headers $headers -ContentType 'application/json' -Body $body
-          } elseif (-not $release.draft -or -not $release.prerelease -or $release.tag_name -ne $tag -or $release.target_commitish -ne $env:SOURCE_COMMIT -or $release.body -ne $notes) {
+          } elseif (-not $release.draft -or $release.prerelease -ne $isPrerelease -or $release.tag_name -ne $tag -or $release.target_commitish -ne $env:SOURCE_COMMIT -or $release.body -ne $notes) {
             throw "An existing non-matching or already published release blocks this version"
           }
 
@@ -273,7 +274,7 @@ jobs:
           if ($repo.visibility -ne 'public' -or $currentMain.object.sha -ne $env:SOURCE_COMMIT) {
             throw "Repository visibility or main changed before publication; draft remains unpublished"
           }
-          $publishBody = @{ draft = $false; prerelease = $true } | ConvertTo-Json
+          $publishBody = @{ draft = $false; prerelease = $isPrerelease } | ConvertTo-Json
           $published = Invoke-RestMethod -Uri "$api/releases/$($release.id)" -Method Patch -Headers $headers -ContentType 'application/json' -Body $publishBody
-          if ($published.draft -or -not $published.prerelease) { throw "Release did not enter public pre-release state" }
+          if ($published.draft -or $published.prerelease -ne $isPrerelease) { throw "Release did not enter expected release state" }
           Write-Host "Published $($published.html_url) from the verified, manually accepted Actions Artifact."

@@ -69,7 +69,7 @@ test('unstable conditional-aura candidate reports its reason, not an artificial 
   expect(result.actual.reason).toContain('UNSTABLE_AURA');expect(result.actual.score).toBeNull();expect(result.actual.preview).toBeNull();expect(result.status).toBe('incomplete');expect(result.hints.join()).toContain('不作优劣结论');expect(game).toEqual(before);
 });
 test('replacement, generated hand, persistent aura and public death chains use the shared engine only',()=>{
-  const input=JSON.parse(readFileSync(new URL('../examples/cli/replay-analysis.json',import.meta.url),'utf8'));
+  const input=JSON.parse(readFileSync(new URL('../examples/cli/m5c1-replay.json',import.meta.url),'utf8'));
   const timeline=new ReplayTimeline(input.operations[0].replay),saved=structuredClone(timeline.replay);
   for(const step of [1,2,3,4,5]){
     const point=historicalDecision(timeline,step),before=structuredClone(point.view),analysis=analyzeDecision(point.view,point.actual,{seed:7});
@@ -96,7 +96,7 @@ test('initial/mulligan/missing replay data cannot fabricate analysis points',()=
   expect(()=>historicalDecision(fake,1)).toThrow(/换牌/);
 });
 test('CLI analyze is read-only, remains compatible with legal/state and covers both modes',()=>{
-  const session=new QbSession(),input=JSON.parse(readFileSync(new URL('../examples/cli/match-analysis.json',import.meta.url),'utf8'));
+  const session=new QbSession(),input=JSON.parse(readFileSync(new URL('../examples/cli/m5c2-analysis.json',import.meta.url),'utf8'));
   const response=session.execute(input);expect(response.ok).toBe(true);
   const rows=response.results as {result:any}[];for(const row of rows.slice(1,3))expect((row.result as ReplayAnalysis).recommended!.cardId).toBe(20);
   const game=rows[3].result as Game;expect(game.replay.commands).toEqual([]);expect(botActions(botSimulation(observeGame(game)))).toContainEqual(passMove());

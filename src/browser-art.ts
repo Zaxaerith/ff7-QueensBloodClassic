@@ -1,9 +1,142 @@
-// Session-only visual projection. Blob URLs never enter a VisualManifest.
+// Session and optional local IndexedDB visual projection. Blob URLs never enter a VisualManifest.
 // SPDX-License-Identifier: GPL-3.0-only
-import {createVisualResolver,getCardVisual,type CardVisual} from './visuals.js';
+import {validateVisualManifest,type VisualManifest} from '../shared/visual-manifest.mjs';
+import {createVisualResolver,type CardVisual} from './visuals.js';
 import {ART_LIMITS,type SelectedArtFile,type VerifiedBrowserArt,type ArtProgress} from './art-import.js';
 export type VisualResolver=(id:number)=>CardVisual;
 export interface BrowserArtView {resolve:VisualResolver;dispose:()=>void;count:number;}
+export const ART_CACHE_DB='qbclassic.artpack.v1';
+const ART_CACHE_STORE='packs',ART_CACHE_KEY='active';
+
+interface CachedArtRecord {
+  version:1;
+  name:string;
+  manifest:VisualManifest;
+  portraits:[string,Blob][];
+  numberedPortraits:number;
+  readBytes:number;
+  savedAt:number;
+}
+
+function resolveIdb(factory?:IDBFactory|null):IDBFactory|null {
+  if(factory!==undefined)return factory;
+  try{return (globalThis as {indexedDB?:IDBFactory}).indexedDB??null;}
+  catch{return null;}
+}
+
+function openArtCacheDb(factory?:IDBFactory|null):Promise<IDBDatabase|null> {
+  const idb=resolveIdb(factory);
+  if(!idb||typeof idb.open!=='function')return Promise.resolve(null);
+  return new Promise(resolve=>{
+    try{
+      const request=idb.open(ART_CACHE_DB,1);
+      request.onupgradeneeded=()=>{
+        const db=request.result;
+        if(!db.objectStoreNames.contains(ART_CACHE_STORE))db.createObjectStore(ART_CACHE_STORE);
+      };
+      request.onsuccess=()=>resolve(request.result);
+      request.onerror=()=>resolve(null);
+      request.onblocked=()=>resolve(null);
+    }catch{resolve(null);}
+  });
+}
+
+function isBlobLike(value:unknown):value is Blob {
+  if(typeof Blob!=='undefined'&&value instanceof Blob)return true;
+  return Boolean(value&&typeof value==='object'&&typeof (value as Blob).size==='number'&&typeof (value as Blob).type==='string');
+}
+
+function parseCachedArt(value:unknown):VerifiedBrowserArt|null {
+  if(!value||typeof value!=='object'||Array.isArray(value))return null;
+  const record=value as Partial<CachedArtRecord>;
+  if(record.version!==1||typeof record.name!=='string'||!record.name||typeof record.numberedPortraits!=='number'||!Array.isArray(record.portraits))return null;
+  try{validateVisualManifest(record.manifest);}catch{return null;}
+  const portraits:[string,Blob][]=[];
+  for(const entry of record.portraits){
+    if(!Array.isArray(entry)||entry.length!==2||typeof entry[0]!=='string'||!isBlobLike(entry[1]))return null;
+    portraits.push([entry[0],entry[1]]);
+  }
+  return {
+    name:record.name,
+    manifest:record.manifest as VisualManifest,
+    portraits,
+    numberedPortraits:record.numberedPortraits,
+    readBytes:typeof record.readBytes==='number'?record.readBytes:0,
+  };
+}
+
+export async function saveCachedArtPack(pack:VerifiedBrowserArt,factory?:IDBFactory|null):Promise<boolean> {
+  const db=await openArtCacheDb(factory);
+  if(!db)return false;
+  return new Promise(resolve=>{
+    let settled=false;
+    const finish=(ok:boolean)=>{
+      if(settled)return;
+      settled=true;
+      try{db.close();}catch{}
+      resolve(ok);
+    };
+    try{
+      const tx=db.transaction(ART_CACHE_STORE,'readwrite');
+      const record:CachedArtRecord={
+        version:1,
+        name:pack.name,
+        manifest:pack.manifest,
+        portraits:pack.portraits,
+        numberedPortraits:pack.numberedPortraits,
+        readBytes:pack.readBytes,
+        savedAt:Date.now(),
+      };
+      tx.objectStore(ART_CACHE_STORE).put(record,ART_CACHE_KEY);
+      tx.oncomplete=()=>finish(true);
+      tx.onerror=()=>finish(false);
+      tx.onabort=()=>finish(false);
+    }catch{finish(false);}
+  });
+}
+
+export async function loadCachedArtPack(factory?:IDBFactory|null):Promise<VerifiedBrowserArt|null> {
+  const db=await openArtCacheDb(factory);
+  if(!db)return null;
+  return new Promise(resolve=>{
+    let settled=false;
+    const finish=(value:VerifiedBrowserArt|null)=>{
+      if(settled)return;
+      settled=true;
+      try{db.close();}catch{}
+      resolve(value);
+    };
+    try{
+      const tx=db.transaction(ART_CACHE_STORE,'readonly');
+      const request=tx.objectStore(ART_CACHE_STORE).get(ART_CACHE_KEY);
+      request.onsuccess=()=>finish(parseCachedArt(request.result));
+      request.onerror=()=>finish(null);
+      tx.onerror=()=>finish(null);
+      tx.onabort=()=>finish(null);
+    }catch{finish(null);}
+  });
+}
+
+export async function clearCachedArtPack(factory?:IDBFactory|null):Promise<boolean> {
+  const db=await openArtCacheDb(factory);
+  if(!db)return false;
+  return new Promise(resolve=>{
+    let settled=false;
+    const finish=(ok:boolean)=>{
+      if(settled)return;
+      settled=true;
+      try{db.close();}catch{}
+      resolve(ok);
+    };
+    try{
+      const tx=db.transaction(ART_CACHE_STORE,'readwrite');
+      tx.objectStore(ART_CACHE_STORE).delete(ART_CACHE_KEY);
+      tx.oncomplete=()=>finish(true);
+      tx.onerror=()=>finish(false);
+      tx.onabort=()=>finish(false);
+    }catch{finish(false);}
+  });
+}
 export function projectBrowserArt(pack:VerifiedBrowserArt,urls:Pick<typeof URL,'createObjectURL'|'revokeObjectURL'>=URL):BrowserArtView{
   const base=createVisualResolver(pack.manifest),blobs=new Map(pack.portraits),values=new Map<number,CardVisual>(),owned:string[]=[];
   try{for(const card of pack.manifest.cards){const visual=base(card.cardId);if(visual.portraitPath){const blob=blobs.get(visual.portraitPath);if(!blob)throw Error('缺少已验证的PNG');const path=urls.createObjectURL(blob);owned.push(path);values.set(card.cardId,Object.freeze({...visual,portraitPath:path}));}}}

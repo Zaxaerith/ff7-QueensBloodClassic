@@ -12,7 +12,7 @@ return {
   base: './',
   publicDir: false,
   resolve: {alias: {'/src': fileURLToPath(new URL('./src',import.meta.url))}},
-  server: {host:'127.0.0.1',port:5173,strictPort:true,fs:{deny:['.env','.env.*','*.{crt,pem,key,p12,pfx,cer,der}','.npmrc','.yarnrc.yml','**/.git/**','**/private-audio/**']}},
+  server: {host:'127.0.0.1',port:5173,strictPort:true,fs:{deny:['.env','.env.*','*.{crt,pem,key,p12,pfx,cer,der}','.npmrc','.yarnrc.yml','**/.git/**','**/private-audio/**','**/.research-cache/audio-lab/**']}},
   build: {outDir:privateMode?'../dist-private':'../dist',emptyOutDir:true},
   preview: {host:'127.0.0.1',port:5173,strictPort:true},
   plugins: [privateAudio(fileURLToPath(new URL('.',import.meta.url))),{name:'catalog',generateBundle(){

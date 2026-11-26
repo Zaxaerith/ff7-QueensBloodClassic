@@ -1,5 +1,6 @@
 import {getLocale,t} from './i18n/index.js';
 import {displayName} from './i18n/card-names.js';
+import {findBossChallenger} from './boss-challengers.js';
 import {byId,type Card} from './cards.js';
 import {findChallenger} from './challengers.js';
 import {difficultyName, opponentName} from './i18n/game-labels.js';
@@ -10,17 +11,18 @@ import {startMatch,resultMarkup,rulesLabel,type MatchSettings} from './match-flo
 import {createCardView} from './card-view.js';
 import type {CardVisual} from './visuals.js';
 import {$,element,button,openDialog,closeDialog,downloadJson,restoreFocus} from './ui-dom.js';
-import {boardPawns,observeTable,placedCardView} from './ui-board.js';
+import {boardPawns,observeTable,placedCardView,tileBonusAriaSuffix,tileBonusBadge} from './ui-board.js';
 import {mountBackgroundPicker} from './ui-background.js';
 import {saveMatch,type SavedMatch,type restoreMatch} from './match-archive.js';
 import {MatchPresentation,publicMatch,presentationEventLabel} from './match-presentation.js';
-import {effectText} from './match-effects.js';
+import {batchLegendaryVfx,effectText} from './match-effects.js';
 import {mountHandFocus} from './ui-hand-focus.js';
 import {mountMatchFeedback} from './ui-match-feedback.js';
 import {mountMatchInput} from './input/match-input.js';
 import {gridStep,legalTarget} from './input/match-cursor.js';
 import type {MatchControl} from './input/input-manager.js';
 import type {AudioController,MatchAudioSession} from './audio-controller.js';
+import type {SfxCue} from './sfx.js';
 import '../site/match-presentation.css';
 
 export function boardNextCell(index:number,key:string):number {
@@ -56,6 +58,29 @@ export function mountMatch(hooks:MatchHooks){
   let matchId='',saveIssue='';
   const audio=hooks.audio;
   let audioSession:MatchAudioSession|undefined;
+  let lastSfxEffect:unknown=null;
+  let vfxTimer:ReturnType<typeof setTimeout>|null=null;
+  const playSfx=(cue:SfxCue,options?:{skipIfVictoryTrack?:boolean})=>{
+    try{audio?.controller.playSfx?.(cue,options);}catch{/* Audio is optional. */}
+  };
+  function triggerLegendaryVfx(kind:'mako'|'abyss'|'chain',row?:number,col?:number){
+    const reduced=document.documentElement?.dataset?.reduceMotion==='true'
+      ||Boolean(window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches);
+    if(reduced)return;
+    if(vfxTimer!==null)clearTimeout(vfxTimer);
+    table.dataset.vfx=kind;
+    const boardEl=$('board');
+    boardEl.querySelectorAll('.vfx-legendary-burst').forEach(node=>node.classList.remove('vfx-legendary-burst'));
+    if(row!==undefined&&col!==undefined){
+      const tile=boardEl.querySelector<HTMLElement>(`[data-cell="${row}-${col}"]`);
+      if(tile){tile.dataset.vfxKind=kind;tile.classList.add('vfx-legendary-burst');}
+    }
+    vfxTimer=setTimeout(()=>{
+      vfxTimer=null;
+      delete table.dataset.vfx;
+      boardEl.querySelectorAll('.vfx-legendary-burst').forEach(node=>node.classList.remove('vfx-legendary-burst'));
+    },280);
+  }
   let inspected:number|null=null;
   const chosen=()=>selected!==null?byId.get(presentation.frame?.hand[selected]??game?.hands[0][selected]??-1):undefined;
   const table=$('board').parentElement!,peek=element('aside','board-peek');peek.hidden=true;peek.id='boardPeek';peek.setAttribute('role','tooltip');table.parentElement!.append(peek);
@@ -67,7 +92,11 @@ export function mountMatch(hooks:MatchHooks){
   let boardSignature='',handSignature='';
   const warning=element('p','match-storage-warning');warning.hidden=true;warning.setAttribute('role','alert');table.parentElement!.append(warning);
   const currentSave=()=>saveMatch(game!,activeSettings,deckName,matchId);
-  function defaultBackground(){table.parentElement!.dataset.background='hybrid';$<HTMLSelectElement>('battleBackground').value='hybrid';}
+  function defaultBackground(opponentId?:string){
+    const bg=findBossChallenger(opponentId)?.battleBackgroundId??'hybrid';
+    table.parentElement!.dataset.background=bg;
+    $<HTMLSelectElement>('battleBackground').value=bg;
+  }
   function resumeAudio(){
     if(!game||!audio?.visible())return;
     try{audioSession=audio.controller.startOrResumeMatch(matchId,game.phase);}catch{/* Audio is optional. */}
@@ -82,10 +111,28 @@ export function mountMatch(hooks:MatchHooks){
     game:()=>game,
     choose:()=>{const view=observeGame(game!,1);return botClient.choose(view,botOptionsForMatch(view,activeSettings));},
     cancelBot:()=>botClient.cancel(),checkpoint:()=>hooks.checkpoint(currentSave()),completed:()=>hooks.completed(currentSave()),
-    changed:()=>{lastMessage=presentation.message;render();},result:showResult,
+    changed:()=>{
+      const eff=presentation.effect;
+      if(eff&&eff!==lastSfxEffect){
+        lastSfxEffect=eff;
+        if(eff.stage==='commit'&&eff.actor===1&&eff.action==='play')playSfx('cardPlace');
+        else if(eff.stage==='events'&&eff.events.length){
+          audio?.controller.playSfxForEvents?.(eff.events);
+          const vfx=batchLegendaryVfx(eff.events,eff.placement);
+          if(vfx)triggerLegendaryVfx(vfx.kind,vfx.row,vfx.col);
+        }
+        else if(eff.stage==='scoring'&&eff.scoring&&!eff.scoring.totals)playSfx('scoreTick');
+      }else if(!eff){
+        lastSfxEffect=null;
+      }
+      lastMessage=presentation.message;render();
+    },result:showResult,
     paused:()=>pauseAudio(),
     matchEnded:(sequence,winner)=>{if(audioSession&&audio?.visible())audio.controller.enterScoring(audioSession,sequence,winner);},
-    totalsRevealed:sequence=>{if(audioSession&&audio?.visible())audio.controller.revealResult(audioSession,sequence);},
+    totalsRevealed:sequence=>{
+      if(audioSession&&audio?.visible())audio.controller.revealResult(audioSession,sequence);
+      if(game&&publicMatch(game).result.winner===0)playSfx('fanfareLite',{skipIfVictoryTrack:true});
+    },
     diagnostic:diagnostic=>{if(import.meta.env.DEV)console.info('[QB Bot]',diagnostic);},
   },()=>document.documentElement.dataset.reduceMotion==='true'||window.matchMedia('(prefers-reduced-motion: reduce)').matches);
   const skip=button(t("skipAnimation"),()=>input.dispatch({type:'control',control:'presentationSkip'}));skip.id='presentationSkip';skip.hidden=true;
@@ -121,7 +168,7 @@ export function mountMatch(hooks:MatchHooks){
     if(!size)return;
     const next=Math.max(0,Math.min(size-1,index));
     if(focusedCard===next&&inspected===null)return;
-    focusedCard=next;inspected=null;peek.hidden=true;updateHandFocus();
+    focusedCard=next;inspected=null;peek.hidden=true;playSfx('cursor');updateHandFocus();
   }
   function inspect(placed:PlacedCard|null){
     inspected=placed?.id??null;const card=placed?byId.get(placed.id)!:focusedCard===null?chosen():byId.get((presentation.frame?.hand??game?.hands[0]??[])[focusedCard]);
@@ -154,7 +201,7 @@ export function mountMatch(hooks:MatchHooks){
       if(selected===null&&inspected===null)peekCell(index);
       return;
     }
-    target=index;lastBoard=index;
+    target=index;lastBoard=index;playSfx('cursor');
     if(selected!==null) presentation.preview(true);
     else render();
   }
@@ -163,9 +210,10 @@ export function mountMatch(hooks:MatchHooks){
     if(!game)return;
     if(presentation.canMulligan){
       if(selectedMulligan.has(index))selectedMulligan.delete(index);else selectedMulligan.add(index);
+      playSfx('cardLift');
       lastMessage=t("mulliganSelectionUpdated");render();
     }else if(presentation.canPlay&&game.hands[0][index]!==undefined){
-      selected=index;target=null;
+      selected=index;target=null;playSfx('cardLift');
     }
   }
   function tileCard(placed:PlacedCard){
@@ -223,7 +271,9 @@ export function mountMatch(hooks:MatchHooks){
     const rules=replayRulesVersion(game.rulesVersion);
     $('who').title=rules;
     $('playerCount').textContent=t("handAndDeckCounts", view.hand.length, view.deckCounts[0]);
-    $('enemyName').textContent=activeSettings.opponent ? opponentName(activeSettings.opponent.npcId,findChallenger(activeSettings.opponent.npcId)?.name) : t('computer');
+    $('enemyName').textContent=activeSettings.opponent
+      ? opponentName(activeSettings.opponent.npcId,(findChallenger(activeSettings.opponent.npcId)??findBossChallenger(activeSettings.opponent.npcId))?.name)
+      : t('computer');
     $('enemyCount').textContent=t("opponentCounts", difficultyName(activeSettings.difficulty), view.enemyHandCount, view.deckCounts[1]);
     $('leftScores').replaceChildren(...rows.map(([a,b],r)=>{const node=element('div','lane-score'+(a>b?' winning':''),String(a));node.setAttribute('aria-label',t("playerLanePower", r+1, a));return node;}));
     $('rightScores').replaceChildren(...rows.map(([a,b],r)=>{const node=element('div','lane-score'+(b>a?' winning':''),String(b));node.setAttribute('aria-label',t("computerLanePower", r+1, b));return node;}));
@@ -235,16 +285,19 @@ export function mountMatch(hooks:MatchHooks){
       const targeted=!locked&&target===index,isPending=targeted&&available;
       const node=button('',()=>input.dispatch({type:'cell',index,hover:false}),
         'tile '+(tile.card?`occupied owner-${tile.card.owner}`:tile.owner!==null?`pawn-${tile.owner}`:'')+(available?' legal':'')+(isPending?' pending':'')+
-        (targeted&&card&&!available?' blocked-target':''));
+        (targeted&&card&&!available?' blocked-target':'')+(tile.tileBonus?' has-tile-bonus':''));
       node.classList.toggle('replacement-target',available&&card?.placement==='replace');
       node.dataset.cell=key;node.dataset.focus=`cell-${index}`;node.tabIndex=index===(target??lastBoard??0)?0:-1;
+      if(tile.tileBonus)node.dataset.tileBonus=String(tile.tileBonus);
       node.disabled=locked;
-      node.setAttribute('aria-label',t("matchTileLabel", r+1, c+1, tile.card?displayName(tile.card.id,byId.get(tile.card.id)!.name)+ " · "+t("currentPower",tile.card.power):tile.owner===null?t("empty2"):t("replayPawnCount", tile.owner+1, tile.pawns), available?t("legalPlacementSuffix"):'', isPending?t("pendingPlacementSuffix"):targeted&&card?' · '+t('inputPlacementBlocked'):''));
+      node.setAttribute('aria-label',t("matchTileLabel", r+1, c+1, tile.card?displayName(tile.card.id,byId.get(tile.card.id)!.name)+ " · "+t("currentPower",tile.card.power):tile.owner===null?t("empty2"):t("replayPawnCount", tile.owner+1, tile.pawns), available?t("legalPlacementSuffix"):'', isPending?t("pendingPlacementSuffix"):targeted&&card?' · '+t('inputPlacementBlocked'):'')+tileBonusAriaSuffix(tile.tileBonus));
       if(tile.card){
         node.append(tileCard(tile.card));
         const batch=presentation.batch;
         if(!forceBoard&&batch&&view===batch.after&&presentation.effect?.motion&&batch.before.board[r][c].card?.instanceId!==tile.card.instanceId)node.classList.add('match-card-arrival');
       }else node.append(boardPawns(tile.owner,tile.pawns));
+      const bonusBadge=tileBonusBadge(tile.tileBonus);
+      if(bonusBadge)node.append(bonusBadge);
       const range=element('span','range-overlay');range.setAttribute('aria-hidden','true');node.append(range);
       if(tile.card)node.setAttribute('aria-describedby','boardPeek');
       board.append(node);
@@ -267,6 +320,9 @@ export function mountMatch(hooks:MatchHooks){
     }
     }
     effects.update(presentation.effect);
+    const rivalFlight=table.querySelector<HTMLElement>('.match-rival-flight:not(:has(.qb-card))');
+    const revealed=byId.get(presentation.effect?.placement?.cardId??-1);
+    if(rivalFlight&&revealed)rivalFlight.append(createCardView(revealed,hooks.visual(revealed.id),{variant:'board'}));
     hand.scrollLeft=scroll;
     if(input.modality!=='pointer')restoreFocus(focused);
     preview(card,target,!!pending);updateHandFocus();
@@ -294,29 +350,36 @@ export function mountMatch(hooks:MatchHooks){
     const save=saveMatch(next,settings,name,id);
     const error=hooks.checkpoint(save);
     if(error&&hooks.hasCheckpoint())return t("newMatchSaveFailed");
+    const boss=findBossChallenger(settings.opponent?.npcId);
     pause();activeSettings=save.settings;deckName=name;game=next;presentation.reset();
-    matchId=id;saveIssue=error??'';defaultBackground();selected=null;focusedCard=0;target=null;lastBoard=null;selectedMulligan.clear();lastMessage=t("newGameStartingPlayer", name);
+    matchId=id;saveIssue=error??'';defaultBackground(settings.opponent?.npcId);selected=null;focusedCard=0;target=null;lastBoard=null;selectedMulligan.clear();
+    lastMessage=boss?`${t("bossBattleBanner")} · ${opponentName(boss.id,boss.name)} · ${t("newGameStartingPlayer", name)}`:t("newGameStartingPlayer", name);
     resumeAudio();presentation.resume();render();
+    $('hand').querySelectorAll<HTMLElement>('.hand-card').forEach((node,index)=>{
+      node.style.setProperty('--deal-index',String(index));
+      node.classList.add('frame-initial-deal');
+    });
     return null;
   }
   function restore(restored:ReturnType<typeof restoreMatch>){
     pause();game=structuredClone(restored.game);activeSettings=structuredClone(restored.save.settings);deckName=restored.save.deckName;matchId=restored.save.id;
-    presentation.reset();selected=null;focusedCard=0;target=null;lastBoard=null;selectedMulligan.clear();saveIssue='';defaultBackground();lastMessage=t("localMatchRestored");
+    presentation.reset();selected=null;focusedCard=0;target=null;lastBoard=null;selectedMulligan.clear();saveIssue='';defaultBackground(restored.save.settings.opponent?.npcId);lastMessage=t("localMatchRestored");
   }
   function exportCurrent(){if(game)downloadJson(exportReplay(game),`queens-blood-${game.replay.seed}.json`);}
   function confirmMulligan(){
     if(!game||!presentation.canMulligan)return;
     if(presentation.commitPlayer(()=>{if(!game!.mulliganDone[0])mulligan(game!,0,[...selectedMulligan].sort((a,b)=>a-b));if(!game!.mulliganDone[1])mulligan(game!,1,[]);},true)){
+      playSfx('confirm');
       selectedMulligan.clear();selected=null;focusedCard=null;target=null;render();
     }
   }
   function confirmPlay(){
     if(!game||!presentation.canPlay)return;
     const move=legalTarget(legalForHand(),target);
-    if(move)humanAction(()=>play(game!,0,move.handIndex,move.row,move.col));
+    if(move){playSfx('cardPlace');humanAction(()=>play(game!,0,move.handIndex,move.row,move.col));}
   }
   function confirmPass(){
-    if(game&&presentation.canPlay)humanAction(()=>pass(game!,0));
+    if(game&&presentation.canPlay){playSfx('confirm');humanAction(()=>pass(game!,0));}
   }
   let passConfirmation:HTMLButtonElement|null=null;
   function requestPass(){
@@ -346,7 +409,7 @@ export function mountMatch(hooks:MatchHooks){
   $('battleLogBtn').onclick=()=>{if(!game)return;const content=element('div','event-log');content.append(element('p','muted',t("eventLogHelp")));for(const text of game.events.map(e=>{const text=publicEventLabel(e);return text?`[${e.seq}] ${text}`:'';}).filter(Boolean).slice(-60))content.append(element('p','',text));openDialog(t("matchEvents"),content);};
   function cancelTarget(){
     if(target===null&&selected===null)return;
-    selected=null;target=null;
+    selected=null;target=null;playSfx('cancel');
     presentation.preview(false);
     lastMessage=t("pendingPlacementCancelled");render();
   }
@@ -377,5 +440,5 @@ export function mountMatch(hooks:MatchHooks){
     if(document.hidden){pauseAudio(true);presentation.skip();}
     else if(presentation.active)resumeAudio();
   });
-  return {start,restore,pause,refresh:()=>{if(presentation.active)render(true);},hasMatch:()=>game!==null,rulesVersion:()=>game&&replayRulesVersion(game.rulesVersion),unfinished:()=>!!game&&game.phase!=='finished',restart:()=>start(activeSettings,deckName),resume:()=>{if(game){defaultBackground();resumeAudio();presentation.resume();render();}},exportCurrent};
+  return {start,restore,pause,refresh:()=>{if(presentation.active)render(true);},hasMatch:()=>game!==null,rulesVersion:()=>game&&replayRulesVersion(game.rulesVersion),unfinished:()=>!!game&&game.phase!=='finished',restart:()=>start(activeSettings,deckName),resume:()=>{if(game){defaultBackground(activeSettings?.opponent?.npcId);resumeAudio();presentation.resume();render();}},exportCurrent};
 }

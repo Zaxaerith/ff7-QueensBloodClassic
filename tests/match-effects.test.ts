@@ -4,7 +4,7 @@ import {createPosition,play,pass,scoreBreakdown,type Position,type Move,type Rul
 import {MatchPresentation,publicMatch,publicEvents,PRESENTATION_MS,type PublicBatch} from '../src/match-presentation.js';
 import {effectPlan,effectTargets,netChanges,effectText,eventSource,type MatchEffect} from '../src/match-effects.js';
 
-const fixtures=JSON.parse(readFileSync(new URL('./fixtures/match-effect-positions.json',import.meta.url),'utf8')) as Record<string,{position:Position;move:Move}>;
+const fixtures=JSON.parse(readFileSync(new URL('../examples/ui/m6-d3-positions.json',import.meta.url),'utf8')) as Record<string,{position:Position;move:Move}>;
 function batch(name:string):PublicBatch {
   const fixture=fixtures[name],game=createPosition(fixture.position),before=publicMatch(game),cursor=game.events.length;
   play(game,0,fixture.move.handIndex,fixture.move.row,fixture.move.col);

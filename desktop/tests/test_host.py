@@ -4,6 +4,8 @@ from concurrent.futures import ThreadPoolExecutor
 import http.client
 import json
 from pathlib import Path
+import re
+import struct
 import subprocess
 import sys
 import tempfile
@@ -11,28 +13,64 @@ import time
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from controller import Controller
+from controller import Controller, detect_ff7_source
 from jobs import Jobs, card_selection
 from pack import verify_pack, relative_path, PackError
-from server import ResourceHost
+from server import ResourceHost, verify_audio_pack, AudioPackError
 from windows import allowed_message, BRIDGE_METHODS, Bridge
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[2]
 
 
-def synthetic_pack(root):
+def synthetic_pack(root, count=1):
     root.mkdir(parents=True)
     (root / 'portraits').mkdir()
     Image.new('RGBA', (8, 12), (20, 40, 100, 255)).save(root / 'portraits/card-041.png')
     data = (root / 'portraits/card-041.png').read_bytes()
-    manifest = dict(version=1, cards=[dict(cardId=41, ff7OriginalEntityId='synthetic:test',
-                                         modelSources={}, portraitPath='portraits/card-041.png', preview3dPath=None)])
+    manifest = dict(version=1, cards=[dict(cardId=i if count > 1 else 41, ff7OriginalEntityId='synthetic:test',
+                                         modelSources={}, portraitPath='portraits/card-041.png', preview3dPath=None) for i in range(1, count + 1)])
     report = dict(schema='qb-local-asset-report', version=1, ok=True,
                   generatedFiles=[dict(path='portraits/card-041.png', size=len(data), sha256=sha256(data).hexdigest())])
     write(root / 'visual-manifest.json', manifest)
     write(root / 'build-report.json', report)
     return manifest, report
+
+
+def synthetic_wav(sample_rate=44100, frames=64):
+    channels = 2
+    bits = 16
+    block_align = channels * (bits // 8)
+    byte_rate = sample_rate * block_align
+    pcm = b'\x00' * (frames * block_align)
+    fmt_chunk = b'fmt ' + struct.pack('<IHHIIHH', 16, 1, channels, sample_rate, byte_rate, block_align, bits)
+    data_chunk = b'data' + struct.pack('<I', len(pcm)) + pcm
+    body = b'WAVE' + fmt_chunk + data_chunk
+    return b'RIFF' + struct.pack('<I', len(body)) + body
+
+
+def synthetic_audio_pack(root):
+    root.mkdir(parents=True)
+    wav_bytes = synthetic_wav(44100, 64)
+    (root / 'match.wav').write_bytes(wav_bytes)
+    (root / 'victory.wav').write_bytes(wav_bytes)
+    config = dict(
+        version=1,
+        tracks=dict(
+            matchLoop=dict(wav='match.wav', loop=dict(sampleRateHz=44100, startFrame=0, endFrameExclusive=64)),
+            victory=dict(wav='victory.wav'),
+        ),
+    )
+    write(root / 'audio-pack.local.json', config)
+    return config, wav_bytes
+
+
+def synthetic_dist(dist):
+    dist.mkdir(parents=True)
+    (dist / 'index.html').write_text('<!doctype html><html><head><title>QB</title></head><body>synthetic</body></html>', 'utf-8')
+    (dist / 'catalog.json').write_text('{}', 'utf-8')
+    (dist / 'assets').mkdir()
+    (dist / 'assets/bot.worker-test.js').write_text('self.onmessage=()=>{}', 'utf-8')
 
 
 def write(path, value):
@@ -118,15 +156,50 @@ class PackTests(unittest.TestCase):
         self.assertNotEqual(bad.returncode, 0)
 
 
+class AudioPackTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory(prefix='qb-desktop-audio-')
+        self.root = Path(self.temp.name) / 'audio'
+        self.config, self.wav = synthetic_audio_pack(self.root)
+
+    def tearDown(self):
+        self.temp.cleanup()
+
+    def test_valid_audio_pack_and_frozen_bytes(self):
+        audio = verify_audio_pack(self.root)
+        self.assertEqual(audio.summary()['tracks'], ['matchLoop', 'victory'])
+        self.assertEqual(audio.summary()['count'], 2)
+        self.assertEqual(set(audio.files), {'/game/private-audio/matchLoop.wav', '/game/private-audio/victory.wav'})
+        self.assertEqual(audio.bootstrap['version'], 1)
+        self.assertEqual(audio.bootstrap['tracks']['matchLoop']['url'], '/game/private-audio/matchLoop.wav')
+        self.assertEqual(audio.bootstrap['tracks']['victory']['url'], '/game/private-audio/victory.wav')
+        # Mutating file on disk after verification must not affect frozen memory buffer.
+        (self.root / 'match.wav').write_bytes(b'corrupted')
+        self.assertEqual(audio.files['/game/private-audio/matchLoop.wav'], self.wav)
+        with self.assertRaises(AudioPackError):
+            verify_audio_pack(self.root)
+
+    def test_rejects_traversal_bad_wav_and_bad_loop(self):
+        bad_configs = [
+            dict(version=2, tracks=self.config['tracks']),
+            dict(version=1, tracks={}),
+            dict(version=1, tracks=dict(victory=dict(wav='../escape.wav'))),
+            dict(version=1, tracks=dict(victory=dict(wav='C:/windows/test.wav'))),
+            dict(version=1, tracks=dict(matchLoop=dict(wav='match.wav'))),
+            dict(version=1, tracks=dict(matchLoop=dict(wav='match.wav', loop=dict(sampleRateHz=44100, startFrame=0, endFrameExclusive=999)))),
+            dict(version=1, tracks=dict(matchLoop=dict(wav='match.wav', loop=dict(sampleRateHz=48000, startFrame=0, endFrameExclusive=64)))),
+        ]
+        for bad in bad_configs:
+            write(self.root / 'audio-pack.local.json', bad)
+            with self.assertRaises(AudioPackError):
+                verify_audio_pack(self.root)
+
+
 class ServerTests(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory(prefix='qb-desktop-http-')
         self.dist = Path(self.temp.name) / 'dist'
-        self.dist.mkdir()
-        (self.dist / 'index.html').write_text('<!doctype html>synthetic', 'utf-8')
-        (self.dist / 'catalog.json').write_text('{}', 'utf-8')
-        (self.dist / 'assets').mkdir()
-        (self.dist / 'assets/bot.worker-test.js').write_text('self.onmessage=()=>{}', 'utf-8')
+        synthetic_dist(self.dist)
         self.host = ResourceHost(self.dist, ROOT / 'desktop/ui', port=0)
         self.host.start()
         self.cookie = 'qb_desktop=' + self.host.cookie
@@ -150,14 +223,28 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(self.request('/game/', auth=False)[0], 403)
         code, headers, _ = self.request('/?launch=' + self.host.token, auth=False)
         self.assertEqual(code, 303)
+        self.assertEqual(headers['Location'], '/')
         self.assertIn('HttpOnly', headers['Set-Cookie'])
         self.assertIn('SameSite=Strict', headers['Set-Cookie'])
         self.assertEqual(self.request('/game/', host='attacker.invalid')[0], 403)
         self.assertEqual(self.request('/game/')[0], 200)
 
+    def test_default_landing_redirect(self):
+        self.host.set_default_landing('/game/')
+        code, headers, _ = self.request('/?launch=' + self.host.token, auth=False)
+        self.assertEqual(code, 303)
+        self.assertEqual(headers['Location'], '/game/')
+        self.assertIn('HttpOnly', headers['Set-Cookie'])
+        self.host.set_default_landing('/')
+        code, headers, _ = self.request('/?launch=' + self.host.token, auth=False)
+        self.assertEqual((code, headers['Location']), (303, '/'))
+        with self.assertRaises(ValueError):
+            self.host.set_default_landing('/evil/')
+
     def test_no_arbitrary_files_or_endpoints(self):
         for path in ['/build-report.json', '/game/../secret', '/game/%2e%2e/secret', '/game/classic/models/test.json',
-                     '/game/classic/visual-manifest.json', '/game/assets/missing.js', '/game/?x=1', '/api/read']:
+                     '/game/classic/visual-manifest.json', '/game/assets/missing.js', '/game/?x=1', '/api/read',
+                     '/game/private-audio/audio-pack.local.json']:
             self.assertEqual(self.request(path)[0], 404, path)
         self.assertEqual(self.request('/', method='POST')[0], 405)
 
@@ -171,6 +258,37 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(self.request('/game/classic/models/test.json')[0], 404)
         self.host.set_pack(None)
         self.assertEqual(self.request('/game/classic/portraits/card-041.png')[0], 404)
+
+    def test_private_audio_serving_and_html_injection(self):
+        audio_dir = Path(self.temp.name) / 'audio'
+        _, wav_bytes = synthetic_audio_pack(audio_dir)
+        verified = verify_audio_pack(audio_dir)
+        base_html = self.host.files['/game/']
+
+        self.host.set_audio(verified)
+        code, headers, body = self.request('/game/private-audio/matchLoop.wav')
+        self.assertEqual(code, 200)
+        self.assertEqual(headers['Content-Type'], 'audio/wav')
+        self.assertIn("media-src 'self'", headers['Content-Security-Policy'])
+        self.assertEqual(body, wav_bytes)
+        self.assertEqual(self.request('/game/private-audio/audio-pack.local.json')[0], 404)
+
+        code, headers, html_bytes = self.request('/game/')
+        self.assertEqual(code, 200)
+        self.assertIn("media-src 'self'", headers['Content-Security-Policy'])
+        html = html_bytes.decode('utf-8')
+        match = re.search(r'<script id="qb-private-audio" type="application/json">(.*?)</script></head>', html)
+        self.assertIsNotNone(match, html)
+        payload = json.loads(match.group(1))
+        self.assertEqual(payload['version'], 1)
+        self.assertEqual(payload['tracks']['matchLoop']['url'], '/game/private-audio/matchLoop.wav')
+        self.assertEqual(payload['tracks']['victory']['url'], '/game/private-audio/victory.wav')
+        # In-memory injection must not mutate frozen base HTML.
+        self.assertEqual(self.host.files['/game/'], base_html)
+
+        self.host.set_audio(None)
+        self.assertEqual(self.request('/game/private-audio/matchLoop.wav')[0], 404)
+        self.assertNotIn(b'qb-private-audio', self.request('/game/')[2])
 
     def test_fixed_port_conflict(self):
         with self.assertRaises(OSError):
@@ -195,6 +313,8 @@ class ServerTests(unittest.TestCase):
             self.assertFalse(self.host.trusted(url))
         self.assertTrue(self.host.trusted(self.host.origin + '/game/'))
         self.assertEqual({n for n in dir(Bridge) if not n.startswith('_')}, set(BRIDGE_METHODS))
+        for name in ('auto_detect_source', 'choose_audio_pack', 'clear_audio_pack', 'set_auto_enter'):
+            self.assertIn(name, BRIDGE_METHODS)
         for name in ['_controller.jobs.start', 'eval', '__dict__', 'window.load_url']:
             self.assertFalse(allowed_message(json.dumps([name, '{}', '1'])))
         for name in BRIDGE_METHODS:
@@ -206,7 +326,7 @@ class JobTests(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory(prefix='qb-desktop-job-')
         self.root = Path(self.temp.name)
         (self.root / 'tools').mkdir()
-        (self.root / 'data').mkdir(parents=True)
+        (self.root / 'data').mkdir(parents=True, exist_ok=True)
         write(self.root / 'data/card-index.json', {'cards': [{'cardId': 41, 'name': 'Synthetic'}]})
         # A synthetic child exercises the actual stdout/err/cancel subprocess path.
         code = '''import sys,json,time,pathlib
@@ -296,13 +416,18 @@ class ControllerTests(unittest.TestCase):
             data = Path(temp)
             (data / 'desktop-settings.json').write_text('{broken', 'utf-8')
             class Host:
+                default_landing = '/game/'
                 def trusted(self, url):
                     return url == 'http://127.0.0.1:38771/'
+                def set_default_landing(self, path):
+                    self.default_landing = path
             class Window:
                 def get_current_url(self):
                     return 'https://untrusted.example/'
-            c = Controller(ROOT, data, Host())
+            host = Host()
+            c = Controller(ROOT, data, host)
             self.assertIn('could not be read', c.notice)
+            self.assertEqual(host.default_landing, '/')
             c.window = Window()
             with self.assertRaises(ValueError):
                 c.start_generation('041')
@@ -327,6 +452,153 @@ class ControllerTests(unittest.TestCase):
                 time.sleep(.01)
             self.assertEqual(c.status()['pack']['portraits'], 1)
             self.assertEqual(c.status()['job']['status'], 'failed')
+
+    def test_startup_auto_verify_and_auto_enter_game(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root_tmp = Path(temp)
+            dist = root_tmp / 'dist'
+            synthetic_dist(dist)
+            pack_dir = root_tmp / 'pack'
+            synthetic_pack(pack_dir, 145)
+            audio_dir = root_tmp / 'audio'
+            synthetic_audio_pack(audio_dir)
+            data = root_tmp / 'data'
+            data.mkdir()
+            write(data / 'desktop-settings.json', dict(
+                version=1,
+                source=None,
+                pack=str(pack_dir),
+                audioPack=str(audio_dir),
+                autoEnterGame=True,
+                preferPlain=False,
+            ))
+            host = ResourceHost(dist, ROOT / 'desktop/ui', port=0)
+            host.start()
+            try:
+                c = Controller(ROOT, data, host)
+                self.assertIsNotNone(c.pack)
+                self.assertIsNotNone(c.audio_pack)
+                self.assertEqual(host.default_landing, '/game/')
+                conn = http.client.HTTPConnection('127.0.0.1', host.port)
+                conn.request('GET', '/?launch=' + host.token, headers={'Host': f'127.0.0.1:{host.port}'})
+                res = conn.getresponse()
+                res.read()
+                self.assertEqual(res.status, 303)
+                self.assertEqual(res.getheader('Location'), '/game/')
+                conn.close()
+
+                loaded_urls = []
+                class Window:
+                    def get_current_url(self):
+                        return host.origin + '/game/'
+                    def load_url(self, url):
+                        loaded_urls.append(url)
+                c.window = Window()
+                c._setup_menu()
+                self.assertEqual(loaded_urls[-1], host.origin + '/')
+
+                c.set_auto_enter(False)
+                self.assertEqual(host.default_landing, '/')
+                saved = json.loads((data / 'desktop-settings.json').read_text('utf-8'))
+                self.assertFalse(saved['autoEnterGame'])
+            finally:
+                host.close()
+
+    def test_startup_moved_pack_falls_back_to_launcher(self):
+        with tempfile.TemporaryDirectory() as temp:
+            data = Path(temp)
+            write(data / 'desktop-settings.json', dict(
+                version=1,
+                pack=str(data / 'missing-pack'),
+                audioPack=str(data / 'missing-audio'),
+                autoEnterGame=True,
+                preferPlain=False,
+            ))
+            class Host:
+                default_landing = '/game/'
+                def set_pack(self, pack):
+                    self.pack = pack
+                def set_audio(self, audio):
+                    self.audio = audio
+                def set_default_landing(self, path):
+                    self.default_landing = path
+            host = Host()
+            c = Controller(ROOT, data, host)
+            self.assertIsNone(c.pack)
+            self.assertIsNone(c.audio_pack)
+            self.assertEqual(host.default_landing, '/')
+            self.assertIn('Saved Art Pack', c.notice)
+            self.assertIn('Saved local Audio Pack', c.notice)
+
+    def test_partial_and_plain_do_not_default_to_auto_enter(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / 'data').mkdir(parents=True, exist_ok=True)
+            write(root / 'data/card-index.json', {'cards': []})
+            synthetic_pack(root / 'partial')
+            write(root / 'desktop-settings.json', dict(version=1, pack=str(root / 'partial'), autoEnterGame=True, preferPlain=False))
+            class Host:
+                origin = 'http://127.0.0.1'
+                def trusted(self, url): return True
+                def set_default_landing(self, path): self.default_landing = path
+            class Window:
+                def get_current_url(self): return 'http://127.0.0.1/'
+                def load_url(self, url): pass
+            host = Host()
+            c = Controller(root, root, host)
+            c.window = Window()
+            self.assertEqual(host.default_landing, '/')
+            self.assertIn('1 张测试卡图', c.notice)
+            c.set_auto_enter(True)
+            c.enter_game(False)
+            self.assertEqual(host.default_landing, '/game/')
+            (root / 'desktop-settings.json').unlink()
+            c = Controller(root, root, host)
+            c.window = Window()
+            c.enter_game(False)
+            self.assertFalse(c.auto_enter)
+            self.assertEqual(host.default_landing, '/')
+
+    def test_detected_pack_indices_are_validated_and_mounted(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            (root / 'data').mkdir(parents=True, exist_ok=True)
+            write(root / 'data/card-index.json', {'cards': []})
+            synthetic_pack(root / 'queen-166', 145)
+            synthetic_audio_pack(root / 'AudioPack')
+            class Host:
+                def trusted(self, url): return True
+                def set_pack(self, pack): self.pack = pack
+                def set_audio(self, audio): self.audio = audio
+                def set_default_landing(self, path): self.default_landing = path
+            class Window:
+                def get_current_url(self): return 'http://127.0.0.1/'
+            host = Host()
+            c = Controller(root, root, host)
+            c.window = Window()
+            detected = c.detect_local_packs()
+            self.assertEqual({p['kind'] for p in detected}, {'art', 'audio'})
+            for invalid in (-1, 999, True, str(root / 'queen-166')):
+                with self.assertRaises(ValueError): c.mount_detected_pack(invalid)
+            for pack in detected: c.mount_detected_pack(pack['index'])
+            self.assertEqual(c.pack.summary()['portraits'], 145)
+            self.assertEqual(c.audio_pack.summary()['count'], 2)
+            self.assertEqual(host.default_landing, '/game/')
+
+    def test_detect_ff7_source_helper(self):
+        with tempfile.TemporaryDirectory() as temp:
+            base = Path(temp)
+            empty_dir = base / 'empty'
+            empty_dir.mkdir()
+            valid_dir = base / 'FINAL FANTASY VII'
+            (valid_dir / 'data/battle').mkdir(parents=True)
+            (valid_dir / 'data/battle/battle.lgp').write_bytes(b'lgp')
+            self.assertIsNone(detect_ff7_source([empty_dir, base / 'missing']))
+            self.assertEqual(detect_ff7_source([empty_dir, valid_dir]), str(valid_dir.resolve()))
+            deep = base / 'Steam Edition'
+            (deep / 'ff7/workingdir/data/field').mkdir(parents=True)
+            (deep / 'ff7/workingdir/data/field/char.lgp').write_bytes(b'lgp')
+            self.assertEqual(detect_ff7_source([deep]), str(deep.resolve()))
 
 
 if __name__ == '__main__':

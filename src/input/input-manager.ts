@@ -1,7 +1,9 @@
 import {ARR_MS,DAS_MS,PassHold,watchGamepads,type ConfirmButtonMode,type Direction,type GamepadCommand,type GamepadFamily} from '../ui-gamepad.js';
 
+export const CARNIVAL_ACTION_EVENT='qb-carnival-action';
+export const GOLD_SAUCER_ACTION_EVENT='qb-gold-saucer-action';
 export type InputModality='keyboard'|'pointer'|'gamepad';
-export type InputContext='NAV_MENU'|'PREPARE'|'DIALOG_MODAL'|'MULLIGAN'|'MATCH_HAND_BROWSE'|'MATCH_BOARD_TARGET'|'MATCH_BOARD_INSPECT'|'MATCH_COMMAND'|'MATCH_PAUSE'|'NPC_TURN'|'PRESENTATION_LOCK'|'RESULT'|'REPLAY';
+export type InputContext='NAV_MENU'|'PREPARE'|'DIALOG_MODAL'|'MULLIGAN'|'MATCH_HAND_BROWSE'|'MATCH_BOARD_TARGET'|'MATCH_BOARD_INSPECT'|'MATCH_COMMAND'|'MATCH_PAUSE'|'NPC_TURN'|'PRESENTATION_LOCK'|'RESULT'|'REPLAY'|'CARNIVAL_STAGE'|'GOLD_SAUCER_STAGE';
 export type MatchControl='confirmPlay'|'confirmMulligan'|'passBtn'|'confirmPass'|'cardDetails'|'presentationSkip'|'resultsBtn';
 type Intent='confirm'|'cancel'|'details'|'editDeck'|'mulliganCommit'|'pass'|'menu'|'help';
 export type SemanticAction=
@@ -16,6 +18,8 @@ export function inputContext(route:string,modal:boolean,phase:string,zone:'hand'
   if(modal)return 'DIALOG_MODAL';
   if(route==='replay')return 'REPLAY';
   if(route==='prepare')return 'PREPARE';
+  if(route==='carnival')return phase?'CARNIVAL_STAGE':'NAV_MENU';
+  if(route==='gold-saucer')return phase?'GOLD_SAUCER_STAGE':'NAV_MENU';
   if(route!=='game')return 'NAV_MENU';
   if(phase==='Result')return 'RESULT';
   if(phase==='OpponentTurn'||phase==='OpponentCommit')return 'NPC_TURN';
@@ -39,7 +43,7 @@ export function acceptsAction(context:InputContext,action:SemanticAction):boolea
     (type==='control'&&action.control==='presentationSkip');
   if(context==='RESULT')return type==='confirm'||type==='cancel'||type==='move'||type==='menu'||
     (type==='control'&&action.control==='resultsBtn');
-  if(context==='NAV_MENU'||context==='PREPARE'||context==='REPLAY')return type==='confirm'||type==='cancel'||type==='move'||
+  if(context==='NAV_MENU'||context==='PREPARE'||context==='REPLAY'||context==='CARNIVAL_STAGE'||context==='GOLD_SAUCER_STAGE')return type==='confirm'||type==='cancel'||type==='move'||
     type==='switch'||type==='details'||type==='scroll'||type==='help'||type==='menu';
   if(context==='MULLIGAN')return type!=='cell'&&type!=='pass'&&
     (type!=='control'||action.control==='confirmMulligan'||action.control==='cardDetails');
@@ -273,19 +277,49 @@ export class InputManager {
     }
     document.addEventListener('contextmenu',event=>{
       const node=event.target;
-      if(!(node instanceof Element)||!node.closest('#board, #hand')||!this.view.context().startsWith('MATCH_'))return;
-      this.use('pointer');
-      event.preventDefault();
-      if(this.view.context()==='MATCH_BOARD_TARGET')this.dispatch({type:'cancel'});
-      else{
-        const pointed=this.view.pointerTarget(node);
-        if(pointed)this.dispatch(pointed);
-        this.dispatch({type:'details'});
+      if(!(node instanceof Element))return;
+      const current=this.view.context();
+      if(current.startsWith('MATCH_')&&node.closest('#board, #hand')){
+        this.use('pointer');
+        event.preventDefault();
+        if(current==='MATCH_BOARD_TARGET')this.dispatch({type:'cancel'});
+        else{
+          const pointed=this.view.pointerTarget(node);
+          if(pointed)this.dispatch(pointed);
+          this.dispatch({type:'details'});
+        }
+      }else if(current==='CARNIVAL_STAGE'&&node.closest('#carnivalBoard, #carnivalHand')){
+        this.use('pointer');
+        event.preventDefault();
+        const stage=node.closest<HTMLElement>('#carnivalStage');
+        if(stage?.dataset.carnivalSelected)this.dispatch({type:'cancel'});
+        else{
+          node.closest<HTMLElement>('[data-carnival-focus]')?.focus({preventScroll:true});
+          this.dispatch({type:'details'});
+        }
+      }else if(current==='GOLD_SAUCER_STAGE'&&node.closest('#gsBoard, #gsHand')){
+        this.use('pointer');
+        event.preventDefault();
+        const stage=node.closest<HTMLElement>('#gsStage');
+        if(stage?.dataset.gsSelected)this.dispatch({type:'cancel'});
+        else{
+          node.closest<HTMLElement>('[data-gs-focus]')?.focus({preventScroll:true});
+          this.dispatch({type:'details'});
+        }
       }
     });
     document.addEventListener('auxclick',event=>{
-      if(event.button===1&&event.target instanceof Element&&event.target.closest('#board, #hand')){
+      if(event.button!==1||!(event.target instanceof Element))return;
+      if(event.target.closest('#board, #hand')){
         this.use('pointer');event.preventDefault();this.dispatch({type:'details'});
+      }else if(this.view.context()==='CARNIVAL_STAGE'&&event.target.closest('#carnivalBoard, #carnivalHand')){
+        this.use('pointer');event.preventDefault();
+        event.target.closest<HTMLElement>('[data-carnival-focus]')?.focus({preventScroll:true});
+        this.dispatch({type:'details'});
+      }else if(this.view.context()==='GOLD_SAUCER_STAGE'&&event.target.closest('#gsBoard, #gsHand')){
+        this.use('pointer');event.preventDefault();
+        event.target.closest<HTMLElement>('[data-gs-focus]')?.focus({preventScroll:true});
+        this.dispatch({type:'details'});
       }
     });
     const stop=()=>{this.direction=null;this.clearPass();};

@@ -1,9 +1,20 @@
 import type {AddedChallengerTactic} from './i18n/challenger-tactics.js';
 
+export type ChallengerRegionId =
+  | 'kalm'
+  | 'under-junon'
+  | 'crows-nest'
+  | 'shinra-8'
+  | 'costa-del-sol'
+  | 'corel'
+  | 'gongaga'
+  | 'cosmo-canyon'
+  | 'nibel';
+
 export interface Challenger {
   readonly id: string;
   readonly name: string;
-  readonly regionId: 'kalm' | 'under-junon' | 'crows-nest';
+  readonly regionId: ChallengerRegionId;
   readonly rewardCardId: number;
   readonly tier: 'beginner' | 'intermediate' | 'advanced';
   readonly tactic: ({readonly key: 'neneTactic' | 'zoganTactic' | 'isabelleTactic'}
@@ -12,7 +23,8 @@ export interface Challenger {
   readonly deck: readonly number[];
 }
 
-// Names, regions and reward-card references are summarized in THIRD_PARTY_NOTICES.md.
+// Names, regions and associated reward cards come from the Rebirth guides
+// cited in docs/M8_A1_NPC_REPORT.md and docs/M8_B0_NPC_EVIDENCE_LEDGER.md.
 // Tiers, tactics and decks are Classic presets.
 export const challengers: readonly Challenger[] = [
   {
@@ -64,6 +76,57 @@ export const challengers: readonly Challenger[] = [
     id: 'cameron', name: 'Cameron', regionId: 'crows-nest', rewardCardId: 113, tier: 'advanced',
     tactic: {addedKey: 'cameron', cards: [20, 113]},
     deck: [1, 1, 2, 2, 15, 15, 17, 17, 20, 20, 22, 22, 26, 26, 113],
+  },
+  // World Tour expansion (Ch.5 - Ch.11): Shinra-8, Costa del Sol, Corel, Gongaga, Cosmo Canyon, Nibel
+  {
+    id: 'felix', name: 'Felix', regionId: 'shinra-8', rewardCardId: 31, tier: 'beginner',
+    tactic: {addedKey: 'felix', cards: [31, 19, 13]},
+    deck: [1, 1, 7, 7, 8, 8, 12, 13, 13, 19, 19, 31, 31, 42, 42],
+  },
+  {
+    id: 'regina', name: 'Regina', regionId: 'shinra-8', rewardCardId: 95, tier: 'advanced',
+    tactic: {addedKey: 'regina', cards: [95, 33, 48]},
+    deck: [1, 1, 8, 8, 13, 13, 24, 24, 31, 31, 33, 33, 48, 48, 95],
+  },
+  {
+    id: 'maurya', name: 'Maurya', regionId: 'costa-del-sol', rewardCardId: 36, tier: 'intermediate',
+    tactic: {addedKey: 'maurya', cards: [36, 10, 56]},
+    deck: [1, 1, 7, 7, 10, 10, 13, 13, 32, 32, 36, 36, 51, 56, 56],
+  },
+  {
+    id: 'biff', name: 'Biff', regionId: 'corel', rewardCardId: 41, tier: 'intermediate',
+    tactic: {addedKey: 'biff', cards: [41, 35, 51]},
+    deck: [1, 1, 7, 8, 20, 20, 30, 30, 35, 35, 39, 41, 41, 51, 51],
+  },
+  {
+    id: 'lidrehl', name: 'Lidrehl', regionId: 'corel', rewardCardId: 76, tier: 'advanced',
+    tactic: {addedKey: 'lidrehl', cards: [76, 35, 48]},
+    deck: [1, 1, 10, 10, 13, 13, 31, 31, 35, 35, 48, 48, 59, 76, 76],
+  },
+  {
+    id: 'zhijun', name: 'Zhijun', regionId: 'gongaga', rewardCardId: 58, tier: 'intermediate',
+    tactic: {addedKey: 'zhijun', cards: [58, 56, 27]},
+    deck: [1, 1, 6, 6, 10, 10, 26, 26, 27, 27, 40, 56, 56, 58, 58],
+  },
+  {
+    id: 'regina-rematch', name: 'Regina (Rematch)', regionId: 'gongaga', rewardCardId: 130, tier: 'advanced',
+    tactic: {addedKey: 'reginaRematch', cards: [130, 129, 80]},
+    deck: [1, 1, 13, 13, 25, 25, 33, 33, 52, 54, 78, 78, 80, 129, 130],
+  },
+  {
+    id: 'bernard', name: 'Bernard', regionId: 'cosmo-canyon', rewardCardId: 123, tier: 'advanced',
+    tactic: {addedKey: 'bernard', cards: [123, 65, 114]},
+    deck: [1, 1, 11, 11, 13, 13, 21, 21, 65, 65, 69, 69, 76, 114, 123],
+  },
+  {
+    id: 'turner', name: 'Turner', regionId: 'nibel', rewardCardId: 66, tier: 'advanced',
+    tactic: {addedKey: 'turner', cards: [66, 75, 136]},
+    deck: [1, 1, 13, 13, 26, 26, 28, 28, 66, 66, 72, 72, 75, 75, 136],
+  },
+  {
+    id: 'vincent-gatekeeper', name: 'Vincent', regionId: 'nibel', rewardCardId: 94, tier: 'advanced',
+    tactic: {addedKey: 'vincentGatekeeper', cards: [94, 142, 47]},
+    deck: [1, 1, 35, 35, 37, 37, 40, 40, 47, 47, 51, 51, 94, 127, 142],
   },
 ];
 

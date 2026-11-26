@@ -94,7 +94,7 @@ test('M3 conditional-cycle detection rejects repeats atomically in either orient
 });
 
 test('M3 JSON fixed position runs through the CLI session core and round-trips a v2 replay',()=>{
-  const request=JSON.parse(readFileSync(new URL('../examples/cli/desert-sahagin.json',import.meta.url),'utf8'));
+  const request=JSON.parse(readFileSync(new URL('../examples/cli/m3-desert-sahagin.json',import.meta.url),'utf8'));
   const session=new QbSession(),result=session.execute(request);expect(result.ok).toBe(true);
   const replay=(session.execute([{op:'replay'}]).results[0] as {result:unknown}).result;
   const restored=new QbSession();expect(restored.execute([{op:'restoreReplay',replay}]).ok).toBe(true);

@@ -1,7 +1,8 @@
 import {t} from './i18n/index.js';
 import {displayName} from './i18n/card-names.js';
-import {createGame,seededRng,scoreBreakdown,LEGACY_RULES_VERSION,type Game,type RuleEvent,type RulesVersion} from './engine.js';
+import {createGame,createPosition,seededRng,scoreBreakdown,LEGACY_RULES_VERSION,TURN_DRAW_RULES_VERSION,type Game,type RuleEvent,type RulesVersion} from './engine.js';
 import {byId} from './cards.js';
+import {createBossOpeningPosition,findBossChallenger} from './boss-challengers.js';
 import type {BotDifficulty} from './bot.js';
 export interface MatchSettings {
   deck: readonly number[];
@@ -20,6 +21,11 @@ export function startMatch(settings:MatchSettings):Game {
   const opponent=settings.opponent;
   if(opponent&&(typeof opponent.npcId!=='string'||!/^[a-z][a-z0-9-]{0,39}$/.test(opponent.npcId)||!Array.isArray(opponent.deck)))throw Error(t("invalidOpponentDeck"));
   const first=settings.first==='player'?0:settings.first==='computer'?1:seededRng(settings.seed)()<.5?0:1;
+  const boss=findBossChallenger(opponent?.npcId);
+  if(boss){
+    const position=createBossOpeningPosition(boss,[settings.deck,opponent!.deck],settings.seed,first,TURN_DRAW_RULES_VERSION);
+    return createPosition(position,TURN_DRAW_RULES_VERSION);
+  }
   return createGame([settings.deck,opponent?.deck??settings.deck],settings.seed,first);
 }
 export function eventLabel(event:RuleEvent):string {

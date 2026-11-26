@@ -1,7 +1,8 @@
 import type {Position, PositionTile, RulesVersion} from './engine.js';
 
 export type PuzzleId = `cc-${string}`;
-export type PuzzleCategory = 'easy' | 'advanced' | 'collection' | 'skill-drill';
+export const puzzleCategories = ['easy', 'advanced', 'collection', 'skill-drill'] as const;
+export type PuzzleCategory = typeof puzzleCategories[number];
 
 export type FixedHandPosition = Position & {
   board: PositionTile[];

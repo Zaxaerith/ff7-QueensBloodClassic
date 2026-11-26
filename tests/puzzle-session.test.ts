@@ -19,7 +19,7 @@ function fixture(id: PuzzleId, initial: FixedHandPosition): PuzzleDefinition {
     id, revision: 1, chapter: 6, category: 'easy', titleKey: `puzzle.${id}.title`,
     rulesVersion: engine.TURN_DRAW_RULES_VERSION, actionMode: 'fixed-hand-solo', winCondition: 'score-win',
     initial: {seed: 1, ...initial},
-    evidence: {initial: {status: 'classic-candidate', sources: ['docs/GAMEPLAY.md']}},
+    evidence: {initial: {status: 'classic-candidate', sources: ['docs/M9_P0_CARD_CARNIVAL_AUDIT.md']}},
   };
 }
 
@@ -106,20 +106,55 @@ test.each([engine.TURN_DRAW_RULES_VERSION, engine.LEGACY_RULES_VERSION] as const
   },
 );
 
+const puzzleById = (id: PuzzleId) => {
+  const found = puzzleCatalog.find(p => p.id === id);
+  if (!found) throw Error(`Missing puzzle ${id}`);
+  return found;
+};
+
 const routes: Array<{
   puzzle: PuzzleDefinition;
   steps: Step[];
   scores: [number, number];
   awards: [number, number][];
 }> = [
+  // Chapter 6 · Easy (P1 baseline — 100% unchanged scores & routes)
   {puzzle: stud, steps: [[23, 'C3'], [15, 'A1'], [14, 'B2']], scores: [5, 4], awards: [[2, 0], [3, 0], [0, 4]]},
   {puzzle: choco, steps: [[108, 'C1'], [109, 'C3'], [107, 'C2']], scores: [17, 16], awards: [[0, 9], [0, 7], [17, 0]]},
   {puzzle: moogles, steps: [[110, 'B1'], [23, 'B2'], [1110, 'C2'], [2110, 'A1'], [8, 'C1']], scores: [11, 6], awards: [[0, 6], [6, 0], [5, 0]]},
+  // Chapter 6 · Advanced & Skill Drill
+  {puzzle: puzzleById('cc-spears-and-needles'), steps: [[12, 'A2'], [31, 'B2'], [31, 'B3'], [14, 'C3']], scores: [8, 6], awards: [[0, 6], [0, 0], [8, 0]]},
+  {puzzle: puzzleById('cc-sea-devil-by-night'), steps: [[32, 'B2'], [32, 'C1'], [10, 'C2'], [1, 'C3'], [10, 'C2'], [1010, 'C3'], [1010, 'B1']], scores: [14, 8], awards: [[0, 8], [8, 0], [6, 0]]},
+  {puzzle: puzzleById('cc-a-kingly-clash'), steps: [[15, 'A2'], [15, 'C2'], [35, 'B3'], [27, 'B1'], [22, 'A1'], [22, 'C1']], scores: [16, 14], awards: [[0, 7], [16, 0], [0, 7]]},
+  {puzzle: puzzleById('cc-power-down-practice'), steps: [[20, 'C2'], [20, 'C3'], [14, 'B2']], scores: [9, 4], awards: [[0, 4], [3, 0], [6, 0]]},
+  // Chapter 12 · Advanced
+  {puzzle: puzzleById('cc-one-shot-one-kill'), steps: [[28, 'C4'], [41, 'A4'], [37, 'C3'], [41, 'B5'], [119, 'B1']], scores: [4, 0], awards: [[0, 0], [4, 0], [0, 0]]},
+  {puzzle: puzzleById('cc-curse-of-the-gi'), steps: [[63, 'A2'], [36, 'B1'], [62, 'B2'], [13, 'C2'], [2, 'C1'], [59, 'C1'], [123, 'B2']], scores: [45, 19], awards: [[25, 0], [0, 19], [20, 0]]},
+  // Chapter 12 · Party Collector's Cards (9)
+  {puzzle: puzzleById('cc-collectors-cloud'), steps: [[1, 'C2'], [86, 'B2'], [143, 'B4']], scores: [18, 12], awards: [[9, 0], [0, 12], [9, 0]]},
+  {puzzle: puzzleById('cc-collectors-barret'), steps: [[6, 'A2'], [36, 'C2'], [41, 'B2'], [51, 'B2'], [87, 'B3']], scores: [9, 6], awards: [[0, 3], [9, 0], [0, 3]]},
+  {puzzle: puzzleById('cc-collectors-tifa'), steps: [[12, 'A1'], [31, 'B2'], [22, 'C2'], [88, 'B3'], [59, 'C2']], scores: [19, 16], awards: [[0, 16], [13, 0], [6, 0]]},
+  {puzzle: puzzleById('cc-collectors-aerith'), steps: [[89, 'A2'], [102, 'A3'], [10, 'C2'], [75, 'C3'], [1010, 'A1']], scores: [21, 20], awards: [[12, 0], [0, 20], [9, 0]]},
+  {puzzle: puzzleById('cc-collectors-red-xiii'), steps: [[36, 'B2'], [65, 'B3'], [65, 'A2'], [90, 'C3'], [67, 'B2']], scores: [16, 0], awards: [[7, 0], [9, 0], [0, 0]]},
+  {puzzle: puzzleById('cc-collectors-yuffie'), steps: [[13, 'C3'], [31, 'A3'], [41, 'B3'], [58, 'C1'], [58, 'B1'], [91, 'B3']], scores: [9, 4], awards: [[0, 4], [5, 0], [4, 0]]},
+  {puzzle: puzzleById('cc-collectors-cait-sith'), steps: [[136, 'C1'], [135, 'A1'], [92, 'A2'], [1092, 'B1'], [141, 'C2'], [139, 'B2']], scores: [38, 27], awards: [[18, 0], [0, 27], [20, 0]]},
+  {puzzle: puzzleById('cc-collectors-cid'), steps: [[93, 'C1'], [1093, 'A1'], [138, 'C2'], [41, 'B4'], [51, 'B4']], scores: [6, 4], awards: [[2, 0], [0, 4], [4, 0]]},
+  {puzzle: puzzleById('cc-collectors-vincent'), steps: [[94, 'B2'], [72, 'A2'], [72, 'C2'], [74, 'A1'], [1094, 'B2']], scores: [11, 0], awards: [[5, 0], [4, 0], [2, 0]]},
+  // Chapter 12 · Skill Drills (4)
+  {puzzle: puzzleById('cc-chain-reactions'), steps: [[12, 'A1'], [50, 'A2'], [48, 'C2']], scores: [14, 11], awards: [[8, 0], [0, 11], [6, 0]]},
+  {puzzle: puzzleById('cc-major-power-outage'), steps: [[63, 'A2'], [61, 'C2'], [62, 'B2'], [74, 'A1']], scores: [21, 13], awards: [[10, 0], [11, 0], [0, 13]]},
+  {puzzle: puzzleById('cc-back-to-replace-ics'), steps: [[54, 'A2'], [14, 'B2'], [52, 'C2']], scores: [21, 10], awards: [[0, 10], [14, 0], [7, 0]]},
+  {puzzle: puzzleById('cc-replacement-test'), steps: [[12, 'A1'], [31, 'B2'], [59, 'C2']], scores: [14, 6], awards: [[0, 6], [8, 0], [6, 0]]},
 ];
 
-test.each(routes)('$puzzle.id follows the P0 candidate route and reconstructs the entire attempt in Replay v2', ({puzzle, steps, scores, awards}) => {
+test('regression route table covers every puzzle in puzzleCatalog', () => {
+  expect(routes.map(r => r.puzzle.id)).toEqual(puzzleCatalog.map(p => p.id));
+});
+
+test.each(routes)('$puzzle.id follows the verified route, clears with winner === 0, and reconstructs in Replay v2', ({puzzle, steps, scores, awards}) => {
   const session = new PuzzleSession(puzzle);
   const start = session.snapshot(), initialMoves = session.moves(), initialReplay = session.debugReplay();
+  expect(new PuzzleSession(puzzle).finish().result).toMatchObject({status: 'failed', winner: 1});
   for (const step of steps) playAt(session, step);
   expect(session.snapshot()).toMatchObject({phase: 'playing', hand: [], result: null});
   expect(session.moves()).toEqual([]);
@@ -142,6 +177,23 @@ test.each(routes)('$puzzle.id follows the P0 candidate route and reconstructs th
   for (const step of steps) playAt(session, step);
   expect(session.finish()).toEqual(completed);
   expect(engine.replayMatch(session.debugReplay())).toEqual(rebuilt);
+});
+
+test('Cloud collector puzzle genuinely triggers Desert Sahagin and Cloud threshold 7, and Vincent supports Galian Beast before Rictus', () => {
+  const cloud = new PuzzleSession(puzzleById('cc-collectors-cloud'));
+  playAt(cloud, [1, 'C2']);
+  playAt(cloud, [86, 'B2']);
+  const afterSeph = playAt(cloud, [143, 'B4']);
+  expect(afterSeph.events).toEqual(expect.arrayContaining([
+    expect.objectContaining({type: 'ThresholdReached', cardId: 86, power: 7}),
+  ]));
+  expect(cloud.finish().result).toMatchObject({status: 'passed', winner: 0, scores: [18, 12]});
+
+  const vincent = new PuzzleSession(puzzleById('cc-collectors-vincent'));
+  for (const step of [[94, 'B2'], [72, 'A2'], [72, 'C2'], [1094, 'B2'], [74, 'A1']] as Step[]) {
+    playAt(vincent, step);
+  }
+  expect(vincent.finish().result).toMatchObject({status: 'passed', winner: 0, scores: [11, 0]});
 });
 
 test('Moogles generates both hand cards once, resolves weakening and destruction, and allows an alternate route', () => {

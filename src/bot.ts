@@ -1,5 +1,5 @@
 import {byId} from './cards.js';
-import {strategyForOpponent,strategyScore,type BotStrategy} from './bot-strategy.js';
+import {isBotStrategy,strategyForOpponent,strategyScore,type BotStrategy} from './bot-strategy.js';
 import {resolutionFailure,type BotDiagnostic} from './bot-diagnostics.js';
 import {legalMoves,play,pass,outcome,opponent,seededRng,type Game,type Player,type Command} from './engine.js';
 
@@ -9,7 +9,7 @@ export type BotAction=Exclude<Command,{type:'mulligan'}>;
 export interface BotView {
   player:Player;board:Game['board'];hand:number[];enemyHandCount:number;
   deckCounts:[number,number];discard:Game['discard'];passes:number;nextInstanceId:number;
-  rulesVersion?:Game['rulesVersion'];
+  rulesVersion?:Game['rulesVersion'];noTurnDraw?:boolean;
 }
 export interface BotOptions {difficulty?:BotDifficulty;seed?:number;maxNodes?:number;explain?:boolean;strategy?:BotStrategy;}
 export interface BotCandidate {action:BotAction;score:number;immediate:number;replies:number;reason:string;}
@@ -26,11 +26,12 @@ export function observeGame(game:Game,player:Player=game.turn):BotView {
   if((player!==0&&player!==1)||game.phase!=='playing'||game.turn!==player)throw Error('Bot requires the current player in playing phase');
   return {player,board:structuredClone(game.board),hand:[...game.hands[player]],enemyHandCount:game.hands[opponent(player)].length,
     ...(game.rulesVersion?{rulesVersion:game.rulesVersion}:{}),
+    ...(game.noTurnDraw?{noTurnDraw:true}:{}),
     deckCounts:[game.decks[0].length,game.decks[1].length],discard:structuredClone(game.discard),passes:game.passes,nextInstanceId:game.nextInstanceId};
 }
 /** Derive UI randomness from public observation, never the deck-shuffle seed. */
 export function botOptionsForMatch(view:BotView,settings:{difficulty:BotDifficulty;opponent?:{npcId:string}}):BotOptions {
-  const publicData=JSON.stringify([view.player,view.board,view.hand,view.enemyHandCount,view.deckCounts,view.discard,view.passes,view.nextInstanceId,view.rulesVersion??'legacy']);
+  const publicData=JSON.stringify([view.player,view.board,view.hand,view.enemyHandCount,view.deckCounts,view.discard,view.passes,view.nextInstanceId,view.rulesVersion??'legacy',...(view.noTurnDraw?['noTurnDraw']:[])]);
   let seed=2166136261;for(let i=0;i<publicData.length;i++)seed=Math.imul(seed^publicData.charCodeAt(i),16777619)>>>0;
   return {difficulty:settings.difficulty,seed,strategy:strategyForOpponent(settings.opponent?.npcId)};
 }
@@ -40,7 +41,7 @@ export function botSimulation(view:BotView):Game {
   const hands:[number[],number[]]=[[],[]];hands[view.player]=[...view.hand];
   hands[opponent(view.player)]=Array(view.enemyHandCount).fill(1);
   const tag=view.rulesVersion?{rulesVersion:view.rulesVersion}:{};
-  return {...tag,board:structuredClone(view.board),hands,decks:view.deckCounts.map(n=>n>0?[1]:[]) as Game['decks'],
+  return {...tag,...(view.noTurnDraw?{noTurnDraw:true}:{}),board:structuredClone(view.board),hands,decks:view.deckCounts.map(n=>n>0?[1]:[]) as Game['decks'],
     discard:structuredClone(view.discard),mulliganDone:[true,true],phase:'playing',turn:view.player,passes:view.passes,
     history:[],events:[],nextInstanceId:view.nextInstanceId,replay:{...tag,version:1,seed:0,decks:[[],[]],firstPlayer:view.player,commands:[]}};
 }
@@ -109,7 +110,7 @@ export function botReplyHypotheses(game:Game,view:BotView,replySeed:number){
 }
 export function decideBot(view:BotView,options:BotOptions={}):BotDecision {
   const difficulty=options.difficulty??'normal',seed=options.seed??1,maxNodes=options.maxNodes??DEFAULT_BOT_NODES[difficulty],strategy=options.strategy??'neutral';
-  if(!['neutral','nene','zogan','isabelle'].includes(strategy))throw Error('Unknown Bot strategy');
+  if(!isBotStrategy(strategy))throw Error('Unknown Bot strategy');
   if(!['easy','normal','hard'].includes(difficulty))throw Error('Unknown Bot difficulty');
   if(!Number.isInteger(seed)||seed<0||seed>0xFFFFFFFF)throw Error('Bot seed must be uint32');
   if(!Number.isInteger(maxNodes)||maxNodes<1||maxNodes>512)throw Error('Bot maxNodes must be 1..512');

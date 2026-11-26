@@ -63,12 +63,22 @@ export function restoreMatch(value:unknown):{save:SavedMatch;game:Game}{
   const settings:MatchSettings={deck:[...s.deck] as number[],seed:Number(s.seed),difficulty:s.difficulty as MatchSettings['difficulty'],first:s.first as MatchSettings['first']};
   const replay=checkedReplay(value.replay);
   if(s.opponent!==undefined){
-    requireValue(replay.version===1&&object(s.opponent)&&text(s.opponent.npcId,40)&&Array.isArray(s.opponent.deck));
+    requireValue(object(s.opponent)&&text(s.opponent.npcId,40)&&Array.isArray(s.opponent.deck));
     settings.opponent={npcId:s.opponent.npcId as string,deck:[...s.opponent.deck] as number[]};
   }
   const initial=startMatch(settings);
   requireValue(settings.seed===replay.seed);
-  if(replay.version===1)requireValue(JSON.stringify(replay.decks)===JSON.stringify(initial.replay.decks)&&initial.turn===replay.firstPlayer);
+  if(settings.opponent!==undefined){
+    requireValue(replay.version===initial.replay.version&&initial.turn===replay.firstPlayer);
+    if(replay.version===1&&initial.replay.version===1){
+      requireValue(JSON.stringify(replay.decks)===JSON.stringify(initial.replay.decks));
+    } else if(replay.version===2&&initial.replay.version===2){
+      const expected=checkedReplay(initial.replay);
+      requireValue(expected.version===2&&JSON.stringify(replay.position)===JSON.stringify(expected.position));
+    }
+  } else if(replay.version===1){
+    requireValue(JSON.stringify(replay.decks)===JSON.stringify(initial.replay.decks)&&initial.turn===replay.firstPlayer);
+  }
   const game=replayMatch(replay);requireValue(value.phase===game.phase&&value.check===stateCheck(game));
   return {save:saveMatch(game,settings,String(value.deckName),String(value.id)),game};
 }

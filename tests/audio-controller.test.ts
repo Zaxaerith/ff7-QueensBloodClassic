@@ -257,7 +257,6 @@ describe('AudioController', () => {
     }})))).toEqual({});
     const backend = new FakeAudio();
     const controller = new AudioController(readPrivateAudioTracks(page()), backend);
-    expect(controller.hasAudio).toBe(false);
     const session = controller.startOrResumeMatch('first', 'playing')!;
     expect(await controller.activateFromGesture()).toBe(false);
     controller.enterScoring(session, 22, 0);
@@ -265,5 +264,69 @@ describe('AudioController', () => {
     expect(controller.state).toBe('Silent');
     expect(backend.activations).toBe(0);
     expect(backend.requests).toHaveLength(0);
+  });
+
+  it('routes challengeLoop and bossLoop via trackHint and parses them from bootstrap', async () => {
+    const multiTracks: AudioTracks = {
+      ...tracks,
+      challengeLoop: {url: '/music/challenge.wav', loop: {sampleRateHz: 44100, startFrame: 0, endFrameExclusive: 3298559}},
+      bossLoop: {url: '/music/boss.wav', loop: {sampleRateHz: 44100, startFrame: 0, endFrameExclusive: 3681395}},
+    };
+    const page = {
+      location: new URL('http://127.0.0.1:5198/') as unknown as Location,
+      getElementById: () => ({textContent: JSON.stringify({version: 1, tracks: multiTracks})}) as HTMLElement,
+    };
+    expect(readPrivateAudioTracks(page)).toEqual(multiTracks);
+
+    const backend = new FakeAudio();
+    const controller = new AudioController(multiTracks, backend);
+    const challengeBuffer = decoded(3298559, 44100);
+    const bossBuffer = decoded(3681395, 44100);
+
+    const s1 = controller.startOrResumeMatch('carnival-1', 'playing', 'live', 'challengeLoop')!;
+    await controller.activateFromGesture();
+    expect(backend.requests.map(r => r.url)).toEqual(['/music/challenge.wav']);
+    backend.requests[0].resolve(challengeBuffer);
+    await flush();
+    expect(controller.state).toBe('MatchLoop');
+    expect(backend.played[0].buffer).toBe(challengeBuffer);
+    expect(controller.startOrResumeMatch('carnival-1', 'playing', 'live', 'challengeLoop')).toBe(s1);
+
+    controller.startOrResumeMatch('queen-boss', 'mulligan', 'live', 'bossLoop');
+    await flush();
+    expect(backend.requests.at(-1)?.url).toBe('/music/boss.wav');
+    backend.requests.at(-1)!.resolve(bossBuffer);
+    await flush();
+    expect(controller.state).toBe('MatchLoop');
+    expect(backend.played.at(-1)?.buffer).toBe(bossBuffer);
+  });
+
+  it('falls back smoothly to matchLoop when requested optional track is missing or fails to decode', async () => {
+    const backend = new FakeAudio();
+    const controller = new AudioController(tracks, backend);
+    controller.startOrResumeMatch('boss-without-track', 'playing', 'live', 'bossLoop');
+    await controller.activateFromGesture();
+    expect(backend.requests.map(r => r.url)).toEqual(['/music/loop.wav']);
+    backend.requests[0].resolve(loopBuffer);
+    await flush();
+    expect(controller.state).toBe('MatchLoop');
+    expect(backend.played[0].buffer).toBe(loopBuffer);
+
+    const backend2 = new FakeAudio();
+    const partialTracks: AudioTracks = {
+      ...tracks,
+      challengeLoop: {url: '/music/broken-challenge.wav', loop: {sampleRateHz: 44100, startFrame: 0, endFrameExclusive: 3298559}},
+    };
+    const controller2 = new AudioController(partialTracks, backend2);
+    controller2.startOrResumeMatch('challenge-fallback', 'playing', 'live', 'challengeLoop');
+    await controller2.activateFromGesture();
+    expect(backend2.requests[0].url).toBe('/music/broken-challenge.wav');
+    backend2.requests[0].reject(new Error('Decode failed'));
+    await flush();
+    expect(backend2.requests[1].url).toBe('/music/loop.wav');
+    backend2.requests[1].resolve(loopBuffer);
+    await flush();
+    expect(controller2.state).toBe('MatchLoop');
+    expect(backend2.played[0].buffer).toBe(loopBuffer);
   });
 });

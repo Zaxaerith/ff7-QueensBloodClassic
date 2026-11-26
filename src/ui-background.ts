@@ -3,7 +3,8 @@ export const battleBackgrounds=[
   {id:'current',label:'originalBlue'},
   {id:'classic',label:'themeClassic'},
   {id:'hybrid',label:'themeHybrid'},
-  {id:'dramatic',label:'themeDramatic'}
+  {id:'dramatic',label:'themeDramatic'},
+  {id:'shadowblood-queen',label:'themeShadowbloodQueen'},
 ] as const;
 
 export function mountBackgroundPicker(host:HTMLElement,select:HTMLSelectElement){

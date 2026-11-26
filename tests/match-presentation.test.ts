@@ -136,6 +136,39 @@ test('mulligan checkpoint restores once, before/after snapshots never become the
   const r=harness(restoreMatch(h.saved[0]).game);expect(r.p.phase).toBe('PlayerSelect');expect(r.saved).toHaveLength(0);r.p.pause();
 });
 
+test.each(['player','computer'] as const)('opening presents START, the actual first turn and the dealt hand in order (%s)',async first=>{
+  const g=startMatch({deck:starterDeck,seed:7,difficulty:'normal',first});
+  const h=harness(g);
+  h.p.commitPlayer(()=>{mulligan(g,0,[0]);mulligan(g,1,[]);},true);
+  expect(h.p.effect?.stage).toBe('start');
+  await vi.advanceTimersByTimeAsync(PRESENTATION_MS.start);
+  expect(h.p.effect).toMatchObject({stage:'turn',actor:first==='player'?0:1,opening:true});
+  expect(h.p.canPlay).toBe(false);
+  await vi.advanceTimersByTimeAsync(PRESENTATION_MS.turn);
+  expect(h.p.effect?.stage).toBe('deal');
+  expect(h.p.frame?.hand).toEqual(g.hands[0]);
+  expect(h.p.frame?.hand).toHaveLength(5);
+  await vi.advanceTimersByTimeAsync(PRESENTATION_MS.deal);
+  expect(h.p.phase).toBe(first==='player'?'PlayerSelect':'OpponentTurn');
+  expect(h.p.effect).toBeNull();
+  expect(g.replay.commands).toHaveLength(2);
+  h.p.pause();
+});
+
+test.each(['skip','fast','reduced'])('opening uses the same mulligan checkpoint and reaches input promptly with %s',async mode=>{
+  const g=startMatch({deck:starterDeck,seed:7,difficulty:'normal',first:'player'}),h=harness(g,mode==='reduced');
+  if(mode==='fast')h.p.setFast(true);
+  h.p.commitPlayer(()=>{mulligan(g,0,[0]);mulligan(g,1,[]);},true);
+  if(mode==='skip')h.p.skip();
+  await vi.advanceTimersByTimeAsync(0);
+  expect(h.p.phase).toBe('PlayerSelect');
+  expect(h.p.effect).toBeNull();
+  expect(h.p.frame?.hand).toEqual(g.hands[0]);
+  expect(g.replay.commands).toHaveLength(2);
+  expect(h.checkpoint).toHaveBeenCalledTimes(1);
+  h.p.pause();
+});
+
 test('replacement/destruction/generation and event seq are unchanged by presentation',async()=>{
   const game=createPosition({hands:[[51],[]],board:[{row:0,col:0,owner:0,cardId:10},{row:0,col:1,owner:1,cardId:7}]});
   const expected=structuredClone(game),m=legalMoves(game,0)[0];play(expected,0,m.handIndex,m.row,m.col);

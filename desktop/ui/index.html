@@ -1,7 +1,204 @@
 <!doctype html>
-<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Queen's Blood Classic · Desktop Setup</title><link rel="stylesheet" href="/setup.css"><script type="module" src="/setup.js"></script></head>
-<body><main><header><p>QUEEN'S BLOOD CLASSIC · WINDOWS</p><h1>Personal Art Pack</h1><p>使用你自己的 FF7 Original Steam PC 英文资源。本机离线生成，不上传游戏文件。</p></header>
-<section><h2>1 · 选择游戏安装目录</h2><p id="source">尚未选择。也可以跳过卡图，直接进入游戏。</p><div class="actions"><button id="source-select">选择 FF7 安装目录…</button><button id="inspect" data-job>检查档案</button><button id="plan" data-job>检查145卡生产计划</button></div></section>
-<section><h2>2 · 生成或加载私人卡图</h2><p>输出保存到本机用户数据目录，每次使用新目录。原安装文件和已有卡包保持只读。</p><div class="actions"><button id="build" data-job>生成全部145张…</button><button id="pack-select" data-job>选择已有 Art Pack…</button><button id="previous" data-job hidden>验证上次使用的卡包</button></div><details><summary>小批次验证 / 重试</summary><label>Card ID <input id="cards" value="041,086,106" maxlength="580" aria-label="小批次卡牌编号"></label><button id="build-subset" data-job>生成指定卡牌…</button><p>只生成所选编号；其他卡图继续使用游戏占位。不会修改历史卡包。</p></details><p id="pack">没有加载卡包</p></section>
-<section aria-live="polite"><h2>任务状态</h2><p id="status">等待操作</p><progress id="progress" value="0" max="145"></progress><p id="current"></p><button id="cancel" hidden>取消任务</button><div id="details"></div><details><summary>任务详情与失败记录</summary><pre id="log"></pre></details></section>
-<section><h2>3 · 开始游戏</h2><div class="actions"><button id="play-art" data-job disabled>使用已验证卡图进入游戏</button><button id="play-plain" data-job>跳过卡图进入游戏</button></div><p>卡组、存档、Records与回放保存在此桌面窗口。使用窗口菜单「Desktop → Resource Setup」返回设置。</p></section><p id="notice" role="alert"></p><footer>本机生成私人卡图 · 不上传原始游戏文件 · Queen's Blood Classic 0.8.0-rc.2</footer></main></body></html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Queen's Blood Classic · Launcher</title>
+  <link rel="stylesheet" href="/setup.css">
+  <script type="module" src="/setup.js"></script>
+</head>
+<body>
+  <main class="launcher-shell">
+    <header class="og-panel hero-header">
+      <div class="hero-top">
+        <div class="brand-block">
+          <p class="brand-kicker" data-i18n="kicker">FINAL FANTASY VII · CLASSIC WINDOWS LAUNCHER</p>
+          <h1 class="brand-title">Queen's Blood Classic</h1>
+          <p class="brand-sub" data-i18n="subtitle">本机离线运行 · 不上传游戏文件 · 原游戏目录始终只读</p>
+        </div>
+        <div class="header-controls">
+          <span class="version-pill" id="version-badge">v1.0.0-rc.1</span>
+          <button type="button" id="lang-toggle" class="og-btn og-btn-compact" aria-label="Switch language">EN / 中文</button>
+        </div>
+      </div>
+
+      <div class="hero-launch-bar">
+        <div class="hero-status-group">
+          <div class="status-chip" id="chip-art">
+            <span class="chip-dot" aria-hidden="true"></span>
+            <span class="chip-text" id="chip-art-text">正在读取本地资源状态…</span>
+          </div>
+          <div class="status-chip" id="chip-audio">
+            <span class="chip-dot" aria-hidden="true"></span>
+            <span class="chip-text" id="chip-audio-text">内置 11 项 PS1 合成音效已就绪</span>
+          </div>
+        </div>
+
+        <div class="hero-cta-group">
+          <button type="button" id="play-primary" class="og-btn og-btn-gold" data-job>
+            <span class="btn-label" id="play-primary-label">▶ 立即开始游戏</span>
+          </button>
+          <button type="button" id="play-plain" class="og-btn og-btn-ghost" data-job hidden>
+            <span class="btn-label" data-i18n="playPlain">经典无图模式进入</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="hero-prefs">
+        <label class="og-check" for="auto-enter">
+          <input type="checkbox" id="auto-enter">
+          <span data-i18n="autoEnterLabel">下次启动直接进入游戏（随时可在窗口菜单 Desktop → Launcher &amp; Resource Setup 返回本页）</span>
+        </label>
+      </div>
+    </header>
+
+    <div class="actions"><button type="button" id="detected-art" class="og-btn og-btn-gold" data-job hidden></button><button type="button" id="detected-audio" class="og-btn og-btn-mako" data-job hidden></button></div>
+    <div id="notice" class="notice-banner" role="alert" hidden></div>
+
+    <section class="og-panel task-panel" id="task-panel" aria-live="polite" hidden>
+      <div class="panel-head">
+        <h2 class="panel-title">
+          <span class="title-mark" aria-hidden="true">◆</span>
+          <span data-i18n="taskTitle">实时任务进度</span>
+        </h2>
+        <span class="task-badge" id="task-badge">IDLE</span>
+      </div>
+      <p class="task-status-line" id="status">等待操作</p>
+      <div class="mako-bar-wrap" role="progressbar" aria-valuemin="0" aria-valuemax="145" aria-valuenow="0" id="mako-bar-wrap">
+        <div class="mako-bar-fill" id="mako-bar-fill"></div>
+        <span class="mako-bar-text" id="mako-bar-text">0%</span>
+      </div>
+      <progress id="progress" class="sr-only" value="0" max="145"></progress>
+      <div class="task-meta-row">
+        <p class="task-current" id="current"></p>
+        <button type="button" id="cancel" class="og-btn og-btn-danger" hidden>
+          <span class="btn-label" data-i18n="cancelTask">安全取消任务</span>
+        </button>
+      </div>
+      <div id="details" class="detail-rows"></div>
+      <details id="log-drawer" class="og-details">
+        <summary data-i18n="logSummary">诊断日志与详细信息</summary>
+        <pre id="log"></pre>
+      </details>
+    </section>
+
+    <section class="module-block">
+      <div class="module-heading">
+        <h2 class="section-label">
+          <span class="step-num">01</span>
+          <span data-i18n="mod1Title">卡图资源配置（二选一）</span>
+        </h2>
+        <p class="section-hint" data-i18n="mod1Hint">可选：从你的正版 FF7 Original 一键生成私人卡图，或直接绑定已完成的 145 / 166 卡包</p>
+      </div>
+
+      <div class="two-col-grid">
+        <article class="og-panel sub-card">
+          <div class="card-head">
+            <h3 data-i18n="buildCardTitle">从 FF7 Original 目录一键构建</h3>
+            <span class="card-tag" data-i18n="buildCardTag">首次推荐</span>
+          </div>
+          <p class="card-desc" data-i18n="buildCardDesc">支持 Steam 英文版 FF7 Original。离线解析本地 LGP 档案生成 145 张卡图，输出至独立用户数据目录，原安装文件只读。</p>
+
+          <div class="path-box">
+            <span class="path-label" data-i18n="sourceLabel">当前游戏目录</span>
+            <p class="path-value" id="source">尚未选择目录</p>
+          </div>
+
+          <div class="actions">
+            <button type="button" id="source-detect" class="og-btn" data-job>
+              <span class="btn-label" data-i18n="detectSteam">自动探测 Steam 目录</span>
+            </button>
+            <button type="button" id="source-select" class="og-btn" data-job>
+              <span class="btn-label" data-i18n="chooseSource">手动选择目录…</span>
+            </button>
+          </div>
+
+          <div class="actions primary-action-row">
+            <button type="button" id="build" class="og-btn og-btn-mako" data-job>
+              <span class="btn-label" data-i18n="oneClickBuild">一键校验并生成 145 张卡图</span>
+            </button>
+          </div>
+
+          <details class="og-details">
+            <summary data-i18n="advancedSummary">高级工具：单独校验、生产计划与指定卡号重试</summary>
+            <div class="advanced-body">
+              <div class="actions">
+                <button type="button" id="inspect" class="og-btn og-btn-compact" data-job>
+                  <span class="btn-label" data-i18n="inspectOnly">仅检查档案</span>
+                </button>
+                <button type="button" id="plan" class="og-btn og-btn-compact" data-job>
+                  <span class="btn-label" data-i18n="planSource">检查 145 卡计划</span>
+                </button>
+              </div>
+              <div class="subset-row">
+                <label class="subset-label" for="cards" data-i18n="subsetLabel">指定卡牌编号（逗号分隔）</label>
+                <div class="subset-controls">
+                  <input id="cards" type="text" value="041,086,106" maxlength="580" aria-label="Card IDs">
+                  <button type="button" id="build-subset" class="og-btn og-btn-compact" data-job>
+                    <span class="btn-label" data-i18n="buildSubset">生成指定卡牌…</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </details>
+        </article>
+
+        <article class="og-panel sub-card">
+          <div class="card-head">
+            <h3 data-i18n="packCardTitle">加载已有 Art Pack 卡包</h3>
+            <span class="card-tag card-tag-silver" data-i18n="packCardTag">支持 145 / 166 卡</span>
+          </div>
+          <p class="card-desc" data-i18n="packCardDesc">若你已拥有生成好的 145 卡或含代币 166 卡完整私人卡包目录，可直接只读校验并秒速挂载，无需重新渲染。</p>
+
+          <div class="path-box">
+            <span class="path-label" data-i18n="packLabel">当前已验证卡包</span>
+            <p class="path-value" id="pack">未挂载卡包（将以经典字形模式游玩）</p>
+          </div>
+
+          <div class="actions">
+            <button type="button" id="pack-select" class="og-btn og-btn-accent" data-job>
+              <span class="btn-label" data-i18n="choosePack">选择已有 Art Pack 目录…</span>
+            </button>
+            <button type="button" id="previous" class="og-btn" data-job hidden>
+              <span class="btn-label" data-i18n="recheckPrev">重新验证上次卡包</span>
+            </button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="og-panel audio-panel">
+      <div class="audio-head">
+        <div>
+          <h2 class="section-label">
+            <span class="step-num">02</span>
+            <span data-i18n="mod2Title">本地音乐包（可选 BGM）</span>
+          </h2>
+          <p class="card-desc" data-i18n="audioDesc">游戏内置 11 项纯程序化 1997 PS1 风格合成音效（发牌、落子、强化、摧毁、连击、胜利等），无需外部音频即可完整游玩。如需本地古典 BGM 循环，可挂载包含 audio-pack.local.json 的目录。</p>
+        </div>
+        <div class="actions audio-actions">
+          <button type="button" id="audio-select" class="og-btn" data-job>
+            <span class="btn-label" data-i18n="chooseAudio">选择本地音乐包目录…</span>
+          </button>
+          <button type="button" id="audio-clear" class="og-btn og-btn-ghost" data-job hidden>
+            <span class="btn-label" data-i18n="clearAudio">清除音乐包</span>
+          </button>
+        </div>
+      </div>
+      <div class="path-box path-box-inline">
+        <span class="path-label" data-i18n="audioPathLabel">本地 BGM 状态</span>
+        <p class="path-value" id="audio-pack">未挂载本地 BGM（仅使用内置 PS1 合成音效）</p>
+      </div>
+    </section>
+
+    <footer class="launcher-footer">
+      <span id="footer-copy" data-i18n="footerCopy">非官方同人作品 · 卡图与音乐包仅供本机私人使用 · 不联网不上传</span>
+      <span id="footer-version">Game v1.0.0-rc.1</span>
+    </footer>
+  </main>
+  <dialog id="confirm-dialog" class="og-panel confirm-dialog" aria-labelledby="confirm-message">
+    <p id="confirm-message"></p>
+    <div class="actions"><button id="confirm-cancel" class="og-btn" type="button" data-i18n="cancelConfirm">取消</button><button id="confirm-accept" class="og-btn og-btn-gold" type="button" data-i18n="acceptConfirm">确定</button></div>
+  </dialog>
+</body>
+</html>

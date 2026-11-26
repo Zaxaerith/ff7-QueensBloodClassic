@@ -62,7 +62,7 @@ COLLECT(he,we,host.binaries,host.datas,worker.binaries,worker.datas,name='Queens
     for name in ['pywebview','pythonnet','clr_loader','cffi','pycparser','bottle','proxy_tools','typing_extensions','Pillow','PyInstaller','pyinstaller-hooks-contrib','altgraph','pefile','pywin32-ctypes','setuptools','packaging']:
         dist=metadata.distribution(name);versions[name]=dist.version
         for f in dist.files or []:
-            if any(word in str(f).lower() for word in ['license','copying','notice']) and dist.locate_file(f).is_file():
+            if any(word in Path(f).name.lower() for word in ['license','copying','notice']) and Path(f).suffix.lower() not in ('.pyc', '.pyo') and dist.locate_file(f).is_file():
                 dest=licenses/name/str(f);dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(dist.locate_file(f),dest)
     shutil.copy2(Path(sys.executable).parent/'LICENSE.txt',licenses/'CPython-LICENSE.txt')
     shutil.copy2(root/'desktop/PORTABLE_README.txt',bundle/'README.txt')

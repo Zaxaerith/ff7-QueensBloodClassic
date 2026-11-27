@@ -46,10 +46,21 @@ const worldTourIds = [
   'zhijun','regina-rematch','bernard','turner','vincent-gatekeeper',
 ] as const;
 
-test('the twenty unique challengers preserve the original ten, have legal distinct decks and registered strategies', () => {
+const taskY2NewcomerIds = [
+  'rolf','navalan','mary','pietro','dax','wize-3',
+  'oscar','robin','kadina','riana','dokaccha','maahir','dale',
+] as const;
+
+const keeperIds = [
+  'cameron','lidrehl','regina-rematch','vincent-gatekeeper','navalan','wize-3',
+] as const;
+
+test('all thirty-three unique challengers preserve the first twenty, mark Keepers, and have legal distinct decks and strategies', () => {
   expect(challengers.slice(0,10).map(({id}) => id)).toEqual(['nene','zogan','isabelle',...additions.map(({id}) => id)]);
-  expect(challengers.slice(10).map(({id}) => id)).toEqual([...worldTourIds]);
-  expect(challengers).toHaveLength(20);
+  expect(challengers.slice(10,20).map(({id}) => id)).toEqual([...worldTourIds]);
+  expect(challengers.slice(20).map(({id}) => id)).toEqual([...taskY2NewcomerIds]);
+  expect(challengers).toHaveLength(33);
+  expect(challengers.filter(npc => npc.keeper).map(({id}) => id)).toEqual([...keeperIds]);
   const deckKeys = new Set<string>();
   for (const npc of challengers) {
     expect(validateDeck(npc.deck),npc.id).toBeNull();
@@ -92,6 +103,15 @@ test.each(locales)('%s shows each new name, region, associated card and tactic, 
     newDetails.add(details);
   }
   expect(newDetails.size).toBe(additions.length);
+  const allDetails = new Set<string>();
+  for (const npc of challengers) {
+    expect(termRecord('npc:'+npc.id,locale)?.name,npc.id).toBeTruthy();
+    const details = opponentDetails(npc);
+    expect(details,npc.id).toContain(`#${String(npc.rewardCardId).padStart(3,'0')} ${resolveCard(npc.rewardCardId)}`);
+    expect(details,npc.id).not.toMatch(/⟦|undefined/);
+    allDetails.add(details);
+  }
+  expect(allDetails.size).toBe(challengers.length);
   expect(opponentDetails(findChallenger('unregistered'))).toBe(t('theComputerUsesTheSameDeckAsYou'));
 });
 

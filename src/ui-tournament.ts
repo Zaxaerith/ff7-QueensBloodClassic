@@ -6,6 +6,7 @@ import {decideBot} from './bot.js';
 import {BotClient} from './bot-client.js';
 import {byId, type Card} from './cards.js';
 import {createCardView} from './card-view.js';
+import {getChallengerBanter} from './challenger-banter.js';
 import {COLS, ROWS, previewEffects, previewInfluence, type Move, type PlacedCard} from './engine.js';
 import {displayName} from './i18n/card-names.js';
 import {
@@ -16,6 +17,7 @@ import type {SemanticAction} from './input/input-manager.js';
 import {gridStep, legalTarget, smartSnap} from './input/match-cursor.js';
 import {batchLegendaryVfx} from './match-effects.js';
 import {MatchPresentation, publicMatch} from './match-presentation.js';
+import {simulateMovePreview} from './move-preview.js';
 import {
   readProgress, recordTournamentRun, writeProgress, type PlayerProgress,
 } from './progress.js';
@@ -29,7 +31,7 @@ import {validateDeck, type SavedDeck, type StoragePort} from './ui-data.js';
 import {button, element} from './ui-dom.js';
 import {PassHold} from './ui-gamepad.js';
 import {mountHandFocus} from './ui-hand-focus.js';
-import {mountMatchFeedback} from './ui-match-feedback.js';
+import {applyMovePreviewOverlay, createResultBanterBlock, isBanterEnabled, mountClassicBanter, mountMatchFeedback} from './ui-match-feedback.js';
 import type {CardVisual} from './visuals.js';
 import '../site/match-presentation.css';
 import '../site/tournament.css';
@@ -211,6 +213,7 @@ export function mountTournament(root: HTMLElement, hooks: TournamentHooks) {
   observeTable(table);
 
   const effects = mountMatchFeedback(table, board, {feedback: feedbackBar, hand});
+  const banter = mountClassicBanter(table);
   const botClient = new BotClient();
   const passHold = new PassHold();
   let passPointerId: number | null = null;
@@ -467,6 +470,20 @@ export function mountTournament(root: HTMLElement, hooks: TournamentHooks) {
     ghost.toggleAttribute('data-invalid', !valid);
   }
 
+  function applyLivePreview(move: Move | null) {
+    const preview = move && session && presentation.canPlay
+      ? simulateMovePreview(session.game, 0, move.handIndex, move.row, move.col)
+      : null;
+    applyMovePreviewOverlay({
+      board,
+      leftScores: scores[0],
+      rightScores: scores[1],
+      playerSide,
+      rivalSide,
+      preview,
+    });
+  }
+
   function renderBracketNode(entry: TournamentBracketEntry, exhibitionHistoricallyCleared: boolean): HTMLElement {
     const spec = TOURNAMENT_ROUNDS[entry.round - 1];
     const node = element('li', `tourney-node${entry.isExhibition ? ' tourney-node--exhibition' : ''}`);
@@ -645,11 +662,19 @@ export function mountTournament(root: HTMLElement, hooks: TournamentHooks) {
     resumeAudio();
     presentation.resume();
     renderStage();
+    const introBanter = getChallengerBanter(spec.opponentId, getLocale());
+    if (introBanter) {
+      banter.show(tournamentOpponentLabel(spec.opponentId, spec.opponentName), introBanter.intro);
+    } else {
+      banter.hide();
+    }
     (hand.querySelector<HTMLElement>('button:not(:disabled)') ?? title).focus({preventScroll: true});
   }
 
   function leave() {
     clearPassHold();
+    banter.hide();
+    applyLivePreview(null);
     if (vfxTimer !== null) { clearTimeout(vfxTimer); vfxTimer = null; }
     delete table.dataset.vfx;
     presentation.pause();
@@ -885,6 +910,7 @@ export function mountTournament(root: HTMLElement, hooks: TournamentHooks) {
     if (rivalFlight && revealed) rivalFlight.append(createCardView(revealed, hooks.visual(revealed.id), {variant: 'board'}));
 
     updateGhostPreview(picked, previewIndex, Boolean(pending));
+    applyLivePreview(pending);
     const browsingCard = view.hand[focusedHand] !== undefined ? byId.get(view.hand[focusedHand]) : picked;
     handFocus.update(browsingCard, picked, locked);
     const peeked = !picked && aimed !== null ? view.board[Math.floor(aimed / COLS)]?.[aimed % COLS]?.card ?? null : null;
@@ -940,6 +966,15 @@ export function mountTournament(root: HTMLElement, hooks: TournamentHooks) {
         children.push(element('p', 'tourney-banner tourney-banner--champion', `★ ${t('tournamentChampionBanner')}`));
       } else if (snap.status === 'eliminated') {
         children.push(element('p', 'tourney-banner tourney-banner--eliminated', t('tournamentEliminated')));
+      }
+      if (isBanterEnabled() && view.result.winner !== null) {
+        const postBanter = getChallengerBanter(spec.opponentId, getLocale());
+        if (postBanter) {
+          children.push(createResultBanterBlock(
+            tournamentOpponentLabel(spec.opponentId, spec.opponentName),
+            view.result.winner === 0 ? postBanter.playerWin : postBanter.playerLoss,
+          ));
+        }
       }
       children.push(laneTable(view.result.rows, view.result.awards));
       result.replaceChildren(...children);
@@ -1128,6 +1163,34 @@ export function mountTournament(root: HTMLElement, hooks: TournamentHooks) {
     }
   }
 
+  board.addEventListener('pointerover', event => {
+    if (!session || !presentation.canPlay) return;
+    const node = (event.target as HTMLElement | null)?.closest<HTMLElement>('[data-index]');
+    if (!node?.dataset.index) return;
+    const idx = Number(node.dataset.index);
+    const view = presentation.frame ?? publicMatch(session.game);
+    if (selected === null) {
+      updatePeek(view.board[Math.floor(idx / COLS)]?.[idx % COLS]?.card ?? null);
+    } else {
+      const picked = byId.get(view.hand[selected]);
+      const legal = playerMoves().filter(m => m.handIndex === selected);
+      const hoveredMove = legalTarget(legal, idx);
+      updateGhostPreview(picked, idx, Boolean(hoveredMove));
+      applyLivePreview(hoveredMove);
+    }
+  });
+  board.addEventListener('pointerleave', () => {
+    if (selected === null) {
+      updatePeek(null);
+    } else if (!pending) {
+      updateGhostPreview(undefined, null, false);
+      applyLivePreview(null);
+    } else if (session) {
+      const view = presentation.frame ?? publicMatch(session.game);
+      updateGhostPreview(byId.get(view.hand[selected]), pending.row * COLS + pending.col, true);
+      applyLivePreview(pending);
+    }
+  });
   root.addEventListener(TOURNAMENT_ACTION_EVENT, event => {
     handleAction((event as CustomEvent<SemanticAction>).detail);
   });

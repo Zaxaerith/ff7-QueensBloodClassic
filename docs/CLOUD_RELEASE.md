@@ -38,4 +38,4 @@ If validation fails, nothing is published. If an asset upload fails after a draf
 
 ## Current release notes
 
-The bilingual notes for this version are in [`docs/releases/v1.0.0.md`](releases/v1.0.0.md). They state that this is an unofficial FF7 fan project, players provide their own FF7 Original PC resources, all 145 Classic Art routes can be generated locally, and the Windows build has not had an independent clean-VM compatibility test. They also preserve the current rule and art limitations.
+The bilingual notes for this version are in [`docs/releases/v1.2.0.md`](releases/v1.2.0.md). They state that this is an unofficial FF7 fan project, players provide their own FF7 Original PC resources, all 145 Classic Art routes can be generated locally, and the Windows build has not had an independent clean-VM compatibility test. They also preserve the current rule and art limitations.

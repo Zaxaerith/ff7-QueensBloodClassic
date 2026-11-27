@@ -17,6 +17,7 @@ export interface Challenger {
   readonly regionId: ChallengerRegionId;
   readonly rewardCardId: number;
   readonly tier: 'beginner' | 'intermediate' | 'advanced';
+  readonly keeper?: boolean;
   readonly tactic: ({readonly key: 'neneTactic' | 'zoganTactic' | 'isabelleTactic'}
     | {readonly addedKey: AddedChallengerTactic}) & {readonly cards: readonly number[]};
   readonly challengeGroupId?: 'moore-twins';
@@ -73,7 +74,7 @@ export const challengers: readonly Challenger[] = [
     deck: [1, 1, 7, 8, 10, 11, 12, 13, 13, 24, 25, 25, 30, 30, 107],
   },
   {
-    id: 'cameron', name: 'Cameron', regionId: 'crows-nest', rewardCardId: 113, tier: 'advanced',
+    id: 'cameron', name: 'Cameron', regionId: 'crows-nest', rewardCardId: 113, tier: 'advanced', keeper: true,
     tactic: {addedKey: 'cameron', cards: [20, 113]},
     deck: [1, 1, 2, 2, 15, 15, 17, 17, 20, 20, 22, 22, 26, 26, 113],
   },
@@ -99,7 +100,7 @@ export const challengers: readonly Challenger[] = [
     deck: [1, 1, 7, 8, 20, 20, 30, 30, 35, 35, 39, 41, 41, 51, 51],
   },
   {
-    id: 'lidrehl', name: 'Lidrehl', regionId: 'corel', rewardCardId: 76, tier: 'advanced',
+    id: 'lidrehl', name: 'Lidrehl', regionId: 'corel', rewardCardId: 76, tier: 'advanced', keeper: true,
     tactic: {addedKey: 'lidrehl', cards: [76, 35, 48]},
     deck: [1, 1, 10, 10, 13, 13, 31, 31, 35, 35, 48, 48, 59, 76, 76],
   },
@@ -109,7 +110,7 @@ export const challengers: readonly Challenger[] = [
     deck: [1, 1, 6, 6, 10, 10, 26, 26, 27, 27, 40, 56, 56, 58, 58],
   },
   {
-    id: 'regina-rematch', name: 'Regina (Rematch)', regionId: 'gongaga', rewardCardId: 130, tier: 'advanced',
+    id: 'regina-rematch', name: 'Regina (Rematch)', regionId: 'gongaga', rewardCardId: 130, tier: 'advanced', keeper: true,
     tactic: {addedKey: 'reginaRematch', cards: [130, 129, 80]},
     deck: [1, 1, 13, 13, 25, 25, 33, 33, 52, 54, 78, 78, 80, 129, 130],
   },
@@ -124,9 +125,75 @@ export const challengers: readonly Challenger[] = [
     deck: [1, 1, 13, 13, 26, 26, 28, 28, 66, 66, 72, 72, 75, 75, 136],
   },
   {
-    id: 'vincent-gatekeeper', name: 'Vincent', regionId: 'nibel', rewardCardId: 94, tier: 'advanced',
+    id: 'vincent-gatekeeper', name: 'Vincent', regionId: 'nibel', rewardCardId: 94, tier: 'advanced', keeper: true,
     tactic: {addedKey: 'vincentGatekeeper', cards: [94, 142, 47]},
     deck: [1, 1, 35, 35, 37, 37, 40, 40, 47, 47, 51, 51, 94, 127, 142],
+  },
+  // Complete World Tour additions (Task Y2): remaining 13 Rebirth world opponents -> 33 total
+  {
+    id: 'rolf', name: 'Rolf', regionId: 'corel', rewardCardId: 40, tier: 'intermediate',
+    tactic: {addedKey: 'rolf', cards: [40, 8, 25]},
+    deck: [1, 1, 7, 7, 8, 8, 12, 12, 23, 23, 25, 25, 40, 40, 107],
+  },
+  {
+    id: 'navalan', name: 'Navalan', regionId: 'corel', rewardCardId: 73, tier: 'advanced', keeper: true,
+    tactic: {addedKey: 'navalan', cards: [73, 27, 46]},
+    deck: [1, 1, 20, 20, 26, 26, 27, 27, 45, 46, 46, 72, 73, 73, 115],
+  },
+  {
+    id: 'mary', name: 'Mary', regionId: 'corel', rewardCardId: 47, tier: 'intermediate',
+    tactic: {addedKey: 'mary', cards: [47, 43, 51]},
+    deck: [1, 1, 10, 10, 35, 35, 36, 36, 43, 43, 47, 47, 51, 51, 58],
+  },
+  {
+    id: 'pietro', name: 'Pietro', regionId: 'corel', rewardCardId: 45, tier: 'intermediate',
+    tactic: {addedKey: 'pietro', cards: [45, 46, 74]},
+    deck: [1, 1, 6, 6, 26, 26, 45, 45, 46, 46, 72, 72, 74, 74, 47],
+  },
+  {
+    id: 'dax', name: 'Dax', regionId: 'corel', rewardCardId: 43, tier: 'intermediate',
+    tactic: {addedKey: 'dax', cards: [43, 20, 42]},
+    deck: [1, 1, 7, 7, 8, 8, 19, 19, 20, 20, 42, 42, 43, 43, 29],
+  },
+  {
+    id: 'wize-3', name: 'Wize 3.0 Ver. 2.0', regionId: 'corel', rewardCardId: 56, tier: 'advanced', keeper: true,
+    tactic: {addedKey: 'wize3', cards: [56, 51, 35]},
+    deck: [1, 1, 10, 10, 35, 35, 40, 40, 51, 51, 56, 56, 69, 69, 98],
+  },
+  {
+    id: 'oscar', name: 'Oscar', regionId: 'gongaga', rewardCardId: 50, tier: 'intermediate',
+    tactic: {addedKey: 'oscar', cards: [50, 33, 24]},
+    deck: [1, 1, 8, 8, 13, 13, 24, 24, 31, 31, 33, 33, 50, 50, 81],
+  },
+  {
+    id: 'robin', name: 'Robin', regionId: 'cosmo-canyon', rewardCardId: 51, tier: 'intermediate',
+    tactic: {addedKey: 'robin', cards: [51, 57, 49]},
+    deck: [1, 1, 10, 10, 36, 36, 40, 40, 49, 49, 51, 51, 57, 57, 58],
+  },
+  {
+    id: 'kadina', name: "Ka'dina", regionId: 'cosmo-canyon', rewardCardId: 66, tier: 'advanced',
+    tactic: {addedKey: 'kadina', cards: [66, 28, 75]},
+    deck: [1, 1, 13, 13, 27, 27, 28, 28, 63, 63, 66, 66, 75, 75, 83],
+  },
+  {
+    id: 'riana', name: 'Riana', regionId: 'costa-del-sol', rewardCardId: 53, tier: 'intermediate',
+    tactic: {addedKey: 'riana', cards: [53, 78, 81]},
+    deck: [1, 1, 13, 13, 24, 24, 31, 31, 53, 53, 78, 78, 81, 81, 109],
+  },
+  {
+    id: 'dokaccha', name: 'Dokaccha', regionId: 'costa-del-sol', rewardCardId: 61, tier: 'advanced',
+    tactic: {addedKey: 'dokaccha', cards: [61, 59, 76]},
+    deck: [1, 1, 11, 11, 26, 26, 52, 54, 59, 59, 61, 61, 76, 76, 123],
+  },
+  {
+    id: 'maahir', name: 'Maahir', regionId: 'costa-del-sol', rewardCardId: 63, tier: 'advanced',
+    tactic: {addedKey: 'maahir', cards: [63, 64, 103]},
+    deck: [1, 1, 20, 20, 26, 26, 27, 27, 62, 62, 63, 63, 64, 64, 103],
+  },
+  {
+    id: 'dale', name: 'Dale', regionId: 'nibel', rewardCardId: 68, tier: 'advanced',
+    tactic: {addedKey: 'dale', cards: [68, 85, 70]},
+    deck: [1, 1, 17, 17, 27, 27, 68, 68, 69, 69, 70, 70, 83, 85, 85],
   },
 ];
 

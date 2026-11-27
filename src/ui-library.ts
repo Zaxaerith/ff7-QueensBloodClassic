@@ -4,11 +4,12 @@ import {displayName,termRecord} from './i18n/card-names.js';
 import {deckLabel,presetName} from './i18n/game-labels.js';
 import {byId,deckPresets} from './cards.js';
 import {createCardView,createCardDetails} from './card-view.js';
+import {decodeDeckCode,derivedTokensForCard,encodeDeckCode,parentCardsForToken} from './deck-code.js';
 import {getCardEvidence,evidenceDimensions} from './evidence.js';
 import type {CardVisual} from './visuals.js';
 import {addReason,validateDeck,matchesEntry,emptyFilter,tokenEntries,presetDeck,libraryRuleSummary,sortLibraryEntries,type LibraryEntry,type LibraryFilter,type LibrarySort,type DeckStore,type SavedDeck} from './ui-data.js';
 import {$,element,button,options,openDialog,closeDialog,notice,downloadJson} from './ui-dom.js';
-import {bindDeckGridKeys,browseCard,cardNumber,mountDeckInspector,renderDeckSlots} from './ui-deck-view.js';
+import {bindDeckGridKeys,browseCard,cardNumber,mountDeckInspector,renderDeckCurve,renderDeckSlots} from './ui-deck-view.js';
 import '../site/deck-editor.css';
 
 export interface LibraryHooks {
@@ -71,6 +72,42 @@ export function mountLibrary(hooks:LibraryHooks){
     const face=entry.card?createCardView(entry.card,hooks.visual(id)):unavailable(entry);
     const notes=element('div','card-notes');
     if(entry.card)notes.append(createCardDetails(entry.card));
+    const derivedIds=derivedTokensForCard(id);
+    if(derivedIds.length){
+      const box=element('section','card-related-box card-related-box--tokens');
+      box.append(element('h4','',t('relatedTokensHeading')));
+      const grid=element('div','card-related-grid');
+      for(const tokenId of derivedIds){
+        const tokenCard=byId.get(tokenId);
+        if(!tokenCard)continue;
+        const label=displayName(tokenId,tokenCard.name);
+        const item=button('',()=>showCard(tokenId),'card-related-item');
+        item.dataset.relatedCardId=String(tokenId);
+        item.setAttribute('aria-label',t('openRelatedCard',label));
+        item.append(
+          createCardView(tokenCard,hooks.visual(tokenId),{variant:'hand'}),
+          element('span','card-related-name',`${cardNumber(tokenId)} ${label}`),
+        );
+        grid.append(item);
+      }
+      if(grid.children.length){box.append(grid);notes.append(box);}
+    }
+    const parentIds=parentCardsForToken(id);
+    if(parentIds.length){
+      const box=element('section','card-related-box card-related-box--parents');
+      box.append(element('h4','',t('relatedParentsHeading')));
+      const row=element('div','card-related-parents');
+      for(const parentId of parentIds){
+        const parentCard=byId.get(parentId);
+        if(!parentCard)continue;
+        const label=displayName(parentId,parentCard.name);
+        const jump=button(`${cardNumber(parentId)} ${label}`,()=>showCard(parentId),'card-related-parent');
+        jump.dataset.relatedCardId=String(parentId);
+        jump.setAttribute('aria-label',t('openRelatedCard',label));
+        row.append(jump);
+      }
+      if(row.children.length){box.append(row);notes.append(box);}
+    }
     notes.append(element('p','',`${rarity(entry.rarity)} · ${entry.card?t("playableRulesCandidate"):t("notImplemented")}`));
     if(id<=145){
       const evidence=getCardEvidence(id);notes.append(element('p','muted',t("ruleEvidenceScope")));
@@ -190,6 +227,9 @@ export function mountLibrary(hooks:LibraryHooks){
     save.disabled = !!error || !!nameError;
     duplicate.disabled = draft.cards.length === 0;
     use.disabled = !!error;
+    const copyCode = $<HTMLButtonElement>('copyDeckCode');
+    copyCode.disabled = !!error;
+    copyCode.title = error ?? t('copyDeckCode');
     const incomplete = error && draft.cards.length < 15;
     $('deckValidation').textContent = incomplete ? t("cardsNeeded", 15 - draft.cards.length)
       : error ? t("invalidDeckReason", error) : t("validDeckUpToTwoCopiesPerStandard");
@@ -201,6 +241,7 @@ export function mountLibrary(hooks:LibraryHooks){
   }
   function refreshEditor() {
     refreshEditorStatus();
+    renderDeckCurve($('deckCurve'), draft.cards);
     const active = document.activeElement;
     const slot = active instanceof HTMLButtonElement && $('deckSlots').contains(active) ? active.dataset.slot : undefined;
     renderDeckSlots($('deckSlots'), draft.cards, hooks.visual, (index, activate) => focusEditor({source: 'slots', slot: index}, activate));
@@ -343,6 +384,7 @@ export function mountLibrary(hooks:LibraryHooks){
     menu.hidden = saved.length === 0;
     current.hidden = false;
     renderBank($('prepareDeckBank'),deck,hooks.choose);
+    renderDeckCurve($('homeDeckCurve'),deck.cards);
     if(problem&&starting)$('prepareDeckBank').querySelector<HTMLElement>('[aria-pressed=true]')?.focus({preventScroll:true});
     const host = $('homeDeckSlots');
     const active = document.activeElement;
@@ -444,6 +486,71 @@ export function mountLibrary(hooks:LibraryHooks){
       const data=hooks.decks(),next={...data,selectedId:data.selectedId===draft.id?null:data.selectedId,decks:data.decks.filter(d=>d.id!==draft.id)};
       if(hooks.save(next)){closeDialog();load(presetDeck());notice(t("deckDeletedAnyMatchInProgressStillUses"));}
     },'danger'));openDialog(t("deleteDeck"),content);
+  };
+  $('copyDeckCode').onclick=()=>{
+    const error=validateDeck(draft.cards);
+    if(error){notice(error);return;}
+    const code=encodeDeckCode(draft.cards);
+    const content=element('div','deck-code-dialog');
+    const hint=element('p','muted deck-code-hint',t('deckCodeManualCopy'));
+    const input=element('input','deck-code-input') as HTMLInputElement;
+    input.type='text';
+    input.readOnly=true;
+    input.value=code;
+    input.setAttribute('aria-label',t('deckShareCodeTitle'));
+    input.onclick=()=>input.select?.();
+    const tryCopy=()=>{
+      input.focus?.();
+      input.select?.();
+      try{
+        const clip=navigator?.clipboard?.writeText?.(code);
+        if(clip&&typeof clip.then==='function'){
+          void clip.then(()=>{hint.textContent=t('deckCodeCopied');}).catch(()=>{hint.textContent=t('deckCodeManualCopy');});
+        }
+      }catch{
+        hint.textContent=t('deckCodeManualCopy');
+      }
+    };
+    const actions=element('div','button-row deck-code-actions');
+    actions.append(button(t('copyDeckCode'),tryCopy,'primary'),button(t('close'),closeDialog));
+    content.append(hint,input,actions);
+    openDialog(t('deckShareCodeTitle'),content,{initial:input,returnTo:$('copyDeckCode')});
+    tryCopy();
+  };
+  $('importDeckCode').onclick=()=>{
+    const content=element('div','deck-code-dialog');
+    const prompt=element('p','muted',t('deckCodeImportPrompt'));
+    const input=element('input','deck-code-input') as HTMLInputElement;
+    input.id='deckCodeImportInput';
+    input.type='text';
+    input.placeholder=t('deckCodePlaceholder');
+    input.autocomplete='off';
+    input.spellcheck=false;
+    input.setAttribute('aria-label',t('importDeckCode'));
+    const errorEl=element('p','warning deck-code-error');
+    errorEl.setAttribute('role','alert');
+    errorEl.hidden=true;
+    const apply=()=>{
+      const decoded=decodeDeckCode(input.value);
+      if(!decoded.ok){
+        errorEl.textContent=t('deckCodeInvalidPrefix',decoded.reason);
+        errorEl.hidden=false;
+        return;
+      }
+      errorEl.hidden=true;
+      draft={...draft,cards:[...decoded.cards]};
+      dirty=true;
+      deckFocus={source:'slots',slot:0};
+      closeDialog();
+      refreshEditor();
+      updateLibraryAvailability();
+      notice(t('deckCodeImported'));
+    };
+    input.onkeydown=(event:KeyboardEvent)=>{if(event.key==='Enter'){event.preventDefault();apply();}};
+    const actions=element('div','button-row deck-code-actions');
+    actions.append(button(t('deckCodeApply'),apply,'primary'),button(t('cancel'),closeDialog));
+    content.append(prompt,input,errorEl,actions);
+    openDialog(t('importDeckCode'),content,{initial:input,returnTo:$('importDeckCode')});
   };
   $('exportDecks').onclick=()=>downloadJson(hooks.decks(),'queens-blood-decks-v1.json');
   return {showCard, showDecks, showHomeDeck, showCollection: refreshCollection, load, localize,

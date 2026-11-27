@@ -837,3 +837,240 @@
   animation: none !important;
   opacity: 0 !important;
 }
+
+/* ------------------------------------------------------------------ */
+/* 11. Live Move Preview Deltas, Destroy Warnings & FF7 Banter Overlay */
+/* ------------------------------------------------------------------ */
+#app .frame-table .lane-score {
+  position: relative;
+  overflow: visible;
+}
+:is(#view-game, #view-gold-saucer, #view-tournament).view .frame-side {
+  position: relative;
+  overflow: visible;
+}
+
+/* Compact zero-jitter lane delta badge beside .lane-score */
+#app .preview-lane-delta {
+  position: absolute;
+  top: -7px;
+  right: -7px;
+  z-index: 8;
+  min-width: 1.75em;
+  padding: 1px 4px;
+  border: 1px solid #8cf5df;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #0d4b4a 0%, #06252c 100%);
+  box-shadow: 0 1px 0 #020514, 0 0 8px rgba(78, 242, 210, .48);
+  color: #b8fff0;
+  font-family: "Consolas", "Cascadia Mono", ui-monospace, monospace;
+  font-size: clamp(.66rem, 1cqi, .82rem);
+  font-weight: 800;
+  line-height: 1.15;
+  text-align: center;
+  text-shadow: 1px 1px 0 #020514;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+#app .preview-lane-delta[data-side="1"] {
+  right: auto;
+  left: -7px;
+}
+#app .preview-lane-delta.negative {
+  border-color: #ff98ad;
+  background: linear-gradient(180deg, #751830 0%, #3d0919 100%);
+  box-shadow: 0 1px 0 #020514, 0 0 8px rgba(255, 84, 114, .48);
+  color: #ffd9e1;
+}
+
+/* Subtle net score delta beside top total score medallion (zero shift) */
+#app .preview-score-delta {
+  position: absolute;
+  top: -8px;
+  right: 4px;
+  z-index: 8;
+  padding: 1px 6px;
+  border: 1px solid var(--gold, #f8dc82);
+  border-radius: 2px;
+  background: linear-gradient(180deg, #104248 0%, #071e2d 100%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .75);
+  color: #8cf5df;
+  font-family: "Consolas", "Cascadia Mono", ui-monospace, monospace;
+  font-size: .78rem;
+  font-weight: 800;
+  line-height: 1.2;
+  text-shadow: 1px 1px 0 #020514;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+#app .frame-side--rival .preview-score-delta {
+  right: auto;
+  left: 4px;
+}
+#app .preview-score-delta.negative {
+  border-color: #ff8aa0;
+  background: linear-gradient(180deg, #6e152d 0%, #380818 100%);
+  color: #ffd1dc;
+}
+#app .preview-score-delta--inline {
+  position: static;
+  display: inline-block;
+  margin-inline-start: 8px;
+  vertical-align: middle;
+}
+
+/* Destroyed cell crimson shatter crosshair + ✕ badge */
+@keyframes qbc-preview-destroy-pulse {
+  0%, 100% { opacity: .88; }
+  50% { opacity: 1; }
+}
+#app .frame-table .tile.preview-destroy > .preview-destroy-fx {
+  position: absolute;
+  inset: 2px;
+  z-index: 6;
+  pointer-events: none;
+  border: 2px solid #ff5472;
+  border-radius: 2px;
+  background:
+    linear-gradient(45deg, transparent 46%, rgba(255, 84, 114, .52) 48% 52%, transparent 54%),
+    linear-gradient(-45deg, transparent 46%, rgba(255, 84, 114, .52) 48% 52%, transparent 54%),
+    rgba(130, 14, 42, .22);
+  box-shadow: inset 0 0 12px rgba(255, 64, 98, .55), 0 0 8px rgba(255, 64, 98, .48);
+  animation: qbc-preview-destroy-pulse 720ms ease-in-out infinite;
+}
+#app .frame-table .tile.preview-destroy .preview-destroy-x {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: clamp(16px, 24%, 22px);
+  height: clamp(16px, 24%, 22px);
+  display: grid;
+  place-items: center;
+  border: 1px solid #ffd4dc;
+  border-radius: 2px;
+  background: #a61734;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .85);
+  color: #ffffff;
+  font-size: clamp(10px, 1.3cqi, 13px);
+  font-weight: 900;
+  line-height: 1;
+}
+
+/* Changed existing cell mini delta badge */
+#app .frame-table .tile > .preview-cell-delta {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  z-index: 6;
+  padding: 1px 4px;
+  border: 1px solid #8cf5df;
+  border-radius: 2px;
+  background: rgba(6, 36, 42, .92);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .85);
+  color: #5effb8;
+  font-family: "Consolas", "Cascadia Mono", ui-monospace, monospace;
+  font-size: clamp(10px, 1.25cqi, 13px);
+  font-weight: 900;
+  line-height: 1.1;
+  text-shadow: 1px 1px 0 #000;
+  pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+#app .frame-table .tile > .preview-cell-delta.negative {
+  border-color: #ff98ad;
+  background: rgba(88, 12, 32, .92);
+  color: #ff6b84;
+}
+
+/* 1997 FF7 OG Classic Blue Dialog Banter Bar (zero layout shift overlay) */
+@keyframes qbc-banter-in {
+  from { opacity: 0; transform: translate(-50%, -8px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+#app .classic-banter {
+  position: absolute;
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9;
+  width: min(calc(100% - 16px), 36rem);
+  display: grid;
+  gap: 2px;
+  padding: 7px 12px;
+  text-align: start;
+  cursor: pointer;
+  border: 2px solid var(--silver, #dfe8fa);
+  border-radius: 4px;
+  background: linear-gradient(155deg, #1d42a6f2 0%, #0f2568f5 52%, #06103ef7 100%);
+  box-shadow:
+    inset 0 0 0 2px #526696,
+    inset 1px 1px 0 rgba(255, 255, 255, .24),
+    0 0 0 2px #050a22,
+    0 8px 22px rgba(0, 0, 0, .78);
+  color: #f6f9ff;
+  text-shadow: 1px 1px 0 #020514;
+  transition: opacity 380ms ease;
+  animation: qbc-banter-in 180ms ease-out both;
+}
+#app .classic-banter.is-fading { opacity: 0; }
+#app .classic-banter-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+#app .classic-banter-speaker {
+  color: var(--gold, #f8dc82);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+#app .classic-banter-skip {
+  color: #9fc0f5;
+  font-size: .7rem;
+  letter-spacing: .04em;
+}
+#app .classic-banter-text {
+  font-size: .88rem;
+  line-height: 1.38;
+  color: #ffffff;
+}
+
+/* Post-match FF7 OG blue quote block inside Result dialog / settlement sheet */
+#app .classic-banter-result,
+#infoDialog .classic-banter-result {
+  margin: .55rem 0 .7rem;
+  padding: 8px 12px;
+  border: 2px solid var(--silver, #dfe8fa);
+  border-radius: 3px;
+  background: linear-gradient(155deg, rgba(29, 66, 166, .9) 0%, rgba(12, 30, 88, .94) 55%, rgba(6, 16, 56, .96) 100%);
+  box-shadow: inset 0 0 0 1px #526696, 0 4px 12px rgba(0, 0, 0, .55);
+  text-align: start;
+}
+#app .classic-banter-result .classic-banter-speaker,
+#infoDialog .classic-banter-result .classic-banter-speaker {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--gold, #f8dc82);
+  font-size: .8rem;
+  letter-spacing: .06em;
+  text-shadow: 1px 1px 0 #020514;
+}
+#app .classic-banter-result .classic-banter-text,
+#infoDialog .classic-banter-result .classic-banter-text {
+  margin: 0;
+  color: #f4f7ff;
+  font-size: .9rem;
+  line-height: 1.45;
+  text-shadow: 1px 1px 0 #020514;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #app .frame-table .tile.preview-destroy > .preview-destroy-fx,
+  #app .classic-banter { animation: none !important; transition: none !important; }
+}
+:root[data-reduce-motion="true"] #app .frame-table .tile.preview-destroy > .preview-destroy-fx,
+:root[data-reduce-motion="true"] #app .classic-banter {
+  animation: none !important;
+  transition: none !important;
+}

@@ -118,13 +118,128 @@
 }
 @keyframes match-card-enter{from{opacity:.58;transform:translateY(-5%) scale(.96)}to{opacity:1;transform:none}}
 @keyframes match-note-enter{from{transform:translateY(5px)}to{transform:none}}
-.match-score-row{position:absolute;left:0;right:0;top:calc(var(--effect-row) * (var(--cell-height) + var(--cell-gap)) + var(--cell-height) * .35);min-height:40px;display:grid;text-align:center;padding:5px;background:linear-gradient(90deg,#0b174ddd,#152b65f5,#0b174ddd);border-block:1px solid #a8badb;color:#edf2ff;font-size:13px}
+.match-score-row{position:absolute;left:0;right:0;top:calc(var(--effect-row) * (var(--cell-height) + var(--cell-gap)) + var(--cell-height) * .35);min-height:40px;display:grid;text-align:center;padding:5px;background:linear-gradient(90deg,#0b174ddd,#152b65f5,#0b174ddd);border-block:1px solid #a8badb;color:#edf2ff;font-size:13px;overflow:hidden}
 .match-score-row.active{border-color:#f5d47b}.match-score-row span{color:#f5d47b}
+.match-score-row.scoring-sweep::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:linear-gradient(108deg,transparent 0%,rgba(248,220,130,.08) 28%,rgba(140,255,232,.72) 50%,rgba(248,220,130,.58) 58%,transparent 80%);
+  transform:translateX(-110%);
+  animation:qbc-scoring-sweep 420ms cubic-bezier(.16,.84,.32,1) both;
+}
+.match-score-row.scoring-sweep[data-winner="1"]::after{
+  background:linear-gradient(108deg,transparent 0%,rgba(255,100,126,.12) 28%,rgba(255,176,192,.76) 50%,rgba(248,220,130,.52) 58%,transparent 80%);
+}
+@keyframes qbc-scoring-sweep{
+  from{transform:translateX(-110%);opacity:.95}
+  to{transform:translateX(115%);opacity:0}
+}
 .match-score-total{position:absolute;top:0;left:0;right:0;padding:5px;background:#0b174df5;border:1px solid #f5d47b;text-align:center;color:#ffe3a5;font-weight:bold;font-size:15px}
+
+/* 1997 FF7 Classic Bouncing Floating Battle Numbers */
+.ff7-battle-num{
+  position:absolute;
+  left:calc(var(--effect-col) * (var(--cell-width) + var(--cell-gap)));
+  top:calc(var(--effect-row) * (var(--cell-height) + var(--cell-gap)));
+  width:var(--cell-width);
+  height:var(--cell-height);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  z-index:7;
+}
+.ff7-battle-num .ff7-battle-digits{
+  display:inline-block;
+  padding:0 2px;
+  border:0;
+  background:none;
+  font-family:"Consolas","Cascadia Mono","Courier New",ui-monospace,monospace;
+  font-weight:900;
+  font-size:clamp(1.25rem,3.1cqi,2.25rem);
+  line-height:1;
+  letter-spacing:-.02em;
+  color:#5effb8;
+  text-shadow:
+    -2px -2px 0 #000,
+     2px -2px 0 #000,
+    -2px  2px 0 #000,
+     2px  2px 0 #000,
+     0px -2px 0 #000,
+     0px  2px 0 #000,
+    -2px  0px 0 #000,
+     2px  0px 0 #000,
+     0px  4px 8px rgba(0,0,0,.85);
+}
+.ff7-battle-num.negative .ff7-battle-digits{color:#ff6b84}
+.match-effects[data-motion=true] .ff7-battle-num .ff7-battle-digits{
+  animation:qbc-ff7-bounce 420ms cubic-bezier(.22,1.38,.36,1) both;
+}
+@keyframes qbc-ff7-bounce{
+  0%{opacity:0;transform:translateY(14px) scale(.72)}
+  34%{opacity:1;transform:translateY(-14px) scale(1.16)}
+  58%{opacity:1;transform:translateY(2px) scale(.96)}
+  78%{opacity:1;transform:translateY(-5px) scale(1.03)}
+  100%{opacity:1;transform:translateY(0) scale(1)}
+}
+
+/* 320ms PS1 High-Contrast White-Crimson Pixel Shatter VFX */
+.match-shatter{
+  position:absolute;
+  left:calc(var(--effect-col) * (var(--cell-width) + var(--cell-gap)));
+  top:calc(var(--effect-row) * (var(--cell-height) + var(--cell-gap)));
+  width:var(--cell-width);
+  height:var(--cell-height);
+  pointer-events:none;
+  z-index:8;
+  overflow:visible;
+}
+.match-shatter .shatter-flash{
+  position:absolute;
+  inset:6%;
+  border-radius:2px;
+  background:radial-gradient(circle,#ffffff 0%,#ff8aa0 46%,rgba(220,30,68,0) 76%);
+  animation:qbc-shatter-flash 320ms steps(5,end) both;
+}
+.match-shatter .shatter-shard{
+  position:absolute;
+  top:50%;
+  left:50%;
+  width:clamp(7px,14%,14px);
+  height:clamp(7px,14%,14px);
+  margin:-5px 0 0 -5px;
+  background:#ffffff;
+  border:1px solid #ff4264;
+  box-shadow:0 0 6px #ff4264,1px 1px 0 #000;
+  animation:qbc-shatter-shard 320ms cubic-bezier(.18,.82,.26,1) both;
+}
+.match-shatter .shatter-shard--0{--sx:-38px;--sy:-34px;--sr:-40deg}
+.match-shatter .shatter-shard--1{--sx:36px;--sy:-30px;--sr:52deg;background:#ff8aa0}
+.match-shatter .shatter-shard--2{--sx:-44px;--sy:8px;--sr:-75deg;background:#ffd4dc}
+.match-shatter .shatter-shard--3{--sx:44px;--sy:12px;--sr:68deg}
+.match-shatter .shatter-shard--4{--sx:-22px;--sy:38px;--sr:-28deg;background:#ff5472}
+.match-shatter .shatter-shard--5{--sx:26px;--sy:36px;--sr:44deg;background:#fff4f6}
+@keyframes qbc-shatter-flash{
+  0%{opacity:1;transform:scale(.62)}
+  40%{opacity:.92;transform:scale(1.12)}
+  100%{opacity:0;transform:scale(1.26)}
+}
+@keyframes qbc-shatter-shard{
+  0%{opacity:1;transform:translate(0,0) scale(1) rotate(0deg)}
+  65%{opacity:.95}
+  100%{opacity:0;transform:translate(var(--sx),var(--sy)) scale(.35) rotate(var(--sr))}
+}
+
 @media(max-width:760px){.match-event-target span,.match-net-change span{font-size:10px;padding:2px}.match-net-change.pawns span{font-size:9px}.match-score-row{font-size:11px;min-height:34px;padding:2px}.match-score-total{font-size:12px}#view-game .battle-feedback .match-action-notice{font-size:11px}}
 @media(prefers-reduced-motion:reduce){
-  .match-drop-target,.match-landing,.match-turn-banner,.match-rival-draw{display:none}
+  .match-drop-target,.match-landing,.match-turn-banner,.match-rival-draw,.match-shatter{display:none}
+  .ff7-battle-num .ff7-battle-digits,.match-score-row.scoring-sweep::after{animation:none!important}
+  .match-score-row.scoring-sweep::after{display:none}
   #view-game .battle-window #hand .hand-card{visibility:visible!important}
 }
-:root[data-reduce-motion=true] :is(.match-drop-target,.match-landing,.match-turn-banner,.match-rival-draw){display:none}
+:root[data-reduce-motion=true] :is(.match-drop-target,.match-landing,.match-turn-banner,.match-rival-draw,.match-shatter){display:none}
+:root[data-reduce-motion=true] .ff7-battle-num .ff7-battle-digits{animation:none!important}
+:root[data-reduce-motion=true] .match-score-row.scoring-sweep::after{display:none;animation:none!important}
 :root[data-reduce-motion=true] #view-game .battle-window #hand .hand-card{visibility:visible!important}

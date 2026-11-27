@@ -30,7 +30,10 @@ test('storage failure preserves the previous payload, while explicit recovery wr
 });
 test('settings default safely; stored summaries contain neither hands nor Game state',()=>{
   expect(readConfig('{')).toEqual(defaultConfig);expect(readConfig('{"version":9}')).toEqual(defaultConfig);
-  const setting={version:1 as const,density:'compact' as const,textSize:'large' as const,reduceMotion:true};expect(readConfig(JSON.stringify(setting))).toEqual(setting);
+  const legacy={version:1 as const,density:'compact' as const,textSize:'large' as const,reduceMotion:true};
+  expect(readConfig(JSON.stringify(legacy))).toEqual({...legacy,classicBanter:true,crtFilter:false});
+  const setting={...legacy,classicBanter:false,crtFilter:true};
+  expect(readConfig(JSON.stringify(setting))).toEqual(setting);
   const record={id:'x',date:'2026-10-31T00:00:00Z',deckName:'经典',difficulty:'normal',seed:701,scores:[10,2]};
   expect(readRecords(JSON.stringify({version:1,records:[record]}))).toEqual([record]);expect(readRecords('{')).toEqual([]);
   expect(readRecords(JSON.stringify({version:1,records:[{...record,game:{hands:[[145],[]]}}]}))[0]).not.toHaveProperty('game');

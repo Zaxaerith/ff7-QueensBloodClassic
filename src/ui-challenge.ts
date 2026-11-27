@@ -1,7 +1,7 @@
 import {bossChallengers,findBossChallenger,type BossChallenger} from './boss-challengers.js';
 import {byId} from './cards.js';
 import {createCardView} from './card-view.js';
-import {challengers,findChallenger,type Challenger} from './challengers.js';
+import {challengers,findChallenger,type Challenger,type ChallengerRegionId} from './challengers.js';
 import {bossProfile,difficultyName,opponentName,opponentProfile,opponentRegionName} from './i18n/game-labels.js';
 import {getLocale,t} from './i18n/index.js';
 import type {PlayerProgress} from './progress.js';
@@ -10,6 +10,12 @@ import {$,button,element} from './ui-dom.js';
 import type {CardVisual} from './visuals.js';
 
 export type ChallengeOpponent = Challenger | BossChallenger;
+type RegionFilter = 'all' | ChallengerRegionId | 'boss';
+
+const REGION_ORDER: readonly ChallengerRegionId[] = [
+  'kalm', 'under-junon', 'crows-nest', 'shinra-8',
+  'costa-del-sol', 'corel', 'gongaga', 'cosmo-canyon', 'nibel',
+];
 
 const rewardLabel={
   'zh-CN':'关联卡','zh-TW':'關聯卡',en:'Associated card',ja:'関連カード',ko:'관련 카드',
@@ -25,6 +31,7 @@ export function mountChallenge(
 ) {
   const roster=$('opponentRoster'), feature=$('challengeFeature');
   let id:string=challengers[0].id;
+  let activeFilter:RegionFilter='all';
   const resolveOpponent=(key:string):ChallengeOpponent|undefined=>findChallenger(key)??findBossChallenger(key);
 
   function select(next:string) {
@@ -41,13 +48,24 @@ export function mountChallenge(
     $('prepOpponentRegion').textContent=[region,tier].filter(Boolean).join(' · ');
     $('opponentInfo').textContent=description;
     roster.querySelectorAll<HTMLButtonElement>('button').forEach(node=>{
-      node.setAttribute('aria-current',String(node.dataset.opponent===id));
+      if(node.dataset.opponent!==undefined){
+        node.setAttribute('aria-current',String(node.dataset.opponent===id));
+      }
     });
-    feature.dataset.challengeTier=boss?'boss':'';
+    feature.dataset.challengeTier=boss?'boss':npc?.keeper?'keeper':'';
     const copy=element('div','challenge-copy');
     if(region)copy.append(element('p','challenge-region',region));
     copy.append(element('h3','challenge-name',name));
-    if(tier)copy.append(element('p',boss?'challenge-tier challenge-tier--boss':'challenge-tier',tier));
+    if(tier||npc?.keeper){
+      const badges=element('div','challenge-badges');
+      if(tier)badges.append(element('p',boss?'challenge-tier challenge-tier--boss':'challenge-tier',tier));
+      if(npc?.keeper){
+        const keeperBadge=element('span','challenge-keeper-badge',`◆ ${t('keeperOfCruorBadge')}`);
+        keeperBadge.dataset.keeper='true';
+        badges.append(keeperBadge);
+      }
+      copy.append(badges);
+    }
     const record=id?getProgress?.().challengers[id]:undefined;
     if(record&&record.wins>0){
       const honor=element('div','honor-badge-row challenge-honor');
@@ -81,10 +99,16 @@ export function mountChallenge(
 
   function refresh() {
     const progress=getProgress?.();
+    const isDefeated=(opponentId:string)=>(progress?.challengers[opponentId]?.wins??0)>0;
+
     function option(entry?:ChallengeOpponent,extraClass='') {
       const key=entry?.id??'',label=entry?opponentName(entry.id,entry.name):t('mirrorPractice');
       const node=button(label,()=>{playSfx?.('confirm');select(key);prepare();},extraClass?`challenge-option ${extraClass}`:'challenge-option');
       node.dataset.opponent=key;
+      if(entry&&'keeper' in entry&&entry.keeper){
+        node.dataset.keeper='true';
+        node.title=t('keeperOfCruorBadge');
+      }
       const record=key?progress?.challengers[key]:undefined;
       if(record&&record.wins>0){
         node.dataset.cleared='true';
@@ -93,18 +117,81 @@ export function mountChallenge(
       node.onfocus=()=>{if(key!==id){playSfx?.('cursor');select(key);}};
       return node;
     }
-    const regions=new Map<Challenger['regionId'],Challenger[]>();
+
+    const regions=new Map<ChallengerRegionId,Challenger[]>();
+    for(const regionId of REGION_ORDER)regions.set(regionId,[]);
     for(const npc of challengers){
       const group=regions.get(npc.regionId)??[];
-      group.push(npc);regions.set(npc.regionId,group);
+      group.push(npc);
+      regions.set(npc.regionId,group);
     }
-    const bossGroup=element('section','challenge-group challenge-group--boss');
-    bossGroup.append(element('h3','',t('bossChallengeSection')),...bossChallengers.map(boss=>option(boss,'challenge-option--boss')));
-    roster.replaceChildren(...Array.from(regions,([region,entries])=>{
-      const group=element('section','challenge-group'),heading=element('h3','',opponentRegionName(region));
+
+    const totalNamed=challengers.length+bossChallengers.length;
+    const totalDefeated=challengers.filter(npc=>isDefeated(npc.id)).length+bossChallengers.filter(boss=>isDefeated(boss.id)).length;
+    const bossDefeated=bossChallengers.filter(boss=>isDefeated(boss.id)).length;
+
+    // Horizontal FF7 Classic region filter pill bar (no data-opponent attribute on tabs).
+    const tabBar=element('div','challenge-region-tabs');
+    tabBar.setAttribute('role','tablist');
+    tabBar.setAttribute('aria-label',t('opponent'));
+
+    const addTab=(filterKey:RegionFilter,label:string,defeated:number,total:number,extraClass='')=>{
+      const active=activeFilter===filterKey;
+      const tab=button(`${label} (${defeated}/${total})`,()=>{
+        if(activeFilter===filterKey)return;
+        activeFilter=filterKey;
+        playSfx?.('cursor');
+        if(filterKey==='boss'){
+          if(!findBossChallenger(id))id=bossChallengers[0].id;
+        }else if(filterKey!=='all'){
+          const list=regions.get(filterKey)??[];
+          if(list.length&&!list.some(npc=>npc.id===id))id=list[0].id;
+        }
+        refresh();
+      },`challenge-region-tab${active?' is-active':''}${extraClass?' '+extraClass:''}`);
+      tab.setAttribute('role','tab');
+      tab.setAttribute('aria-selected',String(active));
+      tab.dataset.regionFilter=filterKey;
+      tabBar.append(tab);
+    };
+
+    addTab('all',t('challengeFilterAll'),totalDefeated,totalNamed);
+    for(const regionId of REGION_ORDER){
+      const entries=regions.get(regionId)??[];
+      if(!entries.length)continue;
+      const cleared=entries.filter(npc=>isDefeated(npc.id)).length;
+      addTab(regionId,opponentRegionName(regionId),cleared,entries.length);
+    }
+    addTab('boss',t('bossChallengeSection'),bossDefeated,bossChallengers.length,'challenge-region-tab--boss');
+
+    const visibleGroups:HTMLElement[]=[tabBar];
+    for(const regionId of REGION_ORDER){
+      if(activeFilter!=='all'&&activeFilter!==regionId)continue;
+      const entries=regions.get(regionId)??[];
+      if(!entries.length)continue;
+      const cleared=entries.filter(npc=>isDefeated(npc.id)).length;
+      const group=element('section','challenge-group');
+      group.dataset.region=regionId;
+      const heading=element('h3','',`${opponentRegionName(regionId)} (${cleared}/${entries.length})`);
       group.append(heading,...entries.map(npc=>option(npc)));
-      return group;
-    }),bossGroup,option());
+      visibleGroups.push(group);
+    }
+
+    if(activeFilter==='all'||activeFilter==='boss'){
+      const bossGroup=element('section','challenge-group challenge-group--boss');
+      bossGroup.dataset.region='boss';
+      bossGroup.append(
+        element('h3','',`${t('bossChallengeSection')} (${bossDefeated}/${bossChallengers.length})`),
+        ...bossChallengers.map(boss=>option(boss,'challenge-option--boss')),
+      );
+      visibleGroups.push(bossGroup);
+    }
+
+    if(activeFilter==='all'){
+      visibleGroups.push(option());
+    }
+
+    roster.replaceChildren(...visibleGroups);
     select(id);
   }
 

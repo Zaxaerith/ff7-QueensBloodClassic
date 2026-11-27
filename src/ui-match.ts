@@ -2,9 +2,11 @@ import {getLocale,t} from './i18n/index.js';
 import {displayName} from './i18n/card-names.js';
 import {findBossChallenger} from './boss-challengers.js';
 import {byId,type Card} from './cards.js';
+import {getChallengerBanter} from './challenger-banter.js';
 import {findChallenger} from './challengers.js';
 import {difficultyName, opponentName} from './i18n/game-labels.js';
 import {mulligan,legalMoves,play,pass,previewInfluence,previewEffects,exportReplay,replayRulesVersion,LEGACY_RULES_VERSION,type Game,type Move,type RuleEvent,type PlacedCard} from './engine.js';
+import {simulateMovePreview} from './move-preview.js';
 import {botOptionsForMatch,observeGame} from './bot.js';
 import {BotClient} from './bot-client.js';
 import {startMatch,resultMarkup,rulesLabel,type MatchSettings} from './match-flow.js';
@@ -17,7 +19,7 @@ import {saveMatch,type SavedMatch,type restoreMatch} from './match-archive.js';
 import {MatchPresentation,publicMatch,presentationEventLabel} from './match-presentation.js';
 import {batchLegendaryVfx,effectText} from './match-effects.js';
 import {mountHandFocus} from './ui-hand-focus.js';
-import {mountMatchFeedback} from './ui-match-feedback.js';
+import {applyMovePreviewOverlay,createResultBanterBlock,isBanterEnabled,mountClassicBanter,mountMatchFeedback} from './ui-match-feedback.js';
 import {mountMatchInput} from './input/match-input.js';
 import {gridStep,legalTarget} from './input/match-cursor.js';
 import type {MatchControl} from './input/input-manager.js';
@@ -86,6 +88,9 @@ export function mountMatch(hooks:MatchHooks){
   const table=$('board').parentElement!,peek=element('aside','board-peek');peek.hidden=true;peek.id='boardPeek';peek.setAttribute('role','tooltip');table.parentElement!.append(peek);
   const handFocus=mountHandFocus(document.querySelector<HTMLElement>('#view-game .hand-area')!,hooks.showCard);
   const effects=mountMatchFeedback(table,$('board'));
+  const banter=mountClassicBanter(table);
+  const playerSideEl=$('score0').parentElement;
+  const rivalSideEl=$('score1').parentElement;
   const aimLayer=element('div','match-aim-layer'),ghost=element('div','match-player-preview');
   aimLayer.setAttribute('aria-hidden','true');aimLayer.append(ghost);table.append(aimLayer);ghost.hidden=true;
   let ghostCard:Card|undefined,ghostLocale=getLocale();
@@ -181,6 +186,16 @@ export function mountMatch(hooks:MatchHooks){
     const pawn=new Set(card&&r!==undefined&&c!==undefined?previewInfluence(card,r,c,0).map(p=>p.join('-')):[]);
     const effect=new Set(card&&r!==undefined&&c!==undefined?previewEffects(card,r,c,0).map(p=>p.join('-')):[]);
     $('board').querySelectorAll<HTMLElement>('.tile').forEach(node=>{node.classList.toggle('preview-pawn',pawn.has(node.dataset.cell!));node.classList.toggle('preview-effect',effect.has(node.dataset.cell!));});
+    const movePreview=card&&valid&&game&&presentation.canPlay&&selected!==null&&r!==undefined&&c!==undefined
+      ?simulateMovePreview(game,0,selected,r,c):null;
+    applyMovePreviewOverlay({
+      board:$('board'),
+      leftScores:$('leftScores'),
+      rightScores:$('rightScores'),
+      playerSide:playerSideEl,
+      rivalSide:rivalSideEl,
+      preview:movePreview,
+    });
     ghost.hidden=!card||index===null;
     if(!card||index===null){ghost.replaceChildren();ghostCard=undefined;return;}
     if(card!==ghostCard||ghostLocale!==getLocale()){
@@ -225,6 +240,14 @@ export function mountMatch(hooks:MatchHooks){
     const winner=(presentation.frame??publicMatch(game)).result.winner;
     content.dataset.outcome=winner===null?'draw':winner===0?'win':'loss';
     content.innerHTML=resultMarkup(game);
+    const oppId=activeSettings.opponent?.npcId;
+    if(oppId&&winner!==null&&isBanterEnabled()){
+      const postBanter=getChallengerBanter(oppId,getLocale());
+      if(postBanter){
+        const oppLabel=opponentName(oppId,(findChallenger(oppId)??findBossChallenger(oppId))?.name);
+        content.append(createResultBanterBlock(oppLabel,winner===0?postBanter.playerWin:postBanter.playerLoss));
+      }
+    }
     const failure=element('p','warning');failure.setAttribute('role','alert');
     const actions=element('div','frame-result-actions');
     const rematch=button(t("rematchSameSettings"),()=>{
@@ -342,7 +365,7 @@ export function mountMatch(hooks:MatchHooks){
     $('feedback').textContent=feedback;$('feedback').title=feedback;
     warning.textContent=presentation.issue||saveIssue;warning.hidden=!warning.textContent;
   }
-  function pause(){presentation.pause();target=null;selected=null;focusedCard=null;inspect(null);}
+  function pause(){banter.hide();presentation.pause();target=null;selected=null;focusedCard=null;inspect(null);}
   function start(settings:MatchSettings,name:string):string|null {
     const next=startMatch(settings),id=crypto.randomUUID();
     // A successful write replaces the old slot in one step. On failure the
@@ -355,6 +378,14 @@ export function mountMatch(hooks:MatchHooks){
     matchId=id;saveIssue=error??'';defaultBackground(settings.opponent?.npcId);selected=null;focusedCard=0;target=null;lastBoard=null;selectedMulligan.clear();
     lastMessage=boss?`${t("bossBattleBanner")} · ${opponentName(boss.id,boss.name)} · ${t("newGameStartingPlayer", name)}`:t("newGameStartingPlayer", name);
     resumeAudio();presentation.resume();render();
+    const oppId=settings.opponent?.npcId;
+    const introBanter=oppId?getChallengerBanter(oppId,getLocale()):null;
+    if(oppId&&introBanter){
+      const oppLabel=opponentName(oppId,(findChallenger(oppId)??boss)?.name);
+      banter.show(oppLabel,introBanter.intro);
+    }else{
+      banter.hide();
+    }
     $('hand').querySelectorAll<HTMLElement>('.hand-card').forEach((node,index)=>{
       node.style.setProperty('--deal-index',String(index));
       node.classList.add('frame-initial-deal');

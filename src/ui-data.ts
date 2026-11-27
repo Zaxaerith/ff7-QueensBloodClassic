@@ -11,7 +11,15 @@ export const STORAGE={decks:'qbclassic.decks.v1',config:'qbclassic.config.v1',re
 export interface StoragePort {getItem(key:string):string|null;setItem(key:string,value:string):void;}
 export interface SavedDeck {id:string;name:string;cards:number[];}
 export interface DeckStore {version:1;selectedId:string|null;decks:SavedDeck[];}
-export interface UiConfig {version:1;density:'comfortable'|'compact';textSize:'normal'|'large';reduceMotion:boolean;locale?:Locale;}
+export interface UiConfig {
+  version:1;
+  density:'comfortable'|'compact';
+  textSize:'normal'|'large';
+  reduceMotion:boolean;
+  classicBanter:boolean;
+  crtFilter:boolean;
+  locale?:Locale;
+}
 export interface AudioConfig {
   version:1;
   bgmVolume:number;
@@ -20,7 +28,7 @@ export interface AudioConfig {
   sfxMuted:boolean;
 }
 export interface MatchRecord {id:string;date:string;deckName:string;difficulty:BotDifficulty;seed:number;scores:[number,number];}
-export const defaultConfig:UiConfig={version:1,density:'comfortable',textSize:'normal',reduceMotion:false};
+export const defaultConfig:UiConfig={version:1,density:'comfortable',textSize:'normal',reduceMotion:false,classicBanter:true,crtFilter:false};
 export function validateDeck(cards:readonly number[]):string|null {
   try{createGame([cards,cards],1);return null;}catch(error){const message=error instanceof Error?error.message:String(error);
     const id=/#(\d+)/.exec(message)?.[1];
@@ -66,7 +74,20 @@ export function readDecks(raw:string|null):{data:DeckStore;issues:string[]} {
 }
 export function readConfig(raw:string|null):UiConfig {
   if(!raw)return {...defaultConfig};
-  try{const v=JSON.parse(raw);if(v?.version===1&&['comfortable','compact'].includes(v.density)&&['normal','large'].includes(v.textSize)&&typeof v.reduceMotion==='boolean')return {version:1,density:v.density,textSize:v.textSize,reduceMotion:v.reduceMotion,...(isLocale(v.locale)?{locale:v.locale}:{})};}catch{}
+  try{
+    const v=JSON.parse(raw);
+    if(v?.version===1&&['comfortable','compact'].includes(v.density)&&['normal','large'].includes(v.textSize)&&typeof v.reduceMotion==='boolean'){
+      return {
+        version:1,
+        density:v.density,
+        textSize:v.textSize,
+        reduceMotion:v.reduceMotion,
+        classicBanter:typeof v.classicBanter==='boolean'?v.classicBanter:defaultConfig.classicBanter,
+        crtFilter:typeof v.crtFilter==='boolean'?v.crtFilter:defaultConfig.crtFilter,
+        ...(isLocale(v.locale)?{locale:v.locale}:{}),
+      };
+    }
+  }catch{}
   return {...defaultConfig};
 }
 export function readAudioConfig(raw:string|null):AudioConfig {

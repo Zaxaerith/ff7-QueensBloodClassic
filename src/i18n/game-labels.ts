@@ -143,7 +143,7 @@ export const survivalRoundOpponentLabel = (round: number, strategy: BotStrategy,
 
 const bloodRankMessageKeys: Record<BloodRankKey,
   'bloodRank1'|'bloodRank2'|'bloodRank3'|'bloodRank4'|'bloodRank5'|'bloodRank6'|
-  'bloodRank7'|'bloodRank8'|'bloodRank9'|'bloodRank10'|'bloodRank11'> = {
+  'bloodRank7'|'bloodRank8'|'bloodRank9'|'bloodRank10'|'bloodRank11'|'bloodRank12'> = {
   bloodathalon: 'bloodRank1',
   bloodletter: 'bloodRank2',
   bloodSquire: 'bloodRank3',
@@ -155,6 +155,7 @@ const bloodRankMessageKeys: Record<BloodRankKey,
   bloodDespot: 'bloodRank9',
   bloodMonarch: 'bloodRank10',
   bloodChampion: 'bloodRank11',
+  bloodGrandmaster: 'bloodRank12',
 };
 
 export const bloodRankTitle = (key: BloodRankKey): string => t(bloodRankMessageKeys[key]);

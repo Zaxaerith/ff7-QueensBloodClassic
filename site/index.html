@@ -25,6 +25,7 @@
 <section class="window d4-home-deck">
 <div class="d4-panel-heading frame-prep-deck-heading"><div><h2 data-i18n="startingDeck">赛前牌组</h2><strong id="currentDeck"></strong></div><span class="muted" id="currentDeckCount"></span></div>
 <div class="frame-deck-bank" id="prepareDeckBank" data-deck-bank role="group" data-i18n-aria-label="startingDeck"></div>
+<div class="deck-curve" id="homeDeckCurve" role="region" data-i18n-aria-label="deckCurveTitle"></div>
 <div aria-label="赛前牌组，15个槽位" class="d4-deck-grid" data-i18n-aria-label="startingDeck15Slots" id="homeDeckSlots"></div>
 <p id="currentDeckStatus" class="warning" role="status" hidden></p>
 <div class="d4-home-deck-choice"><select aria-label="切换已保存牌组" data-i18n-aria-label="switchSavedDeck" id="homeDeckSelect"></select><button data-i18n="savedDecks" id="prepareSavedDecks">已保存卡组</button><button data-i18n="chooseOrEditDeck" id="changeDeck">选择 / 编辑卡组</button></div>
@@ -48,7 +49,7 @@
 <div class="frame-deck-bank" id="editorDeckBank" data-deck-bank role="group" data-i18n-aria-label="savedDecks"></div>
 <div class="editor-tools"><select aria-label="已保存卡组" data-i18n-aria-label="savedDecks" id="savedDecks"></select><button data-i18n="savedDecks" id="editorSavedDecks">已保存卡组</button><button data-i18n="newDeck2" id="newDeck">新建</button><button data-i18n="deckPreset2" id="loadTemplate">卡组模板</button></div>
 <label class="field"><span data-i18n="deckName">卡组名称</span><input id="deckName" maxlength="40"/></label>
-<select aria-label="卡组模板" data-i18n-aria-label="deckPreset2" id="deckTemplate"></select><button data-i18n="exportLocalDecks" id="exportDecks">导出本地卡组</button>
+<select aria-label="卡组模板" data-i18n-aria-label="deckPreset2" id="deckTemplate"></select><button data-i18n="copyDeckCode" id="copyDeckCode" type="button">复制分享码</button><button data-i18n="importDeckCode" id="importDeckCode" type="button">导入分享码</button><button data-i18n="exportLocalDecks" id="exportDecks">导出本地卡组</button>
 </div>
 <nav aria-label="卡组编辑区域" class="d4-deck-tabs" data-i18n-aria-label="deckEditorAreas">
 <button aria-controls="deckSlotsPanel" aria-pressed="false" data-deck-tab="slots" data-i18n="currentDeck">当前牌组</button>
@@ -57,7 +58,7 @@
 </nav>
 <div class="d4-deck-layout">
 <section aria-labelledby="deckSlotsTitle" class="window d4-deck-panel" data-deck-panel="slots" id="deckSlotsPanel">
-<h3 data-i18n="currentDeck" id="deckSlotsTitle" tabindex="-1">当前牌组</h3><div aria-label="草稿牌组，15个槽位" class="d4-deck-grid" data-i18n-aria-label="draftDeck15Slots" id="deckSlots"></div>
+<h3 data-i18n="currentDeck" id="deckSlotsTitle" tabindex="-1">当前牌组</h3><div class="deck-curve" id="deckCurve" role="region" data-i18n-aria-label="deckCurveTitle"></div><div aria-label="草稿牌组，15个槽位" class="d4-deck-grid" data-i18n-aria-label="draftDeck15Slots" id="deckSlots"></div>
 </section>
 <section aria-labelledby="deckLibraryTitle" class="window d4-deck-panel" data-deck-panel="library" id="deckLibraryPanel">
 <div class="d4-panel-heading"><h3 data-i18n="cardLibrary" id="deckLibraryTitle" tabindex="-1">卡库</h3></div>
@@ -100,7 +101,7 @@
   <div class="replay-tools"><details class="action-more"><summary data-i18n="details">详情</summary><div><button data-i18n="analyzeThisMove" id="replayAnalyze">分析本步</button><button data-i18n="eventsInThisStep" id="replayEvents">本步事件</button><button data-i18n="finalScoring2" id="replayScoreDetails">终局计分</button><button data-i18n="exportJson" id="replayExport">导出 JSON</button></div></details><button data-i18n="exitReplay" id="replayExit">退出回放</button></div>
 </div>
 </div></section>
-<section class="view" hidden="" id="view-config"><div class="window narrow-window"><h2 class="view-title" data-i18n="settings" tabindex="-1">设置</h2><div class="frame-config-grid"><div class="frame-config-display"><label class="field"><span data-i18n="language">语言</span><select id="locale"></select></label><label class="field"><span data-i18n="displayDensity">显示密度</span><select id="density"><option data-i18n="standard" value="comfortable">标准</option><option data-i18n="compact" value="compact">紧凑</option></select></label><label class="field"><span data-i18n="textSize">界面文字</span><select id="textSize"><option data-i18n="standard" value="normal">标准</option><option data-i18n="large" value="large">放大</option></select></label><label class="check-field"><input id="reduceMotion" type="checkbox"/><span data-i18n="reduceMotion">减少动效</span></label><p class="muted" data-i18n="reducedMotionHelp">同时遵循系统“减少动态效果”偏好。</p></div>
+<section class="view" hidden="" id="view-config"><div class="window narrow-window"><h2 class="view-title" data-i18n="settings" tabindex="-1">设置</h2><div class="frame-config-grid"><div class="frame-config-display"><label class="field"><span data-i18n="language">语言</span><select id="locale"></select></label><label class="field"><span data-i18n="displayDensity">显示密度</span><select id="density"><option data-i18n="standard" value="comfortable">标准</option><option data-i18n="compact" value="compact">紧凑</option></select></label><label class="field"><span data-i18n="textSize">界面文字</span><select id="textSize"><option data-i18n="standard" value="normal">标准</option><option data-i18n="large" value="large">放大</option></select></label><label class="check-field"><input id="reduceMotion" type="checkbox"/><span data-i18n="reduceMotion">减少动效</span></label><p class="muted" data-i18n="reducedMotionHelp">同时遵循系统“减少动态效果”偏好。</p><label class="check-field"><input id="classicBanter" type="checkbox"/><span data-i18n="classicBanter">对手经典对话（开场 / 战后）</span></label><label class="check-field"><input id="crtFilter" type="checkbox"/><span data-i18n="crtFilter">PS1 CRT 怀旧扫描线滤镜</span></label><p class="muted" data-i18n="crtFilterHelp">叠加细腻扫描线与微弱暗角，还原 1997 电视机质感（不影响清晰度与点击）。</p></div>
 <div class="frame-config-tools">
   <section id="desktopLauncherSection" class="frame-config-controls" hidden><button id="openDesktopLauncher" type="button" data-i18n="openDesktopLauncher">打开桌面启动器（管理卡图与本地音乐）</button></section>
   <section class="frame-config-controls" aria-labelledby="configControlsTitle">

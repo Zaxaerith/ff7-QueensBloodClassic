@@ -584,6 +584,115 @@ body { color: var(--ink); }
   background: linear-gradient(90deg, rgba(110, 20, 62, .55), rgba(54, 14, 58, .3) 70%, transparent);
   border-color: transparent transparent rgba(255, 100, 126, .28) transparent;
 }
+
+/* Horizontal FF7 Classic region filter pill bar */
+#app .challenge-region-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: .55rem;
+  padding: 6px;
+  border: 1px solid rgba(143, 163, 208, .44);
+  border-radius: 3px;
+  background: linear-gradient(180deg, rgba(5, 12, 40, .86) 0%, rgba(4, 9, 30, .92) 100%);
+  box-shadow: inset 0 2px 6px rgba(1, 3, 14, .75);
+}
+#app .challenge-region-tab {
+  min-height: 28px;
+  padding: 3px 9px;
+  border: 1px solid rgba(143, 163, 208, .45);
+  border-radius: 2px;
+  background: linear-gradient(180deg, #1b3a8f 0%, #0f2260 100%);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, .14), 0 1px 0 rgba(2, 5, 18, .65);
+  color: #dce7ff;
+  font-size: .76rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+  text-shadow: 1px 1px 0 #020514;
+  cursor: pointer;
+}
+#app .challenge-region-tab:hover:not(:disabled) {
+  border-color: var(--silver, #dfe8fa);
+  background: linear-gradient(180deg, #2952be 0%, #153184 100%);
+  color: #ffffff;
+}
+#app .challenge-region-tab.is-active,
+#app .challenge-region-tab[aria-selected="true"] {
+  border-color: var(--gold, #f8dc82);
+  background: linear-gradient(180deg, #2b5cc8 0%, #16368c 55%, #0c2160 100%);
+  box-shadow:
+    inset 0 -2px 0 var(--gold, #f8dc82),
+    inset 1px 1px 0 rgba(255, 250, 224, .32),
+    0 0 10px rgba(78, 242, 210, .28);
+  color: #fff6cf;
+  font-weight: 700;
+}
+#app .challenge-region-tab--boss {
+  border-color: rgba(255, 118, 146, .52);
+  background: linear-gradient(180deg, #5d163a 0%, #340b26 100%);
+  color: #ffdce5;
+}
+#app .challenge-region-tab--boss:hover:not(:disabled) {
+  border-color: #ff9cb0;
+  background: linear-gradient(180deg, #7d1d4d 0%, #480f33 100%);
+}
+#app .challenge-region-tab--boss.is-active,
+#app .challenge-region-tab--boss[aria-selected="true"] {
+  border-color: var(--gold, #f8dc82);
+  background: linear-gradient(180deg, #8a1f4f 0%, #4d1035 100%);
+  box-shadow: inset 0 -2px 0 var(--gold, #f8dc82), 0 0 10px rgba(255, 100, 126, .42);
+  color: #fff4c8;
+}
+
+/* Keeper of the Cruor crest styling on roster options & feature dossier */
+#app .challenge-option[data-keeper="true"] {
+  border-inline-start: 2px solid rgba(248, 220, 130, .78);
+  background: linear-gradient(90deg, rgba(118, 34, 64, .34), rgba(28, 44, 104, .22) 68%, transparent);
+  color: #fff1cc;
+}
+#app .challenge-option[data-keeper="true"]::after {
+  background: radial-gradient(circle at 32% 28%, #fffbe0 0 22%, #f8dc82 48%, #b0284e 100%);
+  box-shadow: 0 0 0 1px #03071b, 0 0 0 2px rgba(248, 220, 130, .48), 0 0 8px rgba(248, 220, 130, .52);
+}
+#app .challenge-option[data-keeper="true"]:hover:not(:disabled) {
+  background: linear-gradient(90deg, rgba(146, 40, 76, .48), rgba(38, 60, 132, .3) 72%, transparent);
+}
+#app .challenge-option[data-keeper="true"]:is([aria-current=true], [data-selected=true]) {
+  border-inline-start: 3px solid var(--gold, #f8dc82);
+  background: linear-gradient(90deg, rgba(154, 42, 76, .74), rgba(36, 62, 138, .48) 72%, rgba(20, 38, 96, .14));
+  color: #fff8dc;
+}
+#app .challenge-feature[data-challenge-tier="keeper"] {
+  background:
+    radial-gradient(ellipse 68% 44% at 86% 0%, rgba(248, 220, 130, .2), transparent 70%),
+    radial-gradient(ellipse 52% 36% at 92% 10%, rgba(255, 100, 126, .16), transparent 68%),
+    var(--qbc-window);
+}
+#app .challenge-badges {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: .25rem;
+}
+#app .challenge-badges .challenge-tier {
+  margin-top: 0;
+}
+#app .challenge-keeper-badge[data-keeper="true"] {
+  display: inline-flex;
+  align-items: center;
+  gap: .28rem;
+  padding: .12rem .58rem;
+  border: 1px solid var(--gold, #f8dc82);
+  border-radius: 2px;
+  background: linear-gradient(180deg, rgba(132, 28, 60, .92) 0%, rgba(68, 14, 40, .96) 100%);
+  box-shadow: inset 1px 1px 0 rgba(255, 246, 206, .34), 0 0 10px rgba(248, 220, 130, .3);
+  color: #fff3c4;
+  font: 700 .76rem/1.25 var(--qbc-display, var(--qbc-sans));
+  letter-spacing: .06em;
+  text-shadow: 1px 1px 0 #03071b;
+}
 #app .challenge-option--boss::after { background: var(--qbc-orb-blood); box-shadow: 0 0 0 1px #03071b, 0 0 0 2px rgba(255, 168, 186, .4), 0 0 7px rgba(255, 100, 126, .45); }
 #app .challenge-option--boss:hover:not(:disabled) { background: linear-gradient(90deg, rgba(150, 28, 80, .7), rgba(70, 18, 74, .35) 75%, transparent); }
 #app .challenge-option--boss:is([aria-current=true], [data-selected=true]) {
@@ -1458,4 +1567,40 @@ body { color: var(--ink); }
   #app .carnival-puzzles > li > button { grid-column: 1; }
   #infoDialog .frame-card-detail { grid-template-columns: minmax(0, 1fr); }
   .frame-card-detail > :is(.qb-card, .unavailable-card) { width: min(62%, 180px); }
+}
+
+/* ------------------------------------------------------------------ */
+/* 14. Optional 1997 PS1 CRT Scanline & Vignette Overlay               */
+/* ------------------------------------------------------------------ */
+@keyframes qbc-crt-phosphor {
+  0%, 100% { opacity: .88; }
+  50% { opacity: .94; }
+}
+:root[data-crt="true"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(
+      180deg,
+      rgba(0, 0, 0, .14) 0px,
+      rgba(0, 0, 0, .14) 1px,
+      transparent 1px,
+      transparent 3px
+    ),
+    radial-gradient(
+      ellipse 88% 84% at 50% 50%,
+      transparent 60%,
+      rgba(2, 6, 22, .34) 100%
+    );
+  animation: qbc-crt-phosphor 6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root[data-crt="true"]::after { animation: none; opacity: .86; }
+}
+:root[data-reduce-motion="true"][data-crt="true"]::after {
+  animation: none;
+  opacity: .86;
 }

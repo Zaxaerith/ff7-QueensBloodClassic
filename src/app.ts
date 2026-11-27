@@ -375,7 +375,11 @@ function renderRecords(){
   if(!history.records.length)root.append(element('li','empty',t("emptyRecordList")));
 }
 function applyConfig(){
-  document.documentElement.dataset.density=config.density;document.documentElement.dataset.textSize=config.textSize;document.documentElement.dataset.reduceMotion=String(config.reduceMotion);
+  document.documentElement.dataset.density=config.density;
+  document.documentElement.dataset.textSize=config.textSize;
+  document.documentElement.dataset.reduceMotion=String(config.reduceMotion);
+  document.documentElement.dataset.classicBanter=String(config.classicBanter);
+  document.documentElement.dataset.crt=String(config.crtFilter);
 }
 document.querySelectorAll<HTMLButtonElement>('[data-route]').forEach(node=>{
   node.onclick=()=>{audio.playSfx('confirm');navigate(node.dataset.route as Route);};
@@ -432,10 +436,22 @@ $('startGame').onclick=()=>{
   catch(error){notice(error instanceof Error?error.message:t('invalidMove'));}
 };
 $('applyPreset').onclick=()=>{selectedDeck=presetDeck(Number($<HTMLSelectElement>('advancedPreset').value));library.showHomeDeck(selectedDeck);notice(t("usingDeckPreset", deckLabel(selectedDeck)));};
-$<HTMLSelectElement>('density').value=config.density;$<HTMLSelectElement>('textSize').value=config.textSize;$<HTMLInputElement>('reduceMotion').checked=config.reduceMotion;
-for(const id of ['density','textSize','reduceMotion','locale'])$(id).onchange=()=>{
+$<HTMLSelectElement>('density').value=config.density;
+$<HTMLSelectElement>('textSize').value=config.textSize;
+$<HTMLInputElement>('reduceMotion').checked=config.reduceMotion;
+$<HTMLInputElement>('classicBanter').checked=config.classicBanter;
+$<HTMLInputElement>('crtFilter').checked=config.crtFilter;
+for(const id of ['density','textSize','reduceMotion','classicBanter','crtFilter','locale'])$(id).onchange=()=>{
   const locale=localeSelect.value;
-  config={version:1,...(isLocale(locale)?{locale}:{}),density:$<HTMLSelectElement>('density').value as typeof config.density,textSize:$<HTMLSelectElement>('textSize').value as typeof config.textSize,reduceMotion:$<HTMLInputElement>('reduceMotion').checked};
+  config={
+    version:1,
+    ...(isLocale(locale)?{locale}:{}),
+    density:$<HTMLSelectElement>('density').value as typeof config.density,
+    textSize:$<HTMLSelectElement>('textSize').value as typeof config.textSize,
+    reduceMotion:$<HTMLInputElement>('reduceMotion').checked,
+    classicBanter:$<HTMLInputElement>('classicBanter').checked,
+    crtFilter:$<HTMLInputElement>('crtFilter').checked,
+  };
   if(id==='locale'){setLocale(config.locale??browserLocale());refreshLocalizedPage();}
   applyConfig();notice(safeWrite(storage,STORAGE.config,config)?t('settingsStorageError'):t('settingsSaved'));
 };

@@ -18,6 +18,7 @@ import {GOLD_SAUCER_ACTION_EVENT, type SemanticAction} from './input/input-manag
 import {gridStep, legalTarget, smartSnap} from './input/match-cursor.js';
 import {batchLegendaryVfx} from './match-effects.js';
 import {MatchPresentation, publicMatch} from './match-presentation.js';
+import {simulateMovePreview} from './move-preview.js';
 import {
   GoldSaucerChallengeSession, SurvivalSession,
   readActiveSurvival, writeActiveSurvival,
@@ -33,7 +34,7 @@ import {boardPawns, observeTable, placedCardView, tileBonusAriaSuffix, tileBonus
 import {validateDeck, type SavedDeck, type StoragePort} from './ui-data.js';
 import {button, element} from './ui-dom.js';
 import {mountHandFocus} from './ui-hand-focus.js';
-import {mountMatchFeedback} from './ui-match-feedback.js';
+import {applyMovePreviewOverlay, mountMatchFeedback} from './ui-match-feedback.js';
 import type {CardVisual} from './visuals.js';
 import '../site/match-presentation.css';
 import '../site/gold-saucer.css';
@@ -461,6 +462,20 @@ export function mountGoldSaucer(root: HTMLElement, hooks: GoldSaucerHooks) {
     ghost.toggleAttribute('data-invalid', !valid);
   }
 
+  function applyLivePreview(move: Move | null) {
+    const preview = move && run && presentation.canPlay
+      ? simulateMovePreview(run.session.game, 0, move.handIndex, move.row, move.col)
+      : null;
+    applyMovePreviewOverlay({
+      board,
+      leftScores: scores[0],
+      rightScores: scores[1],
+      playerSide,
+      rivalSide,
+      preview,
+    });
+  }
+
   function rewardBlock(cardId: number): HTMLElement {
     const card = byId.get(cardId);
     const wrap = element('div', 'gs-reward');
@@ -640,6 +655,7 @@ export function mountGoldSaucer(root: HTMLElement, hooks: GoldSaucerHooks) {
     stage.hidden = true;
     peek.hidden = true;
     ghost.hidden = true;
+    applyLivePreview(null);
     delete stage.dataset.gsPhase;
     delete stage.dataset.gsMode;
     delete stage.dataset.gsSelected;
@@ -871,6 +887,7 @@ export function mountGoldSaucer(root: HTMLElement, hooks: GoldSaucerHooks) {
     if (rivalFlight && revealed) rivalFlight.append(createCardView(revealed, hooks.visual(revealed.id), {variant: 'board'}));
 
     updateGhostPreview(picked, previewIndex, Boolean(pending));
+    applyLivePreview(pending);
     const browsingCard = view.hand[focusedHand] !== undefined ? byId.get(view.hand[focusedHand]) : picked;
     handFocus.update(browsingCard, picked, locked);
     const peeked = !picked && aimed !== null ? view.board[Math.floor(aimed / COLS)]?.[aimed % COLS]?.card ?? null : null;
@@ -1173,12 +1190,22 @@ export function mountGoldSaucer(root: HTMLElement, hooks: GoldSaucerHooks) {
     } else {
       const picked = byId.get(view.hand[selected]);
       const legal = playerMoves().filter(m => m.handIndex === selected);
-      updateGhostPreview(picked, idx, Boolean(legalTarget(legal, idx)));
+      const hoveredMove = legalTarget(legal, idx);
+      updateGhostPreview(picked, idx, Boolean(hoveredMove));
+      applyLivePreview(hoveredMove);
     }
   });
   board.addEventListener('pointerleave', () => {
-    if (selected === null) updatePeek(null);
-    else if (!pending) updateGhostPreview(undefined, null, false);
+    if (selected === null) {
+      updatePeek(null);
+    } else if (!pending) {
+      updateGhostPreview(undefined, null, false);
+      applyLivePreview(null);
+    } else if (run) {
+      const view = presentation.frame ?? publicMatch(run.session.game);
+      updateGhostPreview(byId.get(view.hand[selected]), pending.row * COLS + pending.col, true);
+      applyLivePreview(pending);
+    }
   });
   root.addEventListener(GOLD_SAUCER_ACTION_EVENT, event => {
     const action = (event as CustomEvent<SemanticAction>).detail;

@@ -205,8 +205,17 @@ test('New Game binds every localized NPC and mirror option while Continue keeps 
   const difficulty = app.get('difficulty');
   difficulty.value = 'easy';
   const menuOpponent = 'darren-moore';
-  const rosterButtons = () => roster.querySelectorAll('button');
+  const rosterButtons = () => roster.querySelectorAll('button').filter(btn => btn.dataset.opponent !== undefined);
+  const filterTabs = () => roster.querySelectorAll('button').filter(btn => btn.dataset.regionFilter !== undefined);
   const focusOpponent = (id: string) => rosterButtons().find(button => button.dataset.opponent === id)!.focus();
+  focusOpponent(menuOpponent);
+  expect(filterTabs().find(tab => tab.dataset.regionFilter === 'all')?.attributes.get('aria-selected')).toBe('true');
+  expect(rosterButtons().find(btn => btn.dataset.opponent === 'cameron')?.dataset.keeper).toBe('true');
+  // Filtering to Corel narrows visible opponent buttons to Corel challengers, and All restores the full roster.
+  filterTabs().find(tab => tab.dataset.regionFilter === 'corel')!.onclick!();
+  expect(rosterButtons().every(btn => challengers.some(npc => npc.id === btn.dataset.opponent && npc.regionId === 'corel'))).toBe(true);
+  expect(rosterButtons().length).toBe(challengers.filter(npc => npc.regionId === 'corel').length);
+  filterTabs().find(tab => tab.dataset.regionFilter === 'all')!.onclick!();
   focusOpponent(menuOpponent);
   for (const locale of locales) {
     app.get('locale').value = locale;

@@ -147,3 +147,238 @@
   #deckFilters select { font-size: 12px; padding: 6px 3px; }
   #deckFilters input { padding: 6px; }
 }
+
+/* ------------------------------------------------------------------ */
+/* Deck Builder Pro: FF7 OG Rank Curve Bar, Share Codes & Token Links  */
+/* ------------------------------------------------------------------ */
+.deck-curve {
+  margin: 8px 0 4px;
+  padding: 8px 10px;
+  border: 1px solid rgba(143, 163, 208, .48);
+  border-radius: 3px;
+  background:
+    radial-gradient(ellipse 80% 70% at 50% 0%, rgba(44, 88, 204, .22), transparent 72%),
+    linear-gradient(180deg, #060f33 0%, #040924 100%);
+  box-shadow:
+    inset 0 2px 8px rgba(1, 3, 14, .82),
+    inset 0 0 0 1px rgba(82, 102, 150, .35);
+  display: grid;
+  gap: 6px;
+}
+.deck-curve-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.deck-curve-bars {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(34px, 1fr));
+  gap: 6px;
+  flex: 1 1 170px;
+  max-width: 240px;
+}
+.deck-curve-col {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+}
+.deck-curve-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: #edf4ff;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  text-shadow: 1px 1px 0 #020514;
+}
+.deck-curve-track {
+  width: 100%;
+  height: 30px;
+  padding: 2px;
+  display: flex;
+  align-items: flex-end;
+  background: rgba(3, 8, 28, .85);
+  border: 1px solid rgba(120, 144, 198, .42);
+  border-radius: 2px;
+}
+.deck-curve-fill {
+  width: 100%;
+  height: var(--bar-pct, 0%);
+  border-radius: 1px;
+  transition: height 160ms ease-out;
+}
+.deck-curve-fill--mako {
+  background: linear-gradient(180deg, #8cf5df 0%, #2fc4ac 58%, #156e68 100%);
+  box-shadow: 0 0 6px rgba(78, 242, 210, .42);
+}
+.deck-curve-fill--cobalt {
+  background: linear-gradient(180deg, #9fc4ff 0%, #3d74e2 58%, #1a3b96 100%);
+  box-shadow: 0 0 6px rgba(96, 150, 255, .42);
+}
+.deck-curve-fill--gold {
+  background: linear-gradient(180deg, #fff1b8 0%, #e5b84d 58%, #9b6c16 100%);
+  box-shadow: 0 0 6px rgba(248, 220, 130, .45);
+}
+.deck-curve-fill--crimson {
+  background: linear-gradient(180deg, #ffb4c4 0%, #e6486b 58%, #7d1532 100%);
+  box-shadow: 0 0 6px rgba(255, 84, 114, .42);
+}
+.deck-curve-axis {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  color: #9fc4ff;
+  text-shadow: 1px 1px 0 #020514;
+}
+.deck-curve-stats {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+.deck-curve-stat {
+  padding: 2px 7px;
+  border: 1px solid rgba(143, 163, 208, .48);
+  border-radius: 2px;
+  background: rgba(14, 34, 92, .72);
+  color: #d6fff6;
+  font-size: 11.5px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 1px 1px 0 #020514;
+}
+.deck-curve-stat--gold {
+  border-color: rgba(248, 220, 130, .62);
+  color: var(--gold, #f8dc82);
+}
+.deck-curve-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  padding-top: 5px;
+  border-top: 1px solid rgba(143, 163, 208, .22);
+}
+.deck-curve-pill {
+  padding: 1px 6px;
+  border: 1px solid rgba(154, 180, 232, .45);
+  border-radius: 2px;
+  background: rgba(16, 38, 102, .65);
+  color: #e4eeff;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 1px 1px 0 #020514;
+}
+.deck-curve-pill--enhance { border-color: rgba(94, 255, 184, .55); color: #b8ffe0; }
+.deck-curve-pill--enfeeble { border-color: rgba(255, 132, 158, .55); color: #ffd4de; }
+.deck-curve-pill--destroy { border-color: rgba(255, 92, 118, .65); color: #ffc8d2; background: rgba(96, 18, 44, .65); }
+.deck-curve-pill--spawn { border-color: rgba(130, 230, 255, .58); color: #d0f6ff; }
+.deck-curve-pill--replace { border-color: rgba(248, 220, 130, .58); color: #fff1be; }
+
+/* Share code modal */
+.deck-code-dialog {
+  display: grid;
+  gap: 10px;
+}
+.deck-code-dialog p { margin: 0; }
+.deck-code-input {
+  width: 100%;
+  padding: 8px 10px;
+  font-family: "Consolas", "Cascadia Mono", ui-monospace, monospace;
+  font-size: 13.5px;
+  letter-spacing: .04em;
+  color: #f4f8ff;
+  background: #050c2a;
+  border: 1px solid var(--silver, #dfe8fa);
+  border-radius: 3px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, .75);
+}
+.deck-code-input:focus-visible {
+  outline: 2px solid var(--gold, #f8dc82);
+  outline-offset: 2px;
+}
+.deck-code-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* Parent <-> Generated Token bidirectional links inside showCard dialog */
+.card-related-box {
+  margin: 10px 0;
+  padding: 9px 11px;
+  border: 1px solid var(--silver, #dfe8fa);
+  border-radius: 3px;
+  background: linear-gradient(155deg, rgba(24, 54, 138, .88) 0%, rgba(10, 24, 72, .94) 100%);
+  box-shadow: inset 0 0 0 1px rgba(82, 102, 150, .65), 0 4px 12px rgba(0, 0, 0, .5);
+}
+.card-related-box h4 {
+  margin: 0 0 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  color: var(--gold, #f8dc82);
+  text-shadow: 1px 1px 0 #020514;
+}
+.card-related-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 112px));
+  gap: 8px;
+}
+.card-related-item {
+  display: grid;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid rgba(164, 188, 232, .52);
+  border-radius: 3px;
+  background: rgba(5, 12, 40, .72);
+  color: #edf4ff;
+  text-align: center;
+  cursor: pointer;
+}
+.card-related-item:hover,
+.card-related-item:focus-visible {
+  border-color: var(--gold, #f8dc82);
+  box-shadow: 0 0 10px rgba(248, 220, 130, .35);
+}
+.card-related-item .qb-card {
+  width: 100%;
+  pointer-events: none;
+}
+.card-related-name {
+  font-size: 11px;
+  line-height: 1.25;
+  color: #dfe9ff;
+  overflow-wrap: anywhere;
+  text-shadow: 1px 1px 0 #020514;
+}
+.card-related-parents {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.card-related-parent {
+  padding: 5px 10px;
+  font-size: 12.5px;
+  font-weight: 600;
+  border: 1px solid var(--silver, #dfe8fa);
+  border-radius: 3px;
+  background: linear-gradient(180deg, #274db8 0%, #142f7e 100%);
+  color: #fff8de;
+  cursor: pointer;
+}
+.card-related-parent:hover,
+.card-related-parent:focus-visible {
+  border-color: var(--gold, #f8dc82);
+  filter: brightness(1.14);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .deck-curve-fill { transition: none; }
+}
+:root[data-reduce-motion="true"] .deck-curve-fill {
+  transition: none;
+}

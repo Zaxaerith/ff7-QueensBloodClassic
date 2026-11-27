@@ -1,6 +1,6 @@
 {
   "name": "ff7-queens-blood-classic",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "private": false,
   "type": "module",
   "description": "Unofficial fan-made Queen's Blood game with local FF7 Original asset import.",

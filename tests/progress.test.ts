@@ -146,11 +146,11 @@ test('Gold Saucer wins and Survival ranks preserve gold over silver and track fa
   });
 });
 
-test('Tournament progress and Blood Hunter Rank 1-11 progress cleanly up to Rank 11 Blood Champion',()=>{
-  expect(BLOOD_RANKS).toHaveLength(11);
+test('Tournament progress and Blood Hunter Rank 1-12 progress cleanly up to Rank 12 Blood Grandmaster',()=>{
+  expect(BLOOD_RANKS).toHaveLength(12);
   let p=emptyProgress();
   expect(computeBloodRank(p)).toMatchObject({
-    rank:1,key:'bloodathalon',title:'Bloodathalon',points:0,nextThreshold:2,winsToNextRank:2,isMaxRank:false,
+    rank:1,maxRank:12,key:'bloodathalon',title:'Bloodathalon',points:0,nextThreshold:2,winsToNextRank:2,isMaxRank:false,
   });
 
   // Eliminated tournament run updates bestRunWins without incrementing championships.
@@ -158,20 +158,35 @@ test('Tournament progress and Blood Hunter Rank 1-11 progress cleanly up to Rank
   expect(p.tournament).toEqual({championships:0,exhibitionCleared:false,bestRunWins:3});
   expect(computeBloodRank(p).points).toBe(0);
 
-  // Defeat all 20 regular challengers + Shadowblood Queen -> 21 points (Rank 10 Blood Monarch, 1 to Rank 11).
-  for(const npc of challengers){
+  // Defeat first 28 challengers -> 28 points -> Rank 11 Blood Champion (4 to Rank 12).
+  for(const npc of challengers.slice(0,28)){
     p=recordChallengerResult(p,npc.id,'normal',20,10,0);
   }
-  expect(computeBloodRank(p)).toMatchObject({rank:10,key:'bloodMonarch',title:'Blood Monarch',points:20});
+  expect(computeBloodRank(p)).toMatchObject({
+    rank:11,maxRank:12,key:'bloodChampion',title:'Blood Champion',points:28,nextThreshold:32,winsToNextRank:4,isMaxRank:false,
+  });
+
+  // Defeat 3 more challengers (31 points total) -> still Rank 11 with 1 point needed for Rank 12.
+  for(const npc of challengers.slice(28,31)){
+    p=recordChallengerResult(p,npc.id,'normal',20,10,0);
+  }
+  expect(computeBloodRank(p)).toMatchObject({
+    rank:11,maxRank:12,key:'bloodChampion',points:31,nextThreshold:32,winsToNextRank:1,isMaxRank:false,
+  });
+
+  // Defeat the remaining 2 challengers (all 33), Shadowblood Queen, and win Shinra-8 Championship + Exhibition -> 35 points -> Rank 12 Blood Grandmaster!
+  for(const npc of challengers.slice(31)){
+    p=recordChallengerResult(p,npc.id,'normal',20,10,0);
+  }
+  expect(computeBloodRank(p)).toMatchObject({
+    rank:12,maxRank:12,key:'bloodGrandmaster',title:'Blood Grandmaster',points:33,nextThreshold:null,winsToNextRank:0,isMaxRank:true,
+  });
 
   p=recordChallengerResult(p,SHADOWBLOOD_QUEEN_ID,'hard',30,15,0);
-  expect(computeBloodRank(p)).toMatchObject({rank:10,points:21,nextThreshold:22,winsToNextRank:1,isMaxRank:false});
-
-  // Win Shinra-8 Championship + Red XIII Exhibition -> 22 points -> Rank 11 Blood Champion!
   p=recordTournamentRun(p,{wins:6,championshipWon:true,exhibitionCleared:true});
   expect(p.tournament).toEqual({championships:1,exhibitionCleared:true,bestRunWins:6});
   expect(computeBloodRank(p)).toMatchObject({
-    rank:11,maxRank:11,key:'bloodChampion',title:'Blood Champion',points:22,nextThreshold:null,winsToNextRank:0,isMaxRank:true,
+    rank:12,maxRank:12,key:'bloodGrandmaster',title:'Blood Grandmaster',points:35,nextThreshold:null,winsToNextRank:0,isMaxRank:true,
   });
 
   const store=new MemoryStore();
@@ -180,7 +195,7 @@ test('Tournament progress and Blood Hunter Rank 1-11 progress cleanly up to Rank
   expect(progressSummary(p)).toMatchObject({
     tournamentChampionships:1,
     tournamentExhibitionCleared:true,
-    bloodRank:{rank:11,key:'bloodChampion'},
+    bloodRank:{rank:12,key:'bloodGrandmaster'},
   });
 });
 

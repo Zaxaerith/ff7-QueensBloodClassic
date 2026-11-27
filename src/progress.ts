@@ -26,7 +26,8 @@ export type BloodRankKey=
   | 'bloodSovereign'
   | 'bloodDespot'
   | 'bloodMonarch'
-  | 'bloodChampion';
+  | 'bloodChampion'
+  | 'bloodGrandmaster';
 
 export interface BloodRankSpec {
   readonly rank:number;
@@ -39,14 +40,15 @@ export const BLOOD_RANKS:readonly BloodRankSpec[]=[
   {rank:1,key:'bloodathalon',title:'Bloodathalon',minPoints:0},
   {rank:2,key:'bloodletter',title:'Bloodletter',minPoints:2},
   {rank:3,key:'bloodSquire',title:'Blood Squire',minPoints:4},
-  {rank:4,key:'bloodPatriot',title:'Blood Patriot',minPoints:6},
-  {rank:5,key:'bloodMystic',title:'Blood Mystic',minPoints:8},
-  {rank:6,key:'bloodExecutioner',title:'Blood Executioner',minPoints:10},
-  {rank:7,key:'bloodMarquis',title:'Blood Marquis',minPoints:12},
-  {rank:8,key:'bloodSovereign',title:'Blood Sovereign',minPoints:15},
-  {rank:9,key:'bloodDespot',title:'Blood Despot',minPoints:18},
-  {rank:10,key:'bloodMonarch',title:'Blood Monarch',minPoints:20},
-  {rank:11,key:'bloodChampion',title:'Blood Champion',minPoints:22},
+  {rank:4,key:'bloodPatriot',title:'Blood Patriot',minPoints:7},
+  {rank:5,key:'bloodMystic',title:'Blood Mystic',minPoints:10},
+  {rank:6,key:'bloodExecutioner',title:'Blood Executioner',minPoints:13},
+  {rank:7,key:'bloodMarquis',title:'Blood Marquis',minPoints:16},
+  {rank:8,key:'bloodSovereign',title:'Blood Sovereign',minPoints:19},
+  {rank:9,key:'bloodDespot',title:'Blood Despot',minPoints:22},
+  {rank:10,key:'bloodMonarch',title:'Blood Monarch',minPoints:25},
+  {rank:11,key:'bloodChampion',title:'Blood Champion',minPoints:28},
+  {rank:12,key:'bloodGrandmaster',title:'Blood Grandmaster',minPoints:32},
 ];
 
 export interface BloodRankInfo {

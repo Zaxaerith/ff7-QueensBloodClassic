@@ -24,6 +24,19 @@ export const BOT_STRATEGIES=[
   'bernard',
   'turner',
   'vincent-gatekeeper',
+  'rolf',
+  'navalan',
+  'mary',
+  'pietro',
+  'dax',
+  'wize-3',
+  'oscar',
+  'robin',
+  'kadina',
+  'riana',
+  'dokaccha',
+  'maahir',
+  'dale',
   'queen',
 ] as const;
 export type BotStrategy=typeof BOT_STRATEGIES[number];
@@ -375,6 +388,98 @@ export function strategyScore(game:Game,player:Player,strategy:BotStrategy,known
       +(enemy.destroyed-own.destroyed*.2)*1.2
       +own.generatedHandCount*.75
       +(own.frontlinePower-enemy.frontlinePower)*.35;
+  }
+  if(strategy==='rolf'){
+    return (own.frontier-enemy.frontier)*1.05
+      +(own.frontlinePower-enemy.frontlinePower)*.5
+      +(own.enhancedCount-enemy.enhancedCount)*(0.75+own.enhancedScalerWeight*.35)
+      +(own.deathrattlePosition-enemy.deathrattlePosition)*.55
+      +(own.laneSpread-enemy.laneSpread)*.45;
+  }
+  if(strategy==='navalan'){
+    return (own.debuffAura-enemy.debuffAura)*1.2
+      +(enemy.enfeebled-own.enfeebled)*(1.2+own.enfeebledScalerBoard*.45)
+      +(enemy.enfeebledSeverity-own.enfeebledSeverity)*.4
+      +(own.deathrattlePosition-enemy.deathrattlePosition)*1.05
+      +(enemy.destroyed-own.destroyed*.5)*.8;
+  }
+  if(strategy==='mary'){
+    return own.destroyWatcherActive*1.45+own.destroyWatcherGrowth*1.3
+      -enemy.destroyWatcherActive*.7-enemy.destroyWatcherGrowth*.6
+      +(own.deathrattlePosition-enemy.deathrattlePosition)*.95
+      +(enemy.destroyed-own.destroyed*.2)*1.15
+      +own.generatedHandCount*.65;
+  }
+  if(strategy==='pietro'){
+    const totalEnfeebled=own.enfeebled+enemy.enfeebled;
+    return totalEnfeebled*(1.05+own.enfeebledScalerBoard*.45)
+      +(enemy.enfeebled-own.enfeebled)*.75
+      +own.enfeebledScalerBoard*1.15
+      +(enemy.enfeebledSeverity-own.enfeebledSeverity)*.35
+      +(own.frontier-enemy.frontier)*.4;
+  }
+  if(strategy==='dax'){
+    return (own.frontier-enemy.frontier)*1.1
+      +(own.frontlinePower-enemy.frontlinePower)*.65
+      +(enemy.destroyed-own.destroyed*.6)*1.1
+      +own.destroyWatcherActive*.95+own.destroyWatcherGrowth*.9
+      +(enemy.fragile-own.fragile)*.55;
+  }
+  if(strategy==='wize-3'){
+    return own.generatedHandCount*1.05+own.knownHandCount*.45
+      +(own.ranks-enemy.ranks)*.85+own.rank3Prep*1.1
+      +(own.cost3Cards-enemy.cost3Cards)*1.35
+      +own.destroyWatcherActive*1.15+own.destroyWatcherGrowth*1.05
+      +(own.deathrattlePosition-enemy.deathrattlePosition)*.7;
+  }
+  if(strategy==='oscar'){
+    return (own.support-enemy.support)*1.05
+      +(own.chains-enemy.chains)*.95
+      +(own.enhancedCount-enemy.enhancedCount)*.85
+      +(own.verticalSupport-enemy.verticalSupport)*.45
+      +(enemy.enfeebled-own.enfeebled)*.45;
+  }
+  if(strategy==='robin'){
+    return (own.deathrattlePosition-enemy.deathrattlePosition)*1.25
+      +own.generatedHandCount*.9+own.knownHandCount*.4
+      +own.destroyWatcherActive*1.1+own.destroyWatcherGrowth*.95
+      +(own.laneSpread-enemy.laneSpread)*.65;
+  }
+  if(strategy==='kadina'){
+    return (own.enhancedCount+own.enfeebled+enemy.enfeebled)*.95
+      +(own.support-enemy.support)*.85
+      +(own.debuffAura-enemy.debuffAura)*1.05
+      +(own.chains-enemy.chains)*.7;
+  }
+  if(strategy==='riana'){
+    let winningLanes=0;
+    for(let r=0;r<3;r++)if(own.rowPower[r]>enemy.rowPower[r])winningLanes++;
+    return (own.support-enemy.support)*1.0
+      +(own.chains-enemy.chains)*.85
+      +(own.enhancedCount-enemy.enhancedCount)*.8
+      +(own.ranks-enemy.ranks)*.6+own.rank3Prep*.7
+      +winningLanes*.95;
+  }
+  if(strategy==='dokaccha'){
+    return (own.chains-enemy.chains)*1.1
+      +(own.support-enemy.support)*.65
+      +(enemy.enfeebled-own.enfeebled)*.85
+      +(own.frontlinePower-enemy.frontlinePower)*.55
+      +(enemy.destroyed-own.destroyed*.35)*.8;
+  }
+  if(strategy==='maahir'){
+    return (own.debuffAura-enemy.debuffAura)*1.15
+      +(own.enfeebled+enemy.enfeebled)*(0.95+own.enfeebledScalerBoard*.45)
+      +own.enfeebledScalerBoard*1.25
+      +(own.chains-enemy.chains)*.85
+      +(own.ranks-enemy.ranks)*.55+own.rank3Prep*.65;
+  }
+  if(strategy==='dale'){
+    return (own.ranks-enemy.ranks)*.95
+      +own.rank3Prep*1.15
+      +(own.cost3Cards-enemy.cost3Cards)*1.4
+      +(own.enfeebled+enemy.enfeebled)*(0.8+own.enfeebledScalerBoard*.4)
+      +(own.frontier-enemy.frontier)*.75;
   }
   if(strategy==='queen'){
     const totalEnfeebled=own.enfeebled+enemy.enfeebled;

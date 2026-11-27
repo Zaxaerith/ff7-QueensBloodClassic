@@ -1,33 +1,31 @@
-# Gameplay and current limits
+# Gameplay
 
-[简体中文](#玩法与当前限制)
+## Match
 
-## Matches
+Queen's Blood uses a 3×5 board. Players expand pawn levels, place cards when a friendly open space meets the card's level requirement, resolve card effects, and compare row power for row rewards. A match ends after both sides pass under the implemented rules. The candidate engine records state-changing events for replay, and also supports declarative terrain bonuses (`tileBonus`) and draw-free rounds (`noTurnDraw`) for special challenges without altering standard matches.
 
-Queen’s Blood is played on a 3×5 board. Players expand pawn levels, place cards on legal spaces, resolve card abilities, and compare row power. The project includes deck editing, mulligan, three Bot difficulty levels, NPC challengers, saved matches, replay, and match analysis. Saves stay in the browser’s local storage for the current origin.
+The card catalog contains all 145 numbered IDs plus derived token definitions. Rules are independently implemented from public references and tested, but are not a complete verified reproduction of every Rebirth timing edge case. The evidence ledger distinguishes verified fields, candidates, and conflicts. For example, J-Squad is executable candidate data while the generated Hype Johnny base-power evidence remains conflicted.
 
-The catalog contains 145 numbered card definitions. The rules are an independent implementation; some complex effects and timing interactions remain candidates. In particular, #066 Two Face feedback behavior and #134 J-Squad details still need verification against the original game.
+## Opponents, World Tour, Boss & Decks
 
-## Card Carnival
+- **World Tour Roster (20 Named NPCs)**: Spans 9 regions from Kalm and Under Junon to Shinra-8, Costa del Sol, Corel, Gongaga, Cosmo Canyon, and Nibel. Every NPC has a distinct legal 15-card deck and dedicated `BotStrategy` weighting across Easy, Normal, and Hard difficulties (running in a dedicated Bot Worker with strict `BotView` information boundaries).
+- **Shadowblood Queen Boss Battle (M12)**: Preset Replay v2 opening with `#145 Shadowblood Queen` pre-placed on B5 (`row 1, col 4`), a specialized enfeeblement deck, and a dedicated `'queen'` AI profile.
+- **Shinra-8 Cruise Tournament (5+1)**: Five-round full-deck knockout bracket (with Mulligan, turn-start draw, and 1 retry per round) culminating against Regina, unlocking a 6th bonus exhibition match against Red XIII · Overfang.
+- **8 Archetype Deck Presets & Mirror Practice**: Includes 5 classic starter/chain/summon/advanced/royal-endgame presets plus 3 late-game archetype presets (Deathrattle Abyss, Enfeeble Control, Chocobo & J-Squad Swarm), full deck editing, and mirror practice.
 
-Three puzzles are currently playable:
+## Gold Saucer & Multi-Round Survival (6+3)
 
-1. Three-Card Stud
-2. Go for Choco-Broke
-3. Mischief-Making Moogles
+- **6 Single-Match Special Challenges**: *High Ground* (`#121`, `+2` center terrain), *Outflanked* (`#122`, asymmetric flanking), *Don't Fear, MAI's Here* (`#120`, bonus support hand), *Luxury Real Estate* (`#114`, rank 2–3 central axis), *Behind Enemy Lines* (`#117`, interlaced footholds), and *Chadley the Callous* (`#118`, replacement/destroy support).
+- **3 Multi-Round Survival Gauntlets**: *Boot Camp* (3 rounds, `#143`), *Extreme Survival* (4 rounds, `#102`), and *Nightmare Survival* (5 rounds, `#104`, culminating in Round 5 against the Shadowblood Queen). Players lock one 15-card deck across rounds, carry unplayed hands forward, contest early bonus-draw lanes, survive late no-draw rounds, and earn Bronze / Silver / Gold medals based on cumulative score.
 
-The full 22-puzzle set is not implemented. Other puzzle ideas are not presented as playable or as verified reproductions of the original game.
+## Card Carnival (22 Puzzles)
 
-## Languages, controls, and art
+The formal catalog contains 22 engine-verified puzzles spanning Chapter 6 (Easy, Advanced, Skill Drill) and Chapter 12 (Advanced, Collection). The first three Chapter 6 puzzles remain the original P1 baseline, while puzzles 4–22 are registered as `classic-candidate` reconstructions backed by the [Card Carnival evidence ledger](research/card-carnival.md).
 
-The interface has 11 locales and supports keyboard and gamepad controls. Optional BGM playback is available when a private local audio pack is configured; without tracks the game remains silent and audio controls stay hidden. No music assets are included. The game can run without card art. Players may generate a private Art Pack locally from FF7 Original PC resources they lawfully obtained and explicitly import it. Original game archives, extracted models and textures, and generated card art are not included in the public source.
+## Local Saves, Progression & Replay
 
-## 玩法与当前限制
+Decks, settings, match records, active Continue saves, active Survival (`qbclassic.survival.v1`) and Tournament (`qbclassic.tournament.v1`) runs, and the local honor/medal ledger (`qbclassic.progress.v1`, including Blood Hunter Rank 1–11 progression with zero content locks) are stored locally in the current origin with corruption recovery backups. Nothing is uploaded by the game. Completed matches support step-by-step `ReplayTimeline` playback for both Replay v1 and v2.
 
-Queen’s Blood 使用 3×5 棋盘。玩家扩展兵等级、在合法位置放置卡牌、结算能力并比较各行力量。项目提供牌组编辑、换牌、三档 Bot、NPC 挑战者、对局存档、回放和对局分析。存档保存在当前浏览器来源的本地存储中。
+## Languages, Controls, Audio, Art & Desktop
 
-卡牌目录包含 145 张编号卡的定义。本项目独立实现规则，部分复杂能力和时序仍属于候选实现；#066 Two Face 的反馈行为及 #134 J-Squad 细节仍待对照原作核验。
-
-Card Carnival 目前有 3 关可玩谜题：Three-Card Stud、Go for Choco-Broke、Mischief-Making Moogles。完整 22 关尚未实现；其他谜题构想不会被描述为可玩关卡或已核实的原作复现。
-
-界面提供 11 种语言，并支持键盘和手柄。配置私人本地音频包后可启用 BGM；没有音轨时游戏静音运行并隐藏音频控件，公开源码不含音乐文件。游戏可在没有卡图时运行。玩家可以使用自己合法取得的 FF7 Original PC 资源在本机生成私人 Art Pack，并显式导入。公开源码不含原版游戏档案、提取模型或纹理，也不含生成后的卡图。
+The interface supports 11 locales, Classic Frame (v3), keyboard/gamepad navigation, procedural PS1-style Web Audio sound effects (SFX) alongside optional local private BGM, and an art-free fallback mode or validated private Art Packs (including the accepted 145-card pack and optional derived token packs). In addition to standard web builds, the project supports standalone Windows desktop packaging via `desktop/`.

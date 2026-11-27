@@ -2,14 +2,15 @@
 
 [简体中文](README.zh-CN.md)
 
-An unofficial, open-source single-player card game inspired by Queen’s Blood. Version **1.0.0** provides the complete Classic candidate experience.
+An unofficial, open-source single-player card game inspired by Queen’s Blood. Version **1.2.0** provides the expanded Classic candidate experience.
 
 ## Features
 
-- A 3×5 board, 145 numbered card definitions, deck editing, mulligan, saved matches, replay, and match analysis.
-- Three Bot difficulty levels, 20 World Tour challengers, the Shadowblood Queen, and keyboard or gamepad controls.
-- Shinra-8 tournament and Gold Saucer special challenges and survival modes.
-- An 11-language interface and Classic Frame presentation.
+- A 3×5 board, 145 numbered card definitions, 21 derived cards, 8 archetype preset decks, Deck Builder rank curve & mechanic analysis, compact `QBC1-` deck share codes, and Card Detail Parent ↔ Generated Token live preview links.
+- Three Bot difficulty levels, all 33 World Tour challengers across 9 regions (including the 6 Keepers of the Cruor, with a Region Filter bar), Blood Hunter Rank 1–12 progression, the Shadowblood Queen, and keyboard or gamepad controls.
+- Shinra-8 Cruise Tournament (5-round bracket plus Red XIII exhibition match) and Gold Saucer Wonderment Square (6 special-rule challenges and 3 multi-round Survival tiers).
+- Live Hover Move Preview (row/total score delta and destruction crosshair warnings), 1997 FF7 classic floating battle numbers, pixel shatter destroy VFX, classic FF7 blue-box pre/post-match banter, and an optional PS1 CRT scanline filter.
+- An 11-language interface, FrameUI v3 (1997 FF7 OG classic windows unified with the Rebirth tabletop), and procedural Web Audio PS1-style synth SFX.
 - Optional local BGM playback with volume and mute settings; no music files are included.
 - Card Carnival includes 22 playable Classic-candidate puzzles.
 - Candidate local generation routes for all 145 Classic Art cards.

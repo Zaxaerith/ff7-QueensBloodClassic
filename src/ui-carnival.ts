@@ -1,17 +1,19 @@
 import {createCardView} from './card-view.js';
 import {byId, type Card} from './cards.js';
-import {COLS, ROWS, previewEffects, previewInfluence, type PlacedCard, type RuleEvent} from './engine.js';
+import {COLS, ROWS, previewEffects, previewInfluence, replayMatch, type Game, type PlacedCard, type RuleEvent} from './engine.js';
 import {describeAbilities} from './i18n/abilities.js';
 import {displayName, localizedName} from './i18n/card-names.js';
 import {carnivalMessages, carnivalProgressText} from './i18n/carnival.js';
 import {getLocale, t} from './i18n/index.js';
 import {CARNIVAL_ACTION_EVENT, type SemanticAction} from './input/input-manager.js';
 import {gridStep, legalTarget, smartSnap} from './input/match-cursor.js';
+import {simulateMovePreview} from './move-preview.js';
 import {puzzleCatalog, type CarnivalPuzzle, type CarnivalPuzzleId} from './puzzle-catalog.js';
 import {puzzleCategories, type PuzzleCategory} from './puzzle-data.js';
 import {PuzzleSession, type PuzzleMove, type PuzzleResult} from './puzzle-session.js';
 import {boardPawns, observeTable, placedCardView} from './ui-board.js';
 import {button, element} from './ui-dom.js';
+import {applyMovePreviewOverlay} from './ui-match-feedback.js';
 import {replayEventLabel} from './ui-replay.js';
 import type {AudioController, MatchAudioSession} from './audio-controller.js';
 import type {PlayerProgress} from './progress.js';
@@ -126,6 +128,33 @@ export function mountCarnival(root: HTMLElement, hooks: CarnivalHooks) {
   let focusedHand = 0;
   let inspectedBoard: number | null = null;
   let lastInspectorKey = '';
+  let previewGameKey = '';
+  let previewGame: Game | null = null;
+
+  function currentPreviewGame(): Game | null {
+    if (!attempt) return null;
+    const snap = attempt.session.snapshot();
+    if (snap.phase !== 'playing') return null;
+    const key = `${attempt.puzzle.id}:${snap.revision}:${snap.events.length}`;
+    if (key !== previewGameKey || !previewGame) {
+      previewGameKey = key;
+      try { previewGame = replayMatch(attempt.session.debugReplay()); }
+      catch { previewGame = null; }
+    }
+    return previewGame;
+  }
+
+  function applyLivePreview(move: PuzzleMove | null) {
+    const g = move ? currentPreviewGame() : null;
+    const preview = g && move ? simulateMovePreview(g, 0, move.handIndex, move.row, move.col) : null;
+    applyMovePreviewOverlay({
+      board,
+      leftScores: scores[0],
+      rightScores: scores[1],
+      legendDeltaHost: legend,
+      preview,
+    });
+  }
 
   function playSfx(cue: SfxCue, options?: {skipIfVictoryTrack?: boolean}) {
     try { hooks.audio?.controller.playSfx?.(cue, options); }
@@ -338,6 +367,8 @@ export function mountCarnival(root: HTMLElement, hooks: CarnivalHooks) {
     focusedHand = 0;
     inspectedBoard = null;
     lastInspectorKey = '';
+    previewGameKey = '';
+    previewGame = null;
     feedback.replaceChildren();
     list.hidden = true;
     stage.hidden = false;
@@ -354,6 +385,9 @@ export function mountCarnival(root: HTMLElement, hooks: CarnivalHooks) {
     focusedHand = 0;
     inspectedBoard = null;
     lastInspectorKey = '';
+    previewGameKey = '';
+    previewGame = null;
+    applyLivePreview(null);
     stage.hidden = true;
     delete stage.dataset.carnivalPhase;
     delete stage.dataset.carnivalSelected;
@@ -496,6 +530,7 @@ export function mountCarnival(root: HTMLElement, hooks: CarnivalHooks) {
       result.replaceChildren(heading, scoringTable(final));
     } else result.replaceChildren();
     if (focus) root.querySelector<HTMLElement>(`[data-carnival-focus="${focus}"]:not(:disabled)`)?.focus({preventScroll: true});
+    applyLivePreview(pending);
     renderInspector();
   }
 
@@ -553,6 +588,8 @@ export function mountCarnival(root: HTMLElement, hooks: CarnivalHooks) {
     focusedHand = 0;
     inspectedBoard = null;
     lastInspectorKey = '';
+    previewGameKey = '';
+    previewGame = null;
     feedback.replaceChildren();
     resumeAudio();
     renderAttempt();
@@ -733,6 +770,17 @@ export function mountCarnival(root: HTMLElement, hooks: CarnivalHooks) {
     if (node?.dataset.index !== undefined) {
       renderInspector();
     }
+  });
+  board.addEventListener('pointerover', event => {
+    if (!attempt || selected === null) return;
+    const node = (event.target as HTMLElement | null)?.closest<HTMLElement>('[data-index]');
+    if (!node?.dataset.index) return;
+    const idx = Number(node.dataset.index);
+    const legal = attempt.session.moves().filter(move => move.handIndex === selected);
+    applyLivePreview(legalTarget(legal, idx));
+  });
+  board.addEventListener('pointerleave', () => {
+    applyLivePreview(pending);
   });
   root.addEventListener(CARNIVAL_ACTION_EVENT, event => {
     const action = (event as CustomEvent<SemanticAction>).detail;

@@ -41,7 +41,7 @@ const crowsNestTerms: Record<Locale, readonly [region:string,michaela:string,nei
 afterEach(() => setLocale('zh-CN'));
 
 test('all twenty unique challengers have legal numbered decks and the twins share only a challenge group', () => {
-  expect(challengers).toHaveLength(20);
+  expect(challengers).toHaveLength(33);
   expect(challengers.slice(0,10).map(({id}) => id)).toEqual(['nene','zogan','isabelle',...additions.map(({id}) => id)]);
   for (const npc of challengers) {
     expect(validateDeck(npc.deck),npc.id).toBeNull();
